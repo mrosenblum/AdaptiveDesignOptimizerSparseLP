@@ -1,5 +1,6 @@
 Package: AdaptiveDesignOptimizerSparseLP
-Title: What the Package Does (One Line, Title Case)
+Title: Two-Stage, Two Population, Adaptive Enrichment Design 
+  Optimizer Using Sparse Linear Programming
 Version: 0.0.0.9000
 Authors@R: 
     person(given = "First",
