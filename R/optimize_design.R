@@ -1280,8 +1280,14 @@ LP_iteration <- LP_iteration + 1;
 }
 
 if(sln$status==1 || sln$status==5){
-  print(paste("Adaptive Design Optimization Completed. Optimal design is stored in the file: sln2M",LP_iteration-1,".rdata"))
+  save(sln,file=paste("optimized_design.rdata"))
+  save(sln$val,file=paste("optimized_design_expected_sample_size.rdata"))
+  print(paste("Adaptive Design Optimization Completed. Optimal design is stored in the file: optimized_design.rdata"))
+  print(paste("Its optimal value (expected sample size) is stored in the file: optimized_design_expected_sample_size.rdata"))
   print(paste("Optimal Expected Sample Size is",sln$val))
 }
+
+  #Clean up files
+
 
 }
