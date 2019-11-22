@@ -18,13 +18,10 @@
 #' @examples
 #' #For demonstration purposes, the examples below use a coarse discretization.
 #' optimize_design(number_of_LP_refinements=5,discretization_parameter=data.frame(decision_region_discretization=3,rejection_region_discretization=3,Type_I_error_discretiation=10))
-
-rm(list=ls())
 library(parallel)
 library(Matrix)
 library(R.matlab)
 library(mvtnorm)
-
 optimize_design <- function(subpopulation.1.proportion=0.5,
 		total.alpha=0.05-(1e-4),
 		data.generating.distributions=matrix(data=c(0,0,1,1,1,1,
@@ -1289,5 +1286,3 @@ if(sln$status==1 || sln$status==5){
 }
 
 }
-
-optimize_design()
