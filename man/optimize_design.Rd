@@ -28,7 +28,7 @@ optimize_design(subpopulation.1.proportion = 0.5, total.alpha = 0.05 -
 
 \item{total.alpha}{Familywise Type I error rate (1-sided)}
 
-\item{data.generating.distributions}{Matrix encoding data generating distributions (defined in terms of treatment effect pairs and outcome variances) used to define power constraints and  objective function; each row defines the pair (\Delta_1,\Delta_2) of subpopulation 1 and 2 average treatment effects, followed by outcome variances for the four combinations of subpouplation (1 and 2) by study arm (0 and 1).}
+\item{data.generating.distributions}{Matrix encoding data generating distributions (defined in terms of treatment effect pairs and outcome variances) used to define power constraints and  objective function; each row defines the pair (Delta_1,Delta_2) of subpopulation 1 and 2 average treatment effects, followed by outcome variances for the four combinations of subpouplation (1 and 2) by study arm (0 and 1).}
 
 \item{stage.1.sample.sizes}{Vector with 2 entries representing stage 1 sample sizes for subpopulations 1 and 2, respectively}
 
