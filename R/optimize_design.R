@@ -1246,7 +1246,7 @@ tmp = load("power_constraints.rdata")
 a3  = power.constraints
 writeMat("a3.mat",a3=a3)
 
-try(tmp = load("Inequality_Constraints_to_Restrict_MTP_to_Sufficient_Statistics.rdata"),silent=TRUE)
+try((tmp = load("Inequality_Constraints_to_Restrict_MTP_to_Sufficient_Statistics.rdata")),silent=TRUE)
 if(any(ls()=="additional_inequality_constraints_part1")){
 tmp = additional_inequality_constraints_part1
 col = read.table("number_variables.txt")
