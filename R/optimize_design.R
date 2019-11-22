@@ -11,12 +11,13 @@
 #' @param type.of.LP.solver "matlab", "cplex", "GLPK", or "Gurobi" The linear program solve that you want to use; assumes that you have installed this already and that path is set
 #' @param number_of_LP_refinements positive integer indicating how many iterations to run of solving the linear program followed by refining the discretization
 #' @param discretization_parameter vector with 3 elements representing initial discretization of decision region, rejection regions, and grid representing Type I error constraints
+#' @param number_cores the number of cores available for parallelization using the parallel R package
 #' @return 4 element list containing optimized designs from four classes (with increasing complexity):
 #' @section Output
 #' The software computes and optimized design saved as "optimized_design.rdata" and the corresponding expected sample size is saved as "optimized_design_expected_sample_size.rdata".
 #' @examples
 #' #For demonstration purposes, the examples below use a coarse discretization.
-#' optimize_design(number_of_LP_refinements=5,discretization_parameter=data.frame(decision_region_discretization=3,rejection_region_discretization=3,Type_I_error_discretiation=10))
+#' optimize_design(number_of_LP_refinements=5,discretization_parameter=c(3,3,1),number_cores=1)
 #' @export
 optimize_design <- function(subpopulation.1.proportion=0.5,
 		total.alpha=0.05-(1e-4),
@@ -36,7 +37,8 @@ optimize_design <- function(subpopulation.1.proportion=0.5,
 					   0,0,0.8),nrow=4,ncol=3,byrow=TRUE,dimnames=list(c(),c("PowerH01","PowerH02","PowerH0C"))),
     type.of.LP.solver="matlab",
 		number_of_LP_refinements=5,
-		discretization_parameter=c(1,1,10)
+		discretization_parameter=c(1,1,10),
+		number_cores=30
 		){
 
 max_error_prob <- 0 # track approximation errors in problem construction; initialize to 0 here
@@ -1213,7 +1215,7 @@ save(additional_inequality_constraints_part2,file=paste("Inequality_Constraints_
 }
 
 number_jobs <- ceiling(length(ncp_list)/constraints_per_A1_file)+6
-parallel::mclapply(c((number_jobs-5):number_jobs,1:(number_jobs-6)),generate_LP,mc.cores=30) # order of jobs puts computation of power constraints and objective function first since they take longer to compute
+parallel::mclapply(c((number_jobs-5):number_jobs,1:(number_jobs-6)),generate_LP,mc.cores=number_cores) # order of jobs puts computation of power constraints and objective function first since they take longer to compute
 
 number_A1_files <- scan("number_A1_files.txt")
 A1 = numeric(0)

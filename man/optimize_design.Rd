@@ -21,7 +21,8 @@ optimize_design(subpopulation.1.proportion = 0.5, total.alpha = 0.05 -
   power.constraints = matrix(c(0, 0, 0, 0, 0.8, 0, 0.8, 0, 0, 0, 0, 0.8),
   nrow = 4, ncol = 3, byrow = TRUE, dimnames = list(c(), c("PowerH01",
   "PowerH02", "PowerH0C"))), type.of.LP.solver = "matlab",
-  number_of_LP_refinements = 5, discretization_parameter = c(1, 1, 10))
+  number_of_LP_refinements = 5, discretization_parameter = c(1, 1, 10),
+  number_cores = 30)
 }
 \arguments{
 \item{subpopulation.1.proportion}{Proportion of overall population in subpopulation 1. Must be between 0 and 1.}
@@ -43,6 +44,8 @@ optimize_design(subpopulation.1.proportion = 0.5, total.alpha = 0.05 -
 \item{number_of_LP_refinements}{positive integer indicating how many iterations to run of solving the linear program followed by refining the discretization}
 
 \item{discretization_parameter}{vector with 3 elements representing initial discretization of decision region, rejection regions, and grid representing Type I error constraints}
+
+\item{number_cores}{the number of cores available for parallelization using the parallel R package}
 }
 \value{
 4 element list containing optimized designs from four classes (with increasing complexity):
@@ -53,5 +56,5 @@ Authors: Michael Rosenblum, Ethan Fang, Han Liu
 }
 \examples{
 #For demonstration purposes, the examples below use a coarse discretization.
-optimize_design(number_of_LP_refinements=5,discretization_parameter=data.frame(decision_region_discretization=3,rejection_region_discretization=3,Type_I_error_discretiation=10))
+optimize_design(number_of_LP_refinements=5,discretization_parameter=c(3,3,1),number_cores=1)
 }
