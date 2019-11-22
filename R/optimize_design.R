@@ -3,26 +3,21 @@
 #'
 #' @param subpopulation.1.proportion Proportion of overall population in subpopulation 1. Must be between 0 and 1.
 #' @param total.alpha Familywise Type I error rate (1-sided)
-#' @param clinically.meaningful.minimum.treatment.effect Positive value representing \Delta_\min.
 #' @param data.generating.distributions Matrix encoding data generating distributions (defined in terms of treatment effect pairs and outcome variances) used to define power constraints and  objective function; each row defines the pair (\Delta_1,\Delta_2) of subpopulation 1 and 2 average treatment effects, followed by outcome variances for the four combinations of subpouplation (1 and 2) by study arm (0 and 1).
-#' @param outcome.variance Variance of the outcome (assumed to be the same for each arm by subpopulation pair)
 #' @param stage.1.sample.sizes Vector with 2 entries representing stage 1 sample sizes for subpopulations 1 and 2, respectively
 #' @param stage.2.sample.sizes.per.enrollment.choice Matrix with number.choices.end.of.stage.1 rows and 2 columns, where the (i,j) entry represents the stage 2 sample size under enrollment choice i for subpopulation j.
 #' @param objective.function.weights Vector with length equal to number of rows of population.parameters, representing weights used to define the objective function
 #' @param power.constraints Matrix with same number of rows as population.parameters (each representing a data generating distribution) and three columns corresponding to the required power to reject (at least) H_01, H_02, H_0C, respectively.
-#' @param type.of.LP.solver "matlab", "cplex", "GLPK" The linear program solve that you want to use; assumes that you have installed this already
+#' @param type.of.LP.solver "matlab", "cplex", "GLPK", or "Gurobi" The linear program solve that you want to use; assumes that you have installed this already and that path is set
+#' @param number_of_LP_refinements positive integer indicating how many iterations to run of solving the linear program followed by refining the discretization
+#' @param discretization_parameter vector with 3 elements representing initial discretization of decision region, rejection regions, and grid representing Type I error constraints
 #' @return 4 element list containing optimized designs from four classes (with increasing complexity):
-#' @section Designs:
-#' Each optimized design is a list containing: design.parameters and design.performance
-#' @section design.parameters:
-#' design.parameters has the following elements:
+#' @section Output
+#' The software computes and optimized design saved as "optimized_design.rdata" and the corresponding expected sample size is saved as "optimized_design_expected_sample_size.rdata".
 #' @export
 #' @examples
 #' #For demonstration purposes, the examples below use a coarse discretization.
-#' #Example 1: continuous outcome
-## Modified version of
-## /users/mrosen/Projects/public/Ethan_share/Updated_version_with_set_decision_region_option/New_Code_with_option_to_set_decision_region/Finer_rectangles_use_this_version/Generalized_version_K_decisions/Ten_Decisions
-## that takes generic problems inputs
+#' optimize_design(discretization_parameters)
 
 rm(list=ls())
 library(parallel)
@@ -32,7 +27,6 @@ library(mvtnorm)
 
 optimize_design <- function(subpopulation.1.proportion=0.5,
 		total.alpha=0.05-(1e-4),
-		clinically.meaningful.minimum.treatment.effect=1,
 		data.generating.distributions=matrix(data=c(0,0,1,1,1,1,
 					       0,sqrt(1/2)*(qnorm(0.95+1e-4)+qnorm(0.95))/5,1,1,1,1,
 					       sqrt(1/2)*(qnorm(0.95+1e-4)+qnorm(0.95))/5,0,1,1,1,1,
@@ -42,12 +36,15 @@ optimize_design <- function(subpopulation.1.proportion=0.5,
 								    0,0,
 								    150,0,
 		    					            0,150),nrow=4,ncol=2,byrow=TRUE,dimnames=list(c(),c("Subpopulation1Stage2SampleSize","Subpopulation2Stage2SampleSize"))),
-	        objective.function.weights=0.25*c(1,1,1,1),
+	  objective.function.weights=0.25*c(1,1,1,1),
 		power.constraints=matrix(c(0,0,0,
 					   0,0.8,0,
 					   0.8,0,0,
 					   0,0,0.8),nrow=4,ncol=3,byrow=TRUE,dimnames=list(c(),c("PowerH01","PowerH02","PowerH0C"))),
-                type.of.LP.solver="matlab"){
+    type.of.LP.solver="matlab",
+		number_of_LP_refinements=5,
+		discretization_parameter=data.frame(decision_region_discretization=1,rejection_region_discretization=1,Type_I_error_discretiation=10)
+		){
 
 max_error_prob <- 0 # track approximation errors in problem construction; initialize to 0 here
 covariance_Z_1_Z_2 <-  0 # covariance_due_to overlap of subpopulations (generally we assume no overlap)
@@ -188,14 +185,15 @@ modified_joint_distribution <- function(prior_component_index,decision){
 number_reference_rectangles <- number_decisions
 
 ## Below set the FWER constraints and the discretization of the decision and rejection regions
-LP_iteration <- 3 ## TO FIX
-while(LP_iteration < 6){ ## each iteration generates a new LP and solves it
+LP_iteration <- 1 ## TO FIX
+while(LP_iteration <= number_of_LP_refinements){ ## each iteration generates a new LP and solves it
 
 #set widths of large square outside of which multiple testing procedure rejects no null hypotheses (corresponds to w in text)
 w1 <- 6
 w2 <- 6
 # dimension of small squares used in discretization
-tau <- 1
+tau <- discretization_parameter[1]
+tau_mtp <- discretization_parameter[2]
 # Settings for integration region and precision in computing lower bound to original problem using dual solution to discretized problem
 max_eval_iters <- 100000
 w1_unconst <- 5
@@ -209,9 +207,9 @@ grid_width_2 <- 0.01
 if(LP_iteration == 1){
   # list of pairs of non-centrality parameters in G_{tau,w}
   ncp_list <- list()
-  for(z in seq(-9,9,length=180)) {ncp_list <- c(ncp_list,list(c(0,z)))}
-  for(z in seq(-9,9,length=180)) {ncp_list <- c(ncp_list,list(c(z,0)))}
-  for(z in seq(-9,9,length=180)) {ncp_list <- c(ncp_list,list(c(z,-(rho1/rho2)*z)))}
+  for(z in seq(-9,9,length=18*discretization_parameter[3])) {ncp_list <- c(ncp_list,list(c(0,z)))}
+  for(z in seq(-9,9,length=18*discretization_parameter[3])) {ncp_list <- c(ncp_list,list(c(z,0)))}
+  for(z in seq(-9,9,length=18*discretization_parameter[3])) {ncp_list <- c(ncp_list,list(c(z,-(rho1/rho2)*z)))}
   ncp_list <- c(ncp_list,list(c(0,0)))
   ncp_list <- unique(ncp_list)
   constraints_per_A1_file <- 3
@@ -318,14 +316,13 @@ if(LP_iteration == 1){
 ## Generate rectangle partition for stage 2 (multiple testing procedure)
 stage_2_rectangle_offset_value <- 0
 list_of_rectangles_mtp1 <- list()
-tau_mtp1 <- tau
 
-for(x in seq(-w1,w1,by=tau_mtp1))
+for(x in seq(-w1,w1,by=tau_mtp))
 {
 	#Skip lower left quadrant
-	for(y in seq(ifelse(x<0,0,-w2),w2,by=tau_mtp1))
+	for(y in seq(ifelse(x<0,0,-w2),w2,by=tau_mtp))
 	{
-		list_of_rectangles_mtp1<- c(list_of_rectangles_mtp1,list(list(lower_boundaries=c(x,y),upper_boundaries=c(x+tau_mtp1,y+tau_mtp1),allowed_actions=actions,stage_2_rectangle_offset=stage_2_rectangle_offset_value)))
+		list_of_rectangles_mtp1<- c(list_of_rectangles_mtp1,list(list(lower_boundaries=c(x,y),upper_boundaries=c(x+tau_mtp,y+tau_mtp),allowed_actions=actions,stage_2_rectangle_offset=stage_2_rectangle_offset_value)))
 		stage_2_rectangle_offset_value <- stage_2_rectangle_offset_value + length(actions)
 	}
 }
@@ -569,13 +566,12 @@ for(r in list_of_rectangles_dec){
 ## Generate rectangle partition for stage 2 (multiple testing procedure)
 stage_2_rectangle_offset_value <- 0
 list_of_rectangles_mtp1 <- list()
-tau_mtp1 <- tau
-for(x in seq(-w1,w1,by=tau_mtp1))
+for(x in seq(-w1,w1,by=tau_mtp))
 {
 	#Skip lower left quadrant
-	for(y in seq(ifelse(x<0,0,-w2),w2,by=tau_mtp1))
+	for(y in seq(ifelse(x<0,0,-w2),w2,by=tau_mtp))
 	{
-		list_of_rectangles_mtp1<- c(list_of_rectangles_mtp1,list(list(lower_boundaries=c(x,y),upper_boundaries=c(x+tau_mtp1,y+tau_mtp1),allowed_actions=actions,stage_2_rectangle_offset=stage_2_rectangle_offset_value)))
+		list_of_rectangles_mtp1<- c(list_of_rectangles_mtp1,list(list(lower_boundaries=c(x,y),upper_boundaries=c(x+tau_mtp,y+tau_mtp),allowed_actions=actions,stage_2_rectangle_offset=stage_2_rectangle_offset_value)))
 		stage_2_rectangle_offset_value <- stage_2_rectangle_offset_value + length(actions)
 	}
 }
