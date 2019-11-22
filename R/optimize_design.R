@@ -14,7 +14,8 @@
 #' @param number_cores the number of cores available for parallelization using the parallel R package
 #' @return 4 element list containing optimized designs from four classes (with increasing complexity):
 #' @section Output
-#' The software computes and optimized design saved as "optimized_design.rdata" and the corresponding expected sample size is saved as "optimized_design_expected_sample_size.rdata".
+#' The software computes and optimized design saved as "optimized_design.rdata" and the corresponding expected sample size is
+#' saved as "optimized_design_expected_sample_size.rdata".
 #' @examples
 #' #For demonstration purposes, the examples below use a coarse discretization.
 #' optimize_design(number_of_LP_refinements=5,discretization_parameter=c(3,3,1),number_cores=1)
@@ -701,7 +702,7 @@ for(ncp in ncp_list[((task_id-1)*constraints_per_A1_file+1):min(length(ncp_list)
                 for(rprime_counter in 1:length(list_of_rectangles_mtp[[d]])){
                     rprime <- list_of_rectangles_mtp[[d]][[rprime_counter]]
                     ## Get P_{ncp_vec}(Z \in rectangle r)
-                    prob_r <- pmvnorm(mean=mean_vector(ncp,d),sigma=covariance_matrix[[d]],lower=c(r$lower_boundaries,rprime$lower_boundaries),upper=c(r$upper_boundaries,rprime$upper_boundaries),algorithm=GenzBretz(abseps = 0.000000001,maxpts=100000))
+                    prob_r <- mvtnorm::pmvnorm(mean=mean_vector(ncp,d),sigma=covariance_matrix[[d]],lower=c(r$lower_boundaries,rprime$lower_boundaries),upper=c(r$upper_boundaries,rprime$upper_boundaries),algorithm=mvtnorm::GenzBretz(abseps = 0.000000001,maxpts=100000))
                     if(attr(prob_r,"error") > max_error_prob){max_error_prob <- attr(prob_r,"error")}
                     if(r$preset_decision==0){rvec <- c(rvec,prob_r*true_nulls_violated_by_action_set[rprime$allowed_actions])}else{
                         list_of_rectangles_mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles <- list_of_rectangles_mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles + r$preset_decision_value[d]*prob_r*true_nulls_violated_by_action_set[rprime$allowed_actions]
@@ -715,7 +716,7 @@ for(ncp in ncp_list[((task_id-1)*constraints_per_A1_file+1):min(length(ncp_list)
                     intersection_rectangle_lower_boundaries <- pmax(r$lower_boundaries,rprime$lower_boundaries)
                     intersection_rectangle_upper_boundaries <- pmin(r$upper_boundaries,rprime$upper_boundaries)
                     if(sum(intersection_rectangle_lower_boundaries < intersection_rectangle_upper_boundaries)==2){ #case where intersection rectangle non-empty
-                        prob_r <- pmvnorm(mean=mean_vector(ncp,d),sigma=covariance_matrix[[d]],lower=intersection_rectangle_lower_boundaries,upper=intersection_rectangle_upper_boundaries,algorithm=GenzBretz(abseps = 0.000000001,maxpts=100000))
+                        prob_r <- mvtnorm::pmvnorm(mean=mean_vector(ncp,d),sigma=covariance_matrix[[d]],lower=intersection_rectangle_lower_boundaries,upper=intersection_rectangle_upper_boundaries,algorithm=mvtnorm::GenzBretz(abseps = 0.000000001,maxpts=100000))
                         if(attr(prob_r,"error") > max_error_prob){max_error_prob <- attr(prob_r,"error")}
                     } else {# case where rectangle empty
                         prob_r <- 0
@@ -734,7 +735,7 @@ for(ncp in ncp_list[((task_id-1)*constraints_per_A1_file+1):min(length(ncp_list)
                     effective_z_2_upper_boundary <- min(c(r_upper_boundary_z_2,rprime$upper_boundaries[2]))
                     if(effective_z_2_lower_boundary < effective_z_2_upper_boundary){ # case where rectangle non-empty
                         ## Get P_{ncp_vec}(Z \in rectangle r)
-                        prob_r <- pmvnorm(mean=mean_vector(ncp,d),sigma=covariance_matrix[[d]],lower=c(r$lower_boundaries[1],effective_z_2_lower_boundary,rprime$lower_boundaries[1]),upper=c(r$upper_boundaries[1],effective_z_2_upper_boundary,rprime$upper_boundaries[1]),algorithm=GenzBretz(abseps = 0.000000001,maxpts=100000))
+                        prob_r <- mvtnorm::pmvnorm(mean=mean_vector(ncp,d),sigma=covariance_matrix[[d]],lower=c(r$lower_boundaries[1],effective_z_2_lower_boundary,rprime$lower_boundaries[1]),upper=c(r$upper_boundaries[1],effective_z_2_upper_boundary,rprime$upper_boundaries[1]),algorithm=mvtnorm::GenzBretz(abseps = 0.000000001,maxpts=100000))
                         if(attr(prob_r,"error") > max_error_prob){max_error_prob <- attr(prob_r,"error")}
                     } else {# case where rectangle empty
                         prob_r <- 0
@@ -753,7 +754,7 @@ for(ncp in ncp_list[((task_id-1)*constraints_per_A1_file+1):min(length(ncp_list)
                     effective_z_1_upper_boundary <- min(c(r_upper_boundary_z_1,rprime$upper_boundaries[1]))
                     if(effective_z_1_lower_boundary < effective_z_1_upper_boundary){ # case where rectangle non-empty
                         ## Get P_{ncp_vec}(Z \in rectangle r)
-                        prob_r <- pmvnorm(mean=mean_vector(ncp,d),sigma=covariance_matrix[[d]],lower=c(effective_z_1_lower_boundary,r$lower_boundaries[2],rprime$lower_boundaries[2]),upper=c(effective_z_1_upper_boundary,r$upper_boundaries[2],rprime$upper_boundaries[2]),algorithm=GenzBretz(abseps = 0.000000001,maxpts=100000))
+                        prob_r <- mvtnorm::pmvnorm(mean=mean_vector(ncp,d),sigma=covariance_matrix[[d]],lower=c(effective_z_1_lower_boundary,r$lower_boundaries[2],rprime$lower_boundaries[2]),upper=c(effective_z_1_upper_boundary,r$upper_boundaries[2],rprime$upper_boundaries[2]),algorithm=mvtnorm::GenzBretz(abseps = 0.000000001,maxpts=100000))
                         if(attr(prob_r,"error") > max_error_prob){max_error_prob <- attr(prob_r,"error")}
                     } else {# case where rectangle empty
                         prob_r <- 0
@@ -781,7 +782,7 @@ for(ncp in ncp_list[((task_id-1)*constraints_per_A1_file+1):min(length(ncp_list)
     counter <- counter + 1
 }
 
-# print estimated maximum error in computing bivariate normal probabilities using pmvnorm:
+# print estimated maximum error in computing bivariate normal probabilities using mvtnorm::pmvnorm:
 print("Max Error in Multivariate Normal Computation")
 print(max_error_prob); save(max_error_prob,file=paste("max_error_prob",task_id,".rdata",sep=""));
 
@@ -814,7 +815,7 @@ for(ncp in prior_mean_support)
                 for(rprime_counter in 1:length(list_of_rectangles_mtp[[d]])){
                     rprime <- list_of_rectangles_mtp[[d]][[rprime_counter]]
                     ## Get P_{ncp_vec}(Z \in rectangle r)
-                    prob_r <- pmvnorm(mean=modified_mean_vector,sigma=modified_covariance_matrix,lower=c(r$lower_boundaries,rprime$lower_boundaries),upper=c(r$upper_boundaries,rprime$upper_boundaries),algorithm=GenzBretz(abseps = 0.000000001,maxpts=100000))
+                    prob_r <- mvtnorm::pmvnorm(mean=modified_mean_vector,sigma=modified_covariance_matrix,lower=c(r$lower_boundaries,rprime$lower_boundaries),upper=c(r$upper_boundaries,rprime$upper_boundaries),algorithm=mvtnorm::GenzBretz(abseps = 0.000000001,maxpts=100000))
                     if(attr(prob_r,"error") > max_error_prob){max_error_prob <- attr(prob_r,"error")}
                     if(r$preset_decision==0){contribution_to_risk <- c(contribution_to_risk,prob_r*prior_weights[counter]*loss_function_value[d,rprime$allowed_actions])}else{
                         list_of_rectangles_mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles <- list_of_rectangles_mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles + r$preset_decision_value[d]*prob_r*prior_weights[counter]*loss_function_value[d,rprime$allowed_actions]}
@@ -827,7 +828,7 @@ for(ncp in prior_mean_support)
                     intersection_rectangle_lower_boundaries <- pmax(r$lower_boundaries,rprime$lower_boundaries)
                     intersection_rectangle_upper_boundaries <- pmin(r$upper_boundaries,rprime$upper_boundaries)
                     if(sum(intersection_rectangle_lower_boundaries < intersection_rectangle_upper_boundaries)==2){ #case where intersection rectangle non-empty
-                        prob_r <- pmvnorm(mean=modified_mean_vector,sigma=modified_covariance_matrix,lower=intersection_rectangle_lower_boundaries,upper=intersection_rectangle_upper_boundaries,algorithm=GenzBretz(abseps = 0.000000001,maxpts=100000))
+                        prob_r <- mvtnorm::pmvnorm(mean=modified_mean_vector,sigma=modified_covariance_matrix,lower=intersection_rectangle_lower_boundaries,upper=intersection_rectangle_upper_boundaries,algorithm=mvtnorm::GenzBretz(abseps = 0.000000001,maxpts=100000))
                         if(attr(prob_r,"error") > max_error_prob){max_error_prob <- attr(prob_r,"error")}
                     } else {# case where rectangle empty
                         prob_r <- 0
@@ -845,7 +846,7 @@ for(ncp in prior_mean_support)
                     effective_z_2_upper_boundary <- min(c(r_upper_boundary_z_2,rprime$upper_boundaries[2]))
                     if(effective_z_2_lower_boundary < effective_z_2_upper_boundary){ # case where rectangle non-empty
                         ## Get P_{ncp_vec}(Z \in rectangle r)
-                        prob_r <- pmvnorm(mean=modified_mean_vector,sigma=modified_covariance_matrix,lower=c(r$lower_boundaries[1],effective_z_2_lower_boundary,rprime$lower_boundaries[1]),upper=c(r$upper_boundaries[1],effective_z_2_upper_boundary,rprime$upper_boundaries[1]),algorithm=GenzBretz(abseps = 0.000000001,maxpts=100000))
+                        prob_r <- mvtnorm::pmvnorm(mean=modified_mean_vector,sigma=modified_covariance_matrix,lower=c(r$lower_boundaries[1],effective_z_2_lower_boundary,rprime$lower_boundaries[1]),upper=c(r$upper_boundaries[1],effective_z_2_upper_boundary,rprime$upper_boundaries[1]),algorithm=mvtnorm::GenzBretz(abseps = 0.000000001,maxpts=100000))
                         if(attr(prob_r,"error") > max_error_prob){max_error_prob <- attr(prob_r,"error")}
                     } else {# case where rectangle empty
                         prob_r <- 0
@@ -863,7 +864,7 @@ for(ncp in prior_mean_support)
                     effective_z_1_upper_boundary <- min(c(r_upper_boundary_z_1,rprime$upper_boundaries[1]))
                     if(effective_z_1_lower_boundary < effective_z_1_upper_boundary){ # case where rectangle non-empty
                         ## Get P_{ncp_vec}(Z \in rectangle r)
-                        prob_r <- pmvnorm(mean=modified_mean_vector,sigma=modified_covariance_matrix,lower=c(effective_z_1_lower_boundary,r$lower_boundaries[2],rprime$lower_boundaries[2]),upper=c(effective_z_1_upper_boundary,r$upper_boundaries[2],rprime$upper_boundaries[2]),algorithm=GenzBretz(abseps = 0.000000001,maxpts=100000))
+                        prob_r <- mvtnorm::pmvnorm(mean=modified_mean_vector,sigma=modified_covariance_matrix,lower=c(effective_z_1_lower_boundary,r$lower_boundaries[2],rprime$lower_boundaries[2]),upper=c(effective_z_1_upper_boundary,r$upper_boundaries[2],rprime$upper_boundaries[2]),algorithm=mvtnorm::GenzBretz(abseps = 0.000000001,maxpts=100000))
                         if(attr(prob_r,"error") > max_error_prob){max_error_prob <- attr(prob_r,"error")}
                     } else {# case where rectangle empty
                         prob_r <- 0
@@ -889,7 +890,7 @@ for(ncp in prior_mean_support)
 
 if(length(objective_function_vector) !=number_of_variables){print("error in construction of constraints");write(2,file="error_flag")} else{save(objective_function_vector,file=paste("c.rdata"))}
 
-# print estimated maximum error in computing bivariate normal probabilities using pmvnorm:
+# print estimated maximum error in computing bivariate normal probabilities using mvtnorm::pmvnorm:
 print("Max Error in Multivariate Normal Computation")
 print(max_error_prob); save(max_error_prob,file=paste("max_error_prob",task_id,".rdata",sep=""));
 
@@ -978,7 +979,7 @@ for(ncp in power_constraint_list){
                 for(rprime_counter in 1:length(list_of_rectangles_mtp[[d]])){
                     rprime <- list_of_rectangles_mtp[[d]][[rprime_counter]]
                     ## Get P_{ncp_vec}(Z \in rectangle r)
-                    prob_r <- pmvnorm(mean=mean_vector(ncp,d),sigma=covariance_matrix[[d]],lower=c(r$lower_boundaries,rprime$lower_boundaries),upper=c(r$upper_boundaries,rprime$upper_boundaries),algorithm=GenzBretz(abseps = 0.000000001,maxpts=100000)); if(attr(prob_r,"error") > max_error_prob){max_error_prob <- attr(prob_r,"error")}
+                    prob_r <- mvtnorm::pmvnorm(mean=mean_vector(ncp,d),sigma=covariance_matrix[[d]],lower=c(r$lower_boundaries,rprime$lower_boundaries),upper=c(r$upper_boundaries,rprime$upper_boundaries),algorithm=mvtnorm::GenzBretz(abseps = 0.000000001,maxpts=100000)); if(attr(prob_r,"error") > max_error_prob){max_error_prob <- attr(prob_r,"error")}
                     if(r$preset_decision==0){
                       power_constraint_vector_H01 <- c(power_constraint_vector_H01,prob_r*indicator_contribute_to_H01_power[rprime$allowed_actions]);
                       power_constraint_vector_H02 <- c(power_constraint_vector_H02,prob_r*indicator_contribute_to_H02_power[rprime$allowed_actions]);
@@ -997,7 +998,7 @@ for(ncp in power_constraint_list){
                     intersection_rectangle_lower_boundaries <- pmax(r$lower_boundaries,rprime$lower_boundaries)
                     intersection_rectangle_upper_boundaries <- pmin(r$upper_boundaries,rprime$upper_boundaries)
                     if(sum(intersection_rectangle_lower_boundaries < intersection_rectangle_upper_boundaries)==2){ #case where intersection rectangle non-empty
-                        prob_r <- pmvnorm(mean=mean_vector(ncp,d),sigma=covariance_matrix[[d]],lower=intersection_rectangle_lower_boundaries,upper=intersection_rectangle_upper_boundaries,algorithm=GenzBretz(abseps = 0.000000001,maxpts=100000))
+                        prob_r <- mvtnorm::pmvnorm(mean=mean_vector(ncp,d),sigma=covariance_matrix[[d]],lower=intersection_rectangle_lower_boundaries,upper=intersection_rectangle_upper_boundaries,algorithm=mvtnorm::GenzBretz(abseps = 0.000000001,maxpts=100000))
                         if(attr(prob_r,"error") > max_error_prob){max_error_prob <- attr(prob_r,"error")}
                     } else {# case where rectangle empty
                         prob_r <- 0
@@ -1021,7 +1022,7 @@ for(ncp in power_constraint_list){
                     effective_z_2_upper_boundary <- min(c(r_upper_boundary_z_2,rprime$upper_boundaries[2]))
                     if(effective_z_2_lower_boundary < effective_z_2_upper_boundary){ # case where rectangle non-empty
                         ## Get P_{ncp_vec}(Z \in rectangle r)
-                        prob_r <- pmvnorm(mean=mean_vector(ncp,d),sigma=covariance_matrix[[d]],lower=c(r$lower_boundaries[1],effective_z_2_lower_boundary,rprime$lower_boundaries[1]),upper=c(r$upper_boundaries[1],effective_z_2_upper_boundary,rprime$upper_boundaries[1]),algorithm=GenzBretz(abseps = 0.000000001,maxpts=100000))
+                        prob_r <- mvtnorm::pmvnorm(mean=mean_vector(ncp,d),sigma=covariance_matrix[[d]],lower=c(r$lower_boundaries[1],effective_z_2_lower_boundary,rprime$lower_boundaries[1]),upper=c(r$upper_boundaries[1],effective_z_2_upper_boundary,rprime$upper_boundaries[1]),algorithm=mvtnorm::GenzBretz(abseps = 0.000000001,maxpts=100000))
                         if(attr(prob_r,"error") > max_error_prob){max_error_prob <- attr(prob_r,"error")}
                     } else {# case where rectangle empty
                         prob_r <- 0
@@ -1045,7 +1046,7 @@ for(ncp in power_constraint_list){
                     effective_z_1_upper_boundary <- min(c(r_upper_boundary_z_1,rprime$upper_boundaries[1]))
                     if(effective_z_1_lower_boundary < effective_z_1_upper_boundary){ # case where rectangle non-empty
                         ## Get P_{ncp_vec}(Z \in rectangle r)
-                        prob_r <- pmvnorm(mean=mean_vector(ncp,d),sigma=covariance_matrix[[d]],lower=c(effective_z_1_lower_boundary,r$lower_boundaries[2],rprime$lower_boundaries[2]),upper=c(effective_z_1_upper_boundary,r$upper_boundaries[2],rprime$upper_boundaries[2]),algorithm=GenzBretz(abseps = 0.000000001,maxpts=100000))
+                        prob_r <- mvtnorm::pmvnorm(mean=mean_vector(ncp,d),sigma=covariance_matrix[[d]],lower=c(effective_z_1_lower_boundary,r$lower_boundaries[2],rprime$lower_boundaries[2]),upper=c(effective_z_1_upper_boundary,r$upper_boundaries[2],rprime$upper_boundaries[2]),algorithm=mvtnorm::GenzBretz(abseps = 0.000000001,maxpts=100000))
                         if(attr(prob_r,"error") > max_error_prob){max_error_prob <- attr(prob_r,"error")}
                     } else {# case where rectangle empty
                         prob_r <- 0
@@ -1079,7 +1080,7 @@ for(ncp in power_constraint_list){
 }
 save(power_constraint_matrix_H01,power_constraint_matrix_H02,power_constraint_matrix_H0C,file=paste("A3.rdata"))
 
-# print estimated maximum error in computing bivariate normal probabilities using pmvnorm:
+# print estimated maximum error in computing bivariate normal probabilities using mvtnorm::pmvnorm:
 print("Max Error in Multivariate Normal Computation")
 print(max_error_prob); save(max_error_prob,file=paste("max_error_prob",task_id,".rdata",sep=""));
 
