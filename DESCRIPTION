@@ -18,7 +18,7 @@ Imports:
     R.matlab,
     mvtnorm,
     Matrix,
-    parallel,
+    parallel
 RoxygenNote: 6.1.1
 URL: https://github.com/mrosenblum/AdaptiveDesignOptimizerSparseLP
 BugReports: https://github.com/mrosenblum/AdaptiveDesignOptimizerSparseLP/issues

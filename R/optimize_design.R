@@ -14,14 +14,10 @@
 #' @return 4 element list containing optimized designs from four classes (with increasing complexity):
 #' @section Output
 #' The software computes and optimized design saved as "optimized_design.rdata" and the corresponding expected sample size is saved as "optimized_design_expected_sample_size.rdata".
-#' @export
 #' @examples
 #' #For demonstration purposes, the examples below use a coarse discretization.
 #' optimize_design(number_of_LP_refinements=5,discretization_parameter=data.frame(decision_region_discretization=3,rejection_region_discretization=3,Type_I_error_discretiation=10))
-library(parallel)
-library(Matrix)
-library(R.matlab)
-library(mvtnorm)
+#' @export
 optimize_design <- function(subpopulation.1.proportion=0.5,
 		total.alpha=0.05-(1e-4),
 		data.generating.distributions=matrix(data=c(0,0,1,1,1,1,
@@ -1217,7 +1213,7 @@ save(additional_inequality_constraints_part2,file=paste("Inequality_Constraints_
 }
 
 number_jobs <- ceiling(length(ncp_list)/constraints_per_A1_file)+6
-mclapply(c((number_jobs-5):number_jobs,1:(number_jobs-6)),generate_LP,mc.cores=30) # order of jobs puts computation of power constraints and objective function first since they take longer to compute
+parallel::mclapply(c((number_jobs-5):number_jobs,1:(number_jobs-6)),generate_LP,mc.cores=30) # order of jobs puts computation of power constraints and objective function first since they take longer to compute
 
 number_A1_files <- scan("number_A1_files.txt")
 A1 = numeric(0)
