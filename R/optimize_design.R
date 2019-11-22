@@ -1253,7 +1253,8 @@ col = read.table("number_variables.txt")
 col = col$V1
 writeMat("A4.mat",A4=tmp)
 rm(additional_inequality_constraints_part1)
-}
+writeMat("a4status.mat",a4status=1)
+} else {writeMat("a4status.mat",a4status=0)}
 
 tmp11 = read.table("number_equality_constraints_of_first_type.txt")
 tmp11 = tmp11$V1
