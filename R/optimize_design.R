@@ -206,7 +206,7 @@ w2_unconst <- 5
 grid_width_1 <- 0.01
 grid_width_2 <- 0.01
 
-if(LP_iteration == 1){ 
+if(LP_iteration == 1){
   # list of pairs of non-centrality parameters in G_{tau,w}
   ncp_list <- list()
   for(z in seq(-9,9,length=180)) {ncp_list <- c(ncp_list,list(c(0,z)))}
@@ -217,10 +217,10 @@ if(LP_iteration == 1){
   constraints_per_A1_file <- 3
 
   # construct list of rectangles in set R
-  ## List of rectangles defining decision boundaries	
+  ## List of rectangles defining decision boundaries
   ## Each rectangle is encoded by c(lower left (x,y) coordinates, upper right (x,y) coordinates)
   list_of_rectangles_dec <- list()
-  
+
   number_preset_decision_rectangles <- 0
 
   for(x in c(seq(-w1,-3-tau,by=tau),seq(3,w1-tau,by=tau)))
@@ -265,7 +265,7 @@ if(LP_iteration == 1){
    load("ncp_list1.rdata") #TOFIX
    load("list_of_rectangles_dec1.rdata") # Use same discretization of decision region as in iteration 1
    number_preset_decision_rectangles <- 0
-   z_solution <- sln$z 
+   z_solution <- sln$z
    # Get active FWER constraints
    ncp_active_FWER_constraints <- ncp_list[which(sln$dual[1:length(ncp_list)]>0.00001)]
 
@@ -276,15 +276,15 @@ if(LP_iteration == 1){
    for(z in seq(-9,9,length=18)) {ncp_list <- c(ncp_list,list(c(z,-(rho1/rho2)*z)))};
 
    for(ncp in ncp_active_FWER_constraints){
-	if(abs(ncp[1]) < 1e-10 && abs(ncp[2])>1e-10){ # constraint on boundary of H01 null space 
+	if(abs(ncp[1]) < 1e-10 && abs(ncp[2])>1e-10){ # constraint on boundary of H01 null space
 		       for(z in seq(ncp[2]-0.5,ncp[2]+0.5,length=5)) {ncp_list <- c(ncp_list,list(c(0,z)))}} else
-	if(abs(ncp[1]) > 1e-10 && abs(ncp[2])<1e-10){ # constraint on boundary of H02 null space 
+	if(abs(ncp[1]) > 1e-10 && abs(ncp[2])<1e-10){ # constraint on boundary of H02 null space
 		       for(z in seq(ncp[1]-0.5,ncp[1]+0.5,length=5)) {ncp_list <- c(ncp_list,list(c(z,0)))}} else
-	if(abs(ncp[1]) > 1e-10 && abs(ncp[2])>1e-10){ # constraint on boundary of H0C null space 
+	if(abs(ncp[1]) > 1e-10 && abs(ncp[2])>1e-10){ # constraint on boundary of H0C null space
 		       for(z in seq(ncp[1]-0.5,ncp[1]+0.5,length=5)) {ncp_list <- c(ncp_list,list(c(z,-(rho1/rho2)*z)))}}
    }
    ncp_list <- c(ncp_list,list(c(0,0)))
-   ncp_list <- unique(ncp_list)   
+   ncp_list <- unique(ncp_list)
    save(ncp_list,file=paste("ncp_list_short2.rdata",sep=""))
 
    # Create new set of FWER constraints concentrated around active constraints from previous linear program solution
@@ -295,11 +295,11 @@ if(LP_iteration == 1){
 
    number_new_constraints_per_previous_active_constraint <- max(1,floor(500/length(ncp_active_FWER_constraints)))
    for(ncp in ncp_active_FWER_constraints){
-	if(abs(ncp[1]) < 1e-10 && abs(ncp[2])>1e-10){ # constraint on boundary of H01 null space 
+	if(abs(ncp[1]) < 1e-10 && abs(ncp[2])>1e-10){ # constraint on boundary of H01 null space
 		       for(z in seq(ncp[2]-0.5,ncp[2]+0.5,length=number_new_constraints_per_previous_active_constraint)) {ncp_list <- c(ncp_list,list(c(0,z)))}} else
-	if(abs(ncp[1]) > 1e-10 && abs(ncp[2])<1e-10){ # constraint on boundary of H02 null space 
+	if(abs(ncp[1]) > 1e-10 && abs(ncp[2])<1e-10){ # constraint on boundary of H02 null space
 		       for(z in seq(ncp[1]-0.5,ncp[1]+0.5,length=number_new_constraints_per_previous_active_constraint)) {ncp_list <- c(ncp_list,list(c(z,0)))}} else
-	if(abs(ncp[1]) > 1e-10 && abs(ncp[2])>1e-10){ # constraint on boundary of H0C null space 
+	if(abs(ncp[1]) > 1e-10 && abs(ncp[2])>1e-10){ # constraint on boundary of H0C null space
 		       for(z in seq(ncp[1]-0.5,ncp[1]+0.5,length=number_new_constraints_per_previous_active_constraint)) {ncp_list <- c(ncp_list,list(c(z,-(rho1/rho2)*z)))}}
    }
    ncp_list <- c(ncp_list,list(c(0,0)))
@@ -314,7 +314,7 @@ if(LP_iteration == 1){
    z_solution <- sln$z
 
    ## for iterations after 2: run set and split to construct new list_of_rectangles_dec, save it, and proceed
-   load(paste("list_of_rectangles_dec",LP_iteration-1,".rdata",sep="")) # list of rectangles for decision region from previous iteration 
+   load(paste("list_of_rectangles_dec",LP_iteration-1,".rdata",sep="")) # list of rectangles for decision region from previous iteration
 ## Generate rectangle partition for stage 2 (multiple testing procedure)
 stage_2_rectangle_offset_value <- 0
 list_of_rectangles_mtp1 <- list()
@@ -424,11 +424,11 @@ for(r in list_of_rectangles_dec){
 			  variable_start_position <- variable_location(r,d,rprime,rprime$allowed_actions[1])
 			  variable_end_position <- variable_location(r,d,rprime,rprime$allowed_actions[length(rprime$allowed_actions)])
   		  	  list_of_rectangles_dec_with_decision_probs[[counter_set_split_rectangles]]$d_probs[[d]] <-sum(z_solution[variable_start_position:variable_end_position])
-				} else{list_of_rectangles_dec_with_decision_probs[[counter_set_split_rectangles]]$d_probs[[d]] <- 0} 
+				} else{list_of_rectangles_dec_with_decision_probs[[counter_set_split_rectangles]]$d_probs[[d]] <- 0}
 			}
 		}
 		counter_set_split_rectangles<- counter_set_split_rectangles+1
-    }		
+    }
     counter_set_split_rectangles <- 1
 
     ## Check if surrounded by rectangles with identical setting; if so, segment the rectangle; else if in center region then split it; else leave alone
@@ -436,10 +436,10 @@ for(r in list_of_rectangles_dec){
     neighbor_check <- function(r,r2){
 	if(
 	(r$lower_boundaries[1]==r2$upper_boundaries[1] && max(c(r$lower_boundaries[2],r2$lower_boundaries[2]))< min(c(r$upper_boundaries[2],r2$upper_boundaries[2])))
- || (r2$lower_boundaries[1]==r$upper_boundaries[1] && max(c(r$lower_boundaries[2],r2$lower_boundaries[2]))< min(c(r$upper_boundaries[2],r2$upper_boundaries[2]))) 
+ || (r2$lower_boundaries[1]==r$upper_boundaries[1] && max(c(r$lower_boundaries[2],r2$lower_boundaries[2]))< min(c(r$upper_boundaries[2],r2$upper_boundaries[2])))
  || (r$lower_boundaries[2]==r2$upper_boundaries[2] && max(c(r$lower_boundaries[1],r2$lower_boundaries[1]))< min(c(r$upper_boundaries[1],r2$upper_boundaries[1])))
  || (r2$lower_boundaries[2]==r$upper_boundaries[2] && max(c(r$lower_boundaries[1],r2$lower_boundaries[1]))< min(c(r$upper_boundaries[1],r2$upper_boundaries[1])))
-	) {return(1)} else {return(0)}	
+	) {return(1)} else {return(0)}
 	}
 
 ## Code to check neighbor_check works
@@ -459,9 +459,9 @@ for(r in list_of_rectangles_dec){
       for(d in r$allowed_decisions){
 		  if(!is.null(r$d_probs) &&  r$d_probs[d]>= 0.9){
 				list_of_rectangles_dec_with_decision_probs[[counter_set_split_rectangles]]$preset_decision_preliminary <- 1
-				list_of_rectangles_dec_with_decision_probs[[counter_set_split_rectangles]]$preset_decision_value_preliminary <- as.numeric(d==c(1,2,3,4)) 
-		  } 
-		  
+				list_of_rectangles_dec_with_decision_probs[[counter_set_split_rectangles]]$preset_decision_value_preliminary <- as.numeric(d==c(1,2,3,4))
+		  }
+
 		  }
 		  if (is.null(r$d_probs) || max(r$d_probs) < 0.9)
 		  {
@@ -475,18 +475,18 @@ for(r in list_of_rectangles_dec){
  list_of_rectangles_dec_with_decision_probs_augmented <- list()
  for(counter_set_split_rectangles in 1:(length(list_of_rectangles_dec_with_decision_probs)))
  {
-	r <- list_of_rectangles_dec_with_decision_probs[[counter_set_split_rectangles]] 
-	if(r$preset_decision_preliminary == 0 && r$lower_boundaries[1]>=(-4) && r$lower_boundaries[2]>=(-4) && r$upper_boundaries[1]<=4 && r$upper_boundaries[2]<=4){		
+	r <- list_of_rectangles_dec_with_decision_probs[[counter_set_split_rectangles]]
+	if(r$preset_decision_preliminary == 0 && r$lower_boundaries[1]>=(-4) && r$lower_boundaries[2]>=(-4) && r$upper_boundaries[1]<=4 && r$upper_boundaries[2]<=4){
 		r_augmented <- r
 		r_augmented$preset_decision_preliminary <- NULL
-		r_augmented$preset_decision <- 0	
+		r_augmented$preset_decision <- 0
 		r_augmented$allowed_decisions <- decisions
 		width <- r$upper_boundaries-r$lower_boundaries
 		splitx <- splity <- 2
 		for(counter2 in 1:splitx){
 			for(counter3 in 1:splity){
 				r_augmented$lower_boundaries <- (r$lower_boundaries + (c(width[1]*(counter2-1)/splitx,width[2]*(counter3-1)/splity)))
-				r_augmented$upper_boundaries <- (r$lower_boundaries + (c(width[1]*(counter2)/splitx,width[2]*(counter3)/splity)))			
+				r_augmented$upper_boundaries <- (r$lower_boundaries + (c(width[1]*(counter2)/splitx,width[2]*(counter3)/splity)))
 				list_of_rectangles_dec_with_decision_probs_augmented <- c(list_of_rectangles_dec_with_decision_probs_augmented,list(r_augmented))
 				}
 		}
@@ -497,7 +497,7 @@ for(r in list_of_rectangles_dec){
 	} else{ ## check if surrounded by same decision rectangles
 		surrounded_by_same <- 1
 		for(counter2 in 1:(length(list_of_rectangles_dec_with_decision_probs))){
-			r2 <- list_of_rectangles_dec_with_decision_probs[[counter2]] 
+			r2 <- list_of_rectangles_dec_with_decision_probs[[counter2]]
 			if(neighbor_check(r,r2)==1 && !(r2$preset_decision_preliminary==1 && sum(r$preset_decision_value_preliminary == r2$preset_decision_value_preliminary)==4)) {		surrounded_by_same <- 0}
 		}
 		if(surrounded_by_same){
@@ -506,24 +506,24 @@ for(r in list_of_rectangles_dec){
 			r$preset_decision_value <- r$preset_decision_value_preliminary
 			r$preset_decision_value_preliminary <- NULL
 			list_of_rectangles_dec_with_decision_probs_augmented <- c(list_of_rectangles_dec_with_decision_probs_augmented,list(r))
-		} else if(r$lower_boundaries[1]>=(-4) && r$lower_boundaries[2]>=(-4) && r$upper_boundaries[1]<=4 && r$upper_boundaries[2]<=4){		
+		} else if(r$lower_boundaries[1]>=(-4) && r$lower_boundaries[2]>=(-4) && r$upper_boundaries[1]<=4 && r$upper_boundaries[2]<=4){
 			r_augmented <- r
 			r_augmented$preset_decision_preliminary <- NULL
-			r_augmented$preset_decision <- 0	
+			r_augmented$preset_decision <- 0
 			r_augmented$allowed_decisions <- decisions
 			width <- r$upper_boundaries-r$lower_boundaries
 			splitx <- splity <- 2
 			for(counter2 in 1:splitx){
 				for(counter3 in 1:splity){
 					r_augmented$lower_boundaries <- (r$lower_boundaries + (c(width[1]*(counter2-1)/splitx,width[2]*(counter3-1)/splity)))
-					r_augmented$upper_boundaries <- (r$lower_boundaries + (c(width[1]*(counter2)/splitx,width[2]*(counter3)/splity)))			
+					r_augmented$upper_boundaries <- (r$lower_boundaries + (c(width[1]*(counter2)/splitx,width[2]*(counter3)/splity)))
 					list_of_rectangles_dec_with_decision_probs_augmented <- c(list_of_rectangles_dec_with_decision_probs_augmented,list(r_augmented))
 				}
 			}
 		} else {
 			r$preset_decision_preliminary <- NULL
 			r$preset_decision <- 0
-			list_of_rectangles_dec_with_decision_probs_augmented <- c(list_of_rectangles_dec_with_decision_probs_augmented,list(r))			
+			list_of_rectangles_dec_with_decision_probs_augmented <- c(list_of_rectangles_dec_with_decision_probs_augmented,list(r))
 		}
 	}
 	}
@@ -532,7 +532,7 @@ for(r in list_of_rectangles_dec){
 
 	for(d in decisions){list_of_rectangles_dec <- c(list_of_rectangles_dec,list(list(lower_boundaries=c(0,0),upper_boundaries=c(0,0),allowed_decisions=d,preset_decision=0)))}# these are reference rectangles
 
-	   ## Set upper neighbors		     
+	   ## Set upper neighbors
 	        counter_for_r <- 1
   		for(counter_for_r in 1:(length(list_of_rectangles_dec)-number_reference_rectangles)){
 		 	r <- list_of_rectangles_dec[[counter_for_r]]
@@ -541,7 +541,7 @@ for(r in list_of_rectangles_dec){
 		if(count_value <= length(list_of_rectangles_dec)){list_of_rectangles_dec[[counter_for_r]]$upper_neighbor <- count_value}
 		}
 
-	
+
         save(list_of_rectangles_dec,file=paste("list_of_rectangles_dec",LP_iteration,".rdata",sep="")) # modified list of rectangles constructed
 
 	set_counter <- 0
@@ -555,8 +555,8 @@ for(r in list_of_rectangles_dec){
    #
    # Compute new grid of familywise Type I error constraints
    #
- 
-   load(paste("ncp_list",LP_iteration-1,".rdata",sep="")) ## Load previous iteration list of familywise Type I error constraints 
+
+   load(paste("ncp_list",LP_iteration-1,".rdata",sep="")) ## Load previous iteration list of familywise Type I error constraints
    # Get active FWER constraints from previous iteration
    ncp_active_FWER_constraints <- ncp_list[which(sln$dual[1:length(ncp_list)]>0.00001)]
    # Compute maximum number of FWER constraints that are computationally feasible to include
@@ -676,12 +676,12 @@ write(ceiling(length(ncp_list)/constraints_per_A1_file),f=paste("number_A1_files
 power.constraints <- as.vector(power.constraints)
 save(power.constraints,file="power_constraints.rdata")
 save(list_of_rectangles_mtp,file=paste("list_of_rectangles_mtp",LP_iteration,".rdata",sep=""))
-    
+
 ## Includes constraints the restrict multiple testing procedure not depend on stage 1 statistics (given cumulative statistics Z^C and decision d)
 ## Implements unequal rectangle sizes, with setting of rectangles to specific values
 ## Generate Discretized LP based on settings in file
 
-generate_LP <- function(task_id,...){    
+generate_LP <- function(task_id,...){
     max_task_id_for_computing_FWER_constraints <- ceiling(length(ncp_list)/constraints_per_A1_file)
     print("max_task_id_for_computing_FWER_constraints")
     print(max_task_id_for_computing_FWER_constraints)
@@ -1129,7 +1129,7 @@ for(r in list_of_rectangles_dec[1:(length(list_of_rectangles_dec)-number_referen
 }
 
 if(counter>1){
-# previous output in case nothing generated: {additional_inequality_constraints_part1 <- c(); save(additional_inequality_constraints_part1,file=paste("Inequality_Constraints_to_Restrict_MTP_to_Sufficient_Statistics.rdata"))} 
+# previous output in case nothing generated: {additional_inequality_constraints_part1 <- c(); save(additional_inequality_constraints_part1,file=paste("Inequality_Constraints_to_Restrict_MTP_to_Sufficient_Statistics.rdata"))}
 
 additional_inequality_constraints_part1 <- additional_inequality_constraints_part1[1:(counter-1),]
 if(max(additional_inequality_constraints_part1[,2]) > number_of_variables){print("ERROR in Generating Inequality_Constraints_to_Restrict_MTP_to_Sufficient_Statistics");write(5,file="error_flag")} else{
@@ -1281,9 +1281,14 @@ sln = readMat(paste("sln2M1.mat",sep=""))
 save(sln,file=paste("sln2M",LP_iteration,".rdata",sep=""))
 
 if(sln$status==(-9)){return("Linear Program was Infeasible; Please Try Again e.g., With Greater Sample Sizes")} else if(sln$status==1 || sln$status==5){
-print("Linear Program Feasible. Now Evaluating New Linear Program with Finer Discretization of Decision Regions")} else{return("Error in linear program; see solver output: sln2M1.rdata")}
+print(paste("Linear Program at Iteration ",LP_iteration," Solved. Now Evaluating New Linear Program with Finer Discretization of Decision Regions"))} else{return(paste("Error in linear program; see solver output: see sln2M",LP_iteration,".rdata"))}
 
 LP_iteration <- LP_iteration + 1;
+}
+
+if(sln$status==1 || sln$status==5){
+  print(paste("Adaptive Design Optimization Completed. Optimal design is stored in the file: sln2M",LP_iteration-1,".rdata"))
+  print(paste("Optimal Expected Sample Size is",sln$val))
 }
 
 }
