@@ -17,7 +17,7 @@
 #' @export
 #' @examples
 #' #For demonstration purposes, the examples below use a coarse discretization.
-#' optimize_design(discretization_parameters)
+#' optimize_design(number_of_LP_refinements=5,discretization_parameter=data.frame(decision_region_discretization=3,rejection_region_discretization=3,Type_I_error_discretiation=10))
 
 rm(list=ls())
 library(parallel)
@@ -43,7 +43,7 @@ optimize_design <- function(subpopulation.1.proportion=0.5,
 					   0,0,0.8),nrow=4,ncol=3,byrow=TRUE,dimnames=list(c(),c("PowerH01","PowerH02","PowerH0C"))),
     type.of.LP.solver="matlab",
 		number_of_LP_refinements=5,
-		discretization_parameter=data.frame(decision_region_discretization=1,rejection_region_discretization=1,Type_I_error_discretiation=10)
+		discretization_parameter=c(1,1,10)
 		){
 
 max_error_prob <- 0 # track approximation errors in problem construction; initialize to 0 here
