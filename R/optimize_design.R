@@ -1223,43 +1223,43 @@ A1 = numeric(0)
 for(i in 1:number_A1_files){
         tmp = load(paste("A1",i,".rdata",sep=""))
         tmp = constraint_list
-        writeMat(paste("A1",i,".mat",sep=""),tmp=tmp)
+        R.matlab::writeMat(paste("A1",i,".mat",sep=""),tmp=tmp)
 }
 
 tmp = load("A2.rdata")
 tmp = equality_constraints
-writeMat("A2.mat",A2 =tmp)
+R.matlab::writeMat("A2.mat",A2 =tmp)
 
 tmp = load("A3.rdata")
 A3  = rbind(power_constraint_matrix_H01, power_constraint_matrix_H02,power_constraint_matrix_H0C)
-writeMat("A3.mat",A3=A3)
+R.matlab::writeMat("A3.mat",A3=A3)
 
 tmp = load("power_constraints.rdata")
 a3  = power.constraints
-writeMat("a3.mat",a3=a3)
+R.matlab::writeMat("a3.mat",a3=a3)
 
 try((tmp = load("Inequality_Constraints_to_Restrict_MTP_to_Sufficient_Statistics.rdata")),silent=TRUE)
 if(any(ls()=="additional_inequality_constraints_part1")){
 tmp = additional_inequality_constraints_part1
 col = read.table("number_variables.txt")
 col = col$V1
-writeMat("A4.mat",A4=tmp)
+R.matlab::writeMat("A4.mat",A4=tmp)
 rm(additional_inequality_constraints_part1)
-writeMat("a4status.mat",a4status=1)
-} else {writeMat("a4status.mat",a4status=0)}
+R.matlab::writeMat("a4status.mat",a4status=1)
+} else {R.matlab::writeMat("a4status.mat",a4status=0)}
 
 tmp11 = read.table("number_equality_constraints_of_first_type.txt")
 tmp11 = tmp11$V1
-writeMat("a21.mat",a21 = tmp11)
+R.matlab::writeMat("a21.mat",a21 = tmp11)
 
 tmp = load("Inequality_Constraints_to_set_monotonicity_in_hypotheses_rejected.rdata")
 tmp = additional_inequality_constraints_part2
 
-writeMat("A5.mat",A5=tmp)
+R.matlab::writeMat("A5.mat",A5=tmp)
 
 tmp = load("c.rdata")
 obj = objective_function_vector
-writeMat("cc.mat",cc = obj)
+R.matlab::writeMat("cc.mat",cc = obj)
 
 system('matlab -nojvm -r "siterprl()" > output_LP_solver')
 
@@ -1270,7 +1270,7 @@ system('rm Inequality_Constraints_to_Restrict_MTP_to_Sufficient_Statistics.rdata
 system('rm Inequality_Constraints_to_set_monotonicity_in_hypotheses_rejected.rdata')
 ## Check if feasible solution was found; if no, return "problem infeasible"; if yes, construct finer solution
 
-sln = readMat(paste("sln2M1.mat",sep=""))
+sln = R.matlab::readMat(paste("sln2M1.mat",sep=""))
 save(sln,file=paste("sln2M",LP_iteration,".rdata",sep=""))
 
 if(sln$status==(-9)){return("Linear Program was Infeasible; Please Try Again e.g., With Greater Sample Sizes")} else if(sln$status==1 || sln$status==5){
