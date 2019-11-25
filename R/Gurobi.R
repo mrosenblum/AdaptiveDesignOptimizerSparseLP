@@ -1,7 +1,6 @@
 library(gurobi)
 library(Matrix)
 
-
 number_A1_files <- scan("number_A1_files.txt")
 A1 = numeric(0)
 for(i in 1:number_A1_files){
