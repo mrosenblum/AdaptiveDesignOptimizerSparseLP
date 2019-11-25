@@ -1467,7 +1467,7 @@ print("Fraction of solution components with integral value solutions")
 print(sum(sln$z>1-1e-10 | sln$z<10e-10)/length(sln$z))
 
 postscript(paste("rejection_regions.eps"),height=8,horizontal=FALSE,onefile=FALSE,width=8)
-plot(0,type="n",xaxt="n",yaxt="n",xlim=c(-2.78,2.78),ylim=c(-2.78,2.78),main=main_label,xlab=expression(paste(Z[1])),ylab=expression(paste(Z[2])),cex.lab=2,\
+plot(0,type="n",xaxt="n",yaxt="n",xlim=c(-2.78,2.78),ylim=c(-2.78,2.78),main=main_label,xlab=expression(paste(Z[1])),ylab=expression(paste(Z[2])),cex.lab=2,
  cex.axis=2, cex.main=2, cex.sub=2)
 
 axis(1,at=seq(-3,3,by=1),labels=-3:3,cex.axis=2)
