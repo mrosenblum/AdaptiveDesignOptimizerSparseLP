@@ -52,8 +52,10 @@ rho2 <- sqrt(p2)
 actions <- c(1,2,3,4,5,6,7)
 number_actions <- length(actions) # correspond to rejecting nothing, H01, H02, H0C, H01 and H0C, H02 and H0C, all
 
-## ncp (shorthand for non-centrality parameter) is a 2 component vector equal to c(sqrt(2*p_1*sum(stage.1.sample.sizes))\Delta_1/(2\sigma_1) , sqrt(2*p_2*sum(stage.1.sample.sizes)\Delta_2/(2\sigma_2)) for \sigma^2_s=(\sigma^2_{s0}+\sigma^2_{s1})/2.
+## ncp (shorthand for non-centrality parameter) is a 2 component vector equal to c(sqrt(2*p_1*sum(stage.1.sample.sizes))Delta_1/(2sigma_1) , sqrt(2*p_2*sum(stage.1.sample.sizes)Delta_2/(2sigma_2))) for sigma^2_s=(sigma^2_(s0)+sigma^2_(s1))/2.
+
 ## It represents c(EZ_1,EZ_2) for the fixed design that enrolls 2*p_s*sum(stage.1.sample.sizes) from each subpopulation s.
+
 map_from_P_to_type_I_error_indicator_over_set_of_actions <- function(ncp)
 {
 	return(c(0,ncp[1]<=0,ncp[2]<=0,rho1*ncp[1]+rho2*ncp[2]<=0, ncp[1]<=0 || rho1*ncp[1]+rho2*ncp[2]<=0, ncp[2] <= 0 || rho1*ncp[1]+rho2*ncp[2]<=0, ncp[1]<=0 || ncp[2]<=0 || rho1*ncp[1]+rho2*ncp[2]<=0))
@@ -74,11 +76,6 @@ decisions <- (1:number_decisions)
 
 ## Set loss function to be sample size; can modify if desired--general format is matrix with number_decision rows and number_actions columns, and entry is loss function value at corresponding (decision,action pair). Can also generalize to make it depend on the ncp value as well but if so need to modify generalized_generate... objective function construction
 loss_function_value <- array(n_stage1_subpopulation1+n_stage1_subpopulation2+n_stage2_subpopulation1_decision+n_stage2_subpopulation2_decision,c(number_decisions,number_actions))
-# Previously used:
-#loss_function_value_d1 <- rep(4,length(actions))
-#loss_function_value_d2 <- rep(2,length(actions))
-#loss_function_value_d3 <- rep(5,length(actions))
-#loss_function_value_d4 <- rep(5,length(actions))
 
 # Convert data.generating.distributions to list of non-centrality parameter vectors
 prior_mean_support <- c()
@@ -458,17 +455,13 @@ for(counter in 1:length(list_of_rectangles_dec_with_decision_probs)){
 
 ## Round all values
 for(counter in 1:length(list_of_rectangles_dec_with_decision_probs)){
-  #if(r$preset_decision==1){
-  #if(max(list_of_rectangles_dec_with_decision_probs[[counter]]$preset_decision_value)>=0.8){ 
     d <- which(list_of_rectangles_dec_with_decision_probs[[counter]]$preset_decision_value==max(list_of_rectangles_dec_with_decision_probs[[counter]]$preset_decision_value))
     list_of_rectangles_dec_with_decision_probs[[counter]]$preset_decision_value <- rep(0,length(decisions))
     list_of_rectangles_dec_with_decision_probs[[counter]]$preset_decision_value[d] <- 1
     list_of_rectangles_dec_with_decision_probs[[counter]]$allowed_decisions <- c(d)
     list_of_rectangles_dec_with_decision_probs[[counter]]$d_probs <- rep(0,length(decisions))
     list_of_rectangles_dec_with_decision_probs[[counter]]$d_probs[d] <- 1
-    #    rect(max(r$lower_boundaries[1]-tau,-10),max(r$lower_boundaries[2]-tau,-10),min(r$upper_boundaries[1]+tau,10),min(r$upper_boundaries[2]+tau,10),col=d) #, border=NA)
 }
-
 
 merge_rectangles <- function(rectangle_list_to_be_merged){	
 	lgth = length(rectangle_list_to_be_merged)
@@ -565,7 +558,6 @@ merge_rectangles <- function(rectangle_list_to_be_merged){
 	     combined_rectangles[[i]]   = tmp
       }
 return(combined_rectangles)
-
 }
 
 list_of_rectangles_dec_with_decision_probs_merged <- merge_rectangles(list_of_rectangles_dec_with_decision_probs)
@@ -717,6 +709,7 @@ rm(list_of_rectangles_dec_with_decision_probs_merged)
 
 	list_of_rectangles_dec <- list_of_rectangles_dec_with_decision_probs_augmented
 }
+
 	for(d in decisions){list_of_rectangles_dec <- c(list_of_rectangles_dec,list(list(lower_boundaries=c(0,0),upper_boundaries=c(0,0),allowed_decisions=d,preset_decision=0)))}# these are reference rectangles
 
 	   ## Set upper neighbors
@@ -727,7 +720,6 @@ rm(list_of_rectangles_dec_with_decision_probs_merged)
 		while(count_value <= length(list_of_rectangles_dec) && (!(r$upper_boundaries[2]== list_of_rectangles_dec[[count_value]]$lower_boundaries[2] && r$lower_boundaries[1]== list_of_rectangles_dec[[count_value]]$lower_boundaries[1] && r$upper_boundaries[1]== list_of_rectangles_dec[[count_value]]$upper_boundaries[1]))){count_value <- count_value +1}
 		if(count_value <= length(list_of_rectangles_dec)){list_of_rectangles_dec[[counter_for_r]]$upper_neighbor <- count_value}
 		}
-
 
         save(list_of_rectangles_dec,file=paste("list_of_rectangles_dec",LP_iteration,".rdata",sep="")) # modified list of rectangles constructed
 
@@ -751,7 +743,6 @@ rm(list_of_rectangles_dec_with_decision_probs_merged)
    load(paste("ncp_list_short2.rdata",sep=""))
    save(ncp_list,file=paste("ncp_list",LP_iteration,".rdata",sep=""))
    constraints_per_A1_file <- max(1,ceiling(length(ncp_list)/190))
-}
 }
 
 ## Generate rectangle partition for stage 2 (multiple testing procedure)
@@ -1406,12 +1397,16 @@ additional_inequality_constraints_part2 <- additional_inequality_constraints_par
 if(max(additional_inequality_constraints_part2[,2]) > number_of_variables){print("ERROR in Generating Inequality_Constraints_to_set_monotonicity_in_hypotheses_rejected");write(6,file="error_flag")} else{
 save(additional_inequality_constraints_part2,file=paste("Inequality_Constraints_to_set_monotonicity_in_hypotheses_rejected.rdata"))}
 }
-
-
 }
+
+#
+# Generate Linear program in parallel
+#
 
 number_jobs <- ceiling(length(ncp_list)/constraints_per_A1_file)+6
 parallel::mclapply(c((number_jobs-5):number_jobs,1:(number_jobs-6)),generate_LP,mc.cores=number_cores) # order of jobs puts computation of power constraints and objective function first since they take longer to compute
+
+# Convert linear program to matlab format
 
 number_A1_files <- scan("number_A1_files.txt")
 A1 = numeric(0)
@@ -1456,7 +1451,15 @@ tmp = load("c.rdata")
 obj = objective_function_vector
 R.matlab::writeMat("cc.mat",cc = obj)
 
+#
+# Solve linear program by call to cplex via matlab
+#
+
 system('matlab -nojvm -r "siterprl()" > output_LP_solver')
+
+#
+# Extract results from linear program solver and examine whether feasible solution was found
+#
 
 sln = R.matlab::readMat(paste("sln2M1.mat",sep=""))
 save(sln,file=paste("sln2M",LP_iteration,".rdata",sep=""))
