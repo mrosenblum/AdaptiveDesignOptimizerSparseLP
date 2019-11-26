@@ -752,6 +752,7 @@ rm(list_of_rectangles_dec_with_decision_probs_merged)
    save(ncp_list,file=paste("ncp_list",LP_iteration,".rdata",sep=""))
    constraints_per_A1_file <- max(1,ceiling(length(ncp_list)/190))
 }
+}
 
 ## Generate rectangle partition for stage 2 (multiple testing procedure)
 stage_2_rectangle_offset_value <- 0
@@ -1559,5 +1560,5 @@ if(sln$status==1 || sln$status==5){
 }
 
   #Clean up files
-
+  system('rm max_error_prob*')
 }
