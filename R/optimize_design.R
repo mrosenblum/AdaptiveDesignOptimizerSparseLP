@@ -574,7 +574,8 @@ for(counter in 1:length(list_of_rectangles_dec_with_decision_probs_merged)){
   list_of_rectangles_dec_with_decision_probs_merged[[counter]]$preset_decision_value <- list_of_rectangles_dec_with_decision_probs_merged[[counter]]$d_probs
 }
 
-save(list_of_rectangles_dec_with_decision_probs_merged,file=paste("list_of_rectangles_dec_rounded_to_integer.rdata",sep=""))
+
+#save(list_of_rectangles_dec_with_decision_probs_merged,file=paste("list_of_rectangles_dec_rounded_to_integer.rdata",sep=""))
 list_of_rectangles_dec <- list_of_rectangles_dec_with_decision_probs_merged
 
 ## To view results of rounding and merging
@@ -715,7 +716,7 @@ rm(list_of_rectangles_dec_with_decision_probs_merged)
 	}
 
 	list_of_rectangles_dec <- list_of_rectangles_dec_with_decision_probs_augmented
-
+}
 	for(d in decisions){list_of_rectangles_dec <- c(list_of_rectangles_dec,list(list(lower_boundaries=c(0,0),upper_boundaries=c(0,0),allowed_decisions=d,preset_decision=0)))}# these are reference rectangles
 
 	   ## Set upper neighbors
@@ -733,7 +734,7 @@ rm(list_of_rectangles_dec_with_decision_probs_merged)
 	set_counter <- 0
 	for(r1_counter in 1:(length(list_of_rectangles_dec_with_decision_probs_augmented))){if(list_of_rectangles_dec_with_decision_probs_augmented[[r1_counter]]$preset_decision>0){set_counter<-set_counter+1}}
 	number_preset_decision_rectangles <- set_counter
-}}
+}
    #
    # New set of decision rectangles completed
    #
