@@ -1412,7 +1412,7 @@ parallel::mclapply(c((number_jobs-5):number_jobs,1:(number_jobs-6)),generate_LP,
 
 # Convert linear program to matlab format
 
-parallel::writeMat("alphaValue.mat",alphaValue=total.alpha)
+R.matlab::writeMat("alphaValue.mat",alphaValue=total.alpha)
 
 number_A1_files <- scan("number_A1_files.txt")
 A1 = numeric(0)
