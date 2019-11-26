@@ -463,6 +463,8 @@ for(counter in 1:length(list_of_rectangles_dec_with_decision_probs)){
     list_of_rectangles_dec_with_decision_probs[[counter]]$d_probs[d] <- 1
 }
 
+merge_final_round_decision_rectangles <- 1
+if(merge_final_round_decision_rectangles==1){
 merge_rectangles <- function(rectangle_list_to_be_merged){	
 	lgth = length(rectangle_list_to_be_merged)
 	xl   = rep(0,lgth)
@@ -561,6 +563,8 @@ return(combined_rectangles)
 }
 
 list_of_rectangles_dec_with_decision_probs_merged <- merge_rectangles(list_of_rectangles_dec_with_decision_probs)
+} else {list_of_rectangles_dec_with_decision_probs_merged <- list_of_rectangles_dec_with_decision_probs}
+
 
 for(counter in 1:length(list_of_rectangles_dec_with_decision_probs_merged)){
   list_of_rectangles_dec_with_decision_probs_merged[[counter]]$preset_decision_value <- list_of_rectangles_dec_with_decision_probs_merged[[counter]]$d_probs
@@ -1407,6 +1411,8 @@ number_jobs <- ceiling(length(ncp_list)/constraints_per_A1_file)+6
 parallel::mclapply(c((number_jobs-5):number_jobs,1:(number_jobs-6)),generate_LP,mc.cores=number_cores) # order of jobs puts computation of power constraints and objective function first since they take longer to compute
 
 # Convert linear program to matlab format
+
+parallel::writeMat("alphaValue.mat",alphaValue=total.alpha)
 
 number_A1_files <- scan("number_A1_files.txt")
 A1 = numeric(0)
