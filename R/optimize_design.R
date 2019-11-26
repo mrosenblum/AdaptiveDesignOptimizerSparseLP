@@ -724,7 +724,7 @@ rm(list_of_rectangles_dec_with_decision_probs_merged)
         save(list_of_rectangles_dec,file=paste("list_of_rectangles_dec",LP_iteration,".rdata",sep="")) # modified list of rectangles constructed
 
 	set_counter <- 0
-	for(r1_counter in 1:(length(list_of_rectangles_dec_with_decision_probs_augmented))){if(list_of_rectangles_dec_with_decision_probs_augmented[[r1_counter]]$preset_decision>0){set_counter<-set_counter+1}}
+	for(r1_counter in 1:(length(list_of_rectangles_dec))){if(list_of_rectangles_dec[[r1_counter]]$preset_decision>0){set_counter<-set_counter+1}}
 	number_preset_decision_rectangles <- set_counter
 }
    #
