@@ -312,6 +312,8 @@ if(LP_iteration == 1){
    # Either (i) round all decision region rectangles to be integer valued or (ii) set rectangles surrounded by identically valued rectanges and split others.
    #
 
+   if(LP_iteration==number_of_LP_refinements){tau_mtp<-0.25} # if final iteration, use finer multiple testing procedure discretization
+
    if(any(LP_iteration==round_each_decision_rectangle_to_integer || any(LP_iteration==set_rectangles_with_identically_valued_neighbors_and_split_others))){
 
 #
