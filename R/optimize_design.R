@@ -208,7 +208,7 @@ if(LP_iteration == 1){
   for(z in seq(-9,9,length=18*discretization_parameter[3])) {ncp_list <- c(ncp_list,list(c(z,-(rho1/rho2)*z)))}
   ncp_list <- c(ncp_list,list(c(0,0)))
   ncp_list <- unique(ncp_list)
-  constraints_per_A1_file <- 3
+  constraints_per_A1_file <- 1
 
   # construct list of rectangles in set R
   ## List of rectangles defining decision boundaries
@@ -298,7 +298,7 @@ if(LP_iteration == 1){
    }
    ncp_list <- c(ncp_list,list(c(0,0)))
    ncp_list <- unique(ncp_list)
-   constraints_per_A1_file <- max(1,ceiling(length(ncp_list)/190))
+   constraints_per_A1_file <- 1
 
    save(list_of_rectangles_dec,file=paste("list_of_rectangles_dec",LP_iteration,".rdata",sep="")) # list of rectangles for decision region same as LP_iteration 1
    save(ncp_list,file=paste("ncp_list",LP_iteration,".rdata",sep=""))
@@ -746,7 +746,7 @@ rm(list_of_rectangles_dec_with_decision_probs_merged)
 
    load(paste("ncp_list_short2.rdata",sep=""))
    save(ncp_list,file=paste("ncp_list",LP_iteration,".rdata",sep=""))
-   constraints_per_A1_file <- max(1,ceiling(length(ncp_list)/190))
+   constraints_per_A1_file <- 1
 }
 
 ## Generate rectangle partition for stage 2 (multiple testing procedure)
