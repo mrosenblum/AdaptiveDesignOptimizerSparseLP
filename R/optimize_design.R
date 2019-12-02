@@ -312,8 +312,6 @@ if(LP_iteration == 1){
    # Either (i) round all decision region rectangles to be integer valued or (ii) set rectangles surrounded by identically valued rectanges and split others.
    #
 
-   if(LP_iteration==number_of_LP_refinements){tau_mtp<-0.25} # if final iteration, use finer multiple testing procedure discretization
-
    if(any(LP_iteration==round_each_decision_rectangle_to_integer || any(LP_iteration==set_rectangles_with_identically_valued_neighbors_and_split_others))){
 
 #
@@ -465,7 +463,7 @@ for(counter in 1:length(list_of_rectangles_dec_with_decision_probs)){
     list_of_rectangles_dec_with_decision_probs[[counter]]$d_probs[d] <- 1
 }
 
-merge_final_round_decision_rectangles <- 1
+merge_final_round_decision_rectangles <- 0
 if(merge_final_round_decision_rectangles==1){
 merge_rectangles <- function(rectangle_list_to_be_merged){	
 	lgth = length(rectangle_list_to_be_merged)
@@ -752,6 +750,9 @@ rm(list_of_rectangles_dec_with_decision_probs_merged)
 }
 
 ## Generate rectangle partition for stage 2 (multiple testing procedure)
+
+if(LP_iteration==number_of_LP_refinements){tau_mtp<-0.25} # if final iteration, use finer multiple testing procedure discretization
+
 stage_2_rectangle_offset_value <- 0
 list_of_rectangles_mtp1 <- list()
 for(x in seq(-w1,w1,by=tau_mtp))
@@ -1450,6 +1451,8 @@ tmp11 = read.table("number_equality_constraints_of_first_type.txt")
 tmp11 = tmp11$V1
 R.matlab::writeMat("a21.mat",a21 = tmp11)
 
+R.matlab::writeMat("iteration.mat",iteration = LP_iteration)
+
 tmp = load("Inequality_Constraints_to_set_monotonicity_in_hypotheses_rejected.rdata")
 tmp = additional_inequality_constraints_part2
 
@@ -1469,7 +1472,7 @@ system('matlab -nojvm -r "siterprl()" > output_LP_solver')
 # Extract results from linear program solver and examine whether feasible solution was found
 #
 
-sln = R.matlab::readMat(paste("sln2M1.mat",sep=""))
+sln = R.matlab::readMat(paste("sln2M",LP_iteration,".mat",sep=""))
 save(sln,file=paste("sln2M",LP_iteration,".rdata",sep=""))
 
 if(sln$status==(-9)){return("Linear Program was Infeasible; Please Try Again e.g., With Greater Sample Sizes")} else if(sln$status==1 || sln$status==5){
@@ -1480,16 +1483,17 @@ print("Fraction of solution components with integral value solutions")
 print(sum(sln$z>1-1e-10 | sln$z<10e-10)/length(sln$z))
 
 postscript(paste("rejection_regions.eps"),height=8,horizontal=FALSE,onefile=FALSE,width=8)
-plot(0,type="n",xaxt="n",yaxt="n",xlim=c(-2.78,2.78),ylim=c(-2.78,2.78),main=main_label,xlab=expression(paste(Z[1])),ylab=expression(paste(Z[2])),cex.lab=2,
+plot(0,type="n",xaxt="n",yaxt="n",xlim=c(-2.78,2.78),ylim=c(-2.78,2.78),main="Rejection Regions",xlab=expression(paste(Z[1])),ylab=expression(paste(Z[2])),cex.lab=2,
  cex.axis=2, cex.main=2, cex.sub=2)
 
+z_solution <- sln$z
 axis(1,at=seq(-3,3,by=1),labels=-3:3,cex.axis=2)
 axis(2,at=seq(-3,3,by=1),labels=-3:3,cex.axis=2)
-z_rounded <- rep(0,length(z_solution)-1)
+z_rounded <- rep(0,length(z_solution))
 for(d_plot in decisions){
-	rounding_threshold_H01 <- rounding_threshold
-	rounding_threshold_H02 <- rounding_threshold
-	rounding_threshold_H0C <- rounding_threshold 
+	rounding_threshold_H01 <- rounding_threshold <- 0.9
+	rounding_threshold_H02 <- rounding_threshold <- 0.9
+	rounding_threshold_H0C <- rounding_threshold <- 0.9
 	r_reference_index <- length(list_of_rectangles_dec) - number_reference_rectangles + d_plot
 	r_reference <- list_of_rectangles_dec[[r_reference_index]]
 	for(d in r_reference$allowed_decisions){

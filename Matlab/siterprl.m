@@ -25,6 +25,7 @@ load A3.mat
 %end
 
 load alphaValue.mat
+load iteration.mat
 
 [tmp,~] = size(A1);
 a1      = alphaValue*ones(tmp,1);
@@ -105,8 +106,11 @@ if (status==1)||(status==5)
     aa       = [aa;zeros(r5,1)];
     AAn       = [AA;A5];
     [z,val,status,output,dual] = cplexlp(cc,AAn,aa,A2,a2,lb,ub,'options',options);
+    if(iteration<5)
     dual = [dual.ineqlin;dual.eqlin];
-    eval(['save sln2M',num2str(1),'.mat',' output z val status dual'])
+    end
+
+    eval(['save sln2M',num2str(iteration),'.mat',' output z val status dual'])
     
 end
 
