@@ -212,8 +212,8 @@ if(is.null(ncp.list)){
   ## List of rectangles defining decision boundaries
   ## Each rectangle is encoded by c(lower left (x,y) coordinates, upper right (x,y) coordinates)
 
-if(!is.null(list.of.rectangles.dec)){list_of_rectangles_dec <- list.of.rectangles.dec} else {
-  list_of_rectangles_dec <- list()
+if(is.null(list.of.rectangles.dec)){
+  list.of.rectangles.dec <- list()
 
   number_preset_decision_rectangles <- 0
 
@@ -221,7 +221,7 @@ if(!is.null(list.of.rectangles.dec)){list_of_rectangles_dec <- list.of.rectangle
   {
 	for(y in seq(-w2,w2-tau,by=tau))
 	{
-		list_of_rectangles_dec<- c(list_of_rectangles_dec,list(list(lower_boundaries=c(x,y),upper_boundaries=c(x+tau,y+tau),allowed_decisions=decisions,preset_decision=0)))
+		list.of.rectangles.dec<- c(list.of.rectangles.dec,list(list(lower_boundaries=c(x,y),upper_boundaries=c(x+tau,y+tau),allowed_decisions=decisions,preset_decision=0)))
 	}
   }
 
@@ -229,7 +229,7 @@ if(!is.null(list.of.rectangles.dec)){list_of_rectangles_dec <- list.of.rectangle
     {
     for(y in c(seq(-w1,-3-tau,by=tau),seq(3,w1-tau,by=tau)))
 	{
-		list_of_rectangles_dec<- c(list_of_rectangles_dec,list(list(lower_boundaries=c(x,y),upper_boundaries=c(x+tau,y+tau),allowed_decisions=decisions,preset_decision=0)))
+		list.of.rectangles.dec<- c(list.of.rectangles.dec,list(list(lower_boundaries=c(x,y),upper_boundaries=c(x+tau,y+tau),allowed_decisions=decisions,preset_decision=0)))
 	}
   }
 
@@ -237,101 +237,101 @@ if(!is.null(list.of.rectangles.dec)){list_of_rectangles_dec <- list.of.rectangle
   {
 	for(y in seq(-3,3-tau/2,by=tau/2))
 	{
-		list_of_rectangles_dec<- c(list_of_rectangles_dec,list(list(lower_boundaries=c(x,y),upper_boundaries=c(x+tau/2,y+tau/2),allowed_decisions=decisions,preset_decision=0)))
+		list.of.rectangles.dec<- c(list.of.rectangles.dec,list(list(lower_boundaries=c(x,y),upper_boundaries=c(x+tau/2,y+tau/2),allowed_decisions=decisions,preset_decision=0)))
 	}
   }
 
-  for(d in decisions){list_of_rectangles_dec <- c(list_of_rectangles_dec,list(list(lower_boundaries=c(0,0),upper_boundaries=c(0,0),allowed_decisions=d,preset_decision=0)))}# these are reference rectangles
+  for(d in decisions){list.of.rectangles.dec <- c(list.of.rectangles.dec,list(list(lower_boundaries=c(0,0),upper_boundaries=c(0,0),allowed_decisions=d,preset_decision=0)))}# these are reference rectangles
 
    ## Set upper neighbors
    counter_for_r <- 1
-   for(counter_for_r in 1:(length(list_of_rectangles_dec)-number_reference_rectangles)){
-	r <- list_of_rectangles_dec[[counter_for_r]]
+   for(counter_for_r in 1:(length(list.of.rectangles.dec)-number_reference_rectangles)){
+	r <- list.of.rectangles.dec[[counter_for_r]]
 	count_value <- 1
-	while(count_value <= length(list_of_rectangles_dec) && (!(r$upper_boundaries[2]== list_of_rectangles_dec[[count_value]]$lower_boundaries[2] && r$lower_boundaries[1]== list_of_rectangles_dec[[count_value]]$lower_boundaries[1] && r$upper_boundaries[1]== list_of_rectangles_dec[[count_value]]$upper_boundaries[1]))){count_value <- count_value +1}
-	if(count_value <= length(list_of_rectangles_dec)){list_of_rectangles_dec[[counter_for_r]]$upper_neighbor <- count_value}
+	while(count_value <= length(list.of.rectangles.dec) && (!(r$upper_boundaries[2]== list.of.rectangles.dec[[count_value]]$lower_boundaries[2] && r$lower_boundaries[1]== list.of.rectangles.dec[[count_value]]$lower_boundaries[1] && r$upper_boundaries[1]== list.of.rectangles.dec[[count_value]]$upper_boundaries[1]))){count_value <- count_value +1}
+	if(count_value <= length(list.of.rectangles.dec)){list.of.rectangles.dec[[counter_for_r]]$upper_neighbor <- count_value}
    }
-   save(list_of_rectangles_dec,file=paste("list_of_rectangles_dec",LP.iteration,".rdata",sep=""))
+   save(list.of.rectangles.dec,file=paste("list.of.rectangles.dec",LP.iteration,".rdata",sep=""))
    save(ncp.list,file=paste("ncp.list",LP.iteration,".rdata",sep=""))
 }
 
 ## Set multiple testing procedure rectangle partition
 
 stage_2_rectangle_offset_value <- 0
-list_of_rectangles_mtp1 <- list()
+list.of.rectangles.mtp1 <- list()
 for(x in seq(-w1,w1,by=tau_mtp))
 {
 	#Skip lower left quadrant
 	for(y in seq(ifelse(x<0,0,-w2),w2,by=tau_mtp))
 	{
-		list_of_rectangles_mtp1<- c(list_of_rectangles_mtp1,list(list(lower_boundaries=c(x,y),upper_boundaries=c(x+tau_mtp,y+tau_mtp),allowed_actions=actions,stage_2_rectangle_offset=stage_2_rectangle_offset_value)))
+		list.of.rectangles.mtp1<- c(list.of.rectangles.mtp1,list(list(lower_boundaries=c(x,y),upper_boundaries=c(x+tau_mtp,y+tau_mtp),allowed_actions=actions,stage_2_rectangle_offset=stage_2_rectangle_offset_value)))
 		stage_2_rectangle_offset_value <- stage_2_rectangle_offset_value + length(actions)
 	}
 }
 ## Only one large rectangle for lower left quadrant
-list_of_rectangles_mtp1<- c(list_of_rectangles_mtp1,list(list(lower_boundaries=c(-Inf,-Inf),upper_boundaries=c(0,0),allowed_actions=actions,stage_2_rectangle_offset=stage_2_rectangle_offset_value)))
+list.of.rectangles.mtp1<- c(list.of.rectangles.mtp1,list(list(lower_boundaries=c(-Inf,-Inf),upper_boundaries=c(0,0),allowed_actions=actions,stage_2_rectangle_offset=stage_2_rectangle_offset_value)))
 stage_2_rectangle_offset_value <- stage_2_rectangle_offset_value + length(actions)
 
 number_rectangles_by_actions_for_decision_type1  <- stage_2_rectangle_offset_value
 
 ## Set right neighbors
 counter_for_rprime <- 1
-for(rprime in list_of_rectangles_mtp1)
+for(rprime in list.of.rectangles.mtp1)
 {
 	count_value <- 1
-	while(count_value <= length(list_of_rectangles_mtp1) && (!(rprime$upper_boundaries[1]== list_of_rectangles_mtp1[[count_value]]$lower_boundaries[1] && rprime$lower_boundaries[2]== list_of_rectangles_mtp1[[count_value]]$lower_boundaries[2] && rprime$upper_boundaries[2]== list_of_rectangles_mtp1[[count_value]]$upper_boundaries[2]))){count_value <- count_value +1}
-	if(count_value <= length(list_of_rectangles_mtp1)){list_of_rectangles_mtp1[[counter_for_rprime]]$right_neighbor <- count_value}
+	while(count_value <= length(list.of.rectangles.mtp1) && (!(rprime$upper_boundaries[1]== list.of.rectangles.mtp1[[count_value]]$lower_boundaries[1] && rprime$lower_boundaries[2]== list.of.rectangles.mtp1[[count_value]]$lower_boundaries[2] && rprime$upper_boundaries[2]== list.of.rectangles.mtp1[[count_value]]$upper_boundaries[2]))){count_value <- count_value +1}
+	if(count_value <= length(list.of.rectangles.mtp1)){list.of.rectangles.mtp1[[counter_for_rprime]]$right_neighbor <- count_value}
 	counter_for_rprime <- counter_for_rprime +1
 }
 ## Set upper neighbors
 counter_for_rprime <- 1
-for(rprime in list_of_rectangles_mtp1)
+for(rprime in list.of.rectangles.mtp1)
 {
 	count_value <- 1
-	while(count_value <= length(list_of_rectangles_mtp1) && (!(rprime$upper_boundaries[2]== list_of_rectangles_mtp1[[count_value]]$lower_boundaries[2] && rprime$lower_boundaries[1]== list_of_rectangles_mtp1[[count_value]]$lower_boundaries[1] && rprime$upper_boundaries[1]== list_of_rectangles_mtp1[[count_value]]$upper_boundaries[1]))){count_value <- count_value +1}
-	if(count_value <= length(list_of_rectangles_mtp1)){list_of_rectangles_mtp1[[counter_for_rprime]]$upper_neighbor <- count_value}
+	while(count_value <= length(list.of.rectangles.mtp1) && (!(rprime$upper_boundaries[2]== list.of.rectangles.mtp1[[count_value]]$lower_boundaries[2] && rprime$lower_boundaries[1]== list.of.rectangles.mtp1[[count_value]]$lower_boundaries[1] && rprime$upper_boundaries[1]== list.of.rectangles.mtp1[[count_value]]$upper_boundaries[1]))){count_value <- count_value +1}
+	if(count_value <= length(list.of.rectangles.mtp1)){list.of.rectangles.mtp1[[counter_for_rprime]]$upper_neighbor <- count_value}
 	counter_for_rprime <- counter_for_rprime +1
 }
 
-##Set list_of_rectangles_mtp2
+##Set list.of.rectangles.mtp2
 stage_2_rectangle_offset_value <- 0
-list_of_rectangles_mtp2 <- list()
+list.of.rectangles.mtp2 <- list()
 for(x in seq(-w1,w1,by=tau)){
     for(y in seq(-w2,w2,by=tau)){
-        list_of_rectangles_mtp2<- c(list_of_rectangles_mtp2,list(list(lower_boundaries=c(x,y),upper_boundaries=c(x+tau,y+tau),allowed_actions=actions,stage_2_rectangle_offset=stage_2_rectangle_offset_value)))
+        list.of.rectangles.mtp2<- c(list.of.rectangles.mtp2,list(list(lower_boundaries=c(x,y),upper_boundaries=c(x+tau,y+tau),allowed_actions=actions,stage_2_rectangle_offset=stage_2_rectangle_offset_value)))
         stage_2_rectangle_offset_value <- stage_2_rectangle_offset_value + length(actions)
     }
 }
 ## IF WANT TO TEMPORARILY SET MTP2 TO SINGLE LARGE RECTANGLE, replace above loops by:
-#list_of_rectangles_mtp2<- c(list_of_rectangles_mtp2,list(list(lower_boundaries=c(-Inf,-Inf),upper_boundaries=c(Inf,Inf),allowed_actions=actions,stage_2_rectangle_offset=stage_2_rectangle_offset_value)))
+#list.of.rectangles.mtp2<- c(list.of.rectangles.mtp2,list(list(lower_boundaries=c(-Inf,-Inf),upper_boundaries=c(Inf,Inf),allowed_actions=actions,stage_2_rectangle_offset=stage_2_rectangle_offset_value)))
 #stage_2_rectangle_offset_value <- stage_2_rectangle_offset_value + length(actions)
 
 number_rectangles_by_actions_for_decision_type2  <- stage_2_rectangle_offset_value
 
 ##Set stage 2 rectangle sets for each d_type:
 #Set stage 2 rectangles sets to be the same for d_type 1, 3, and 4. (Allow different for d_type 2)
-list_of_rectangles_mtp3 <- list_of_rectangles_mtp4 <- list_of_rectangles_mtp1;
+list.of.rectangles.mtp3 <- list.of.rectangles.mtp4 <- list.of.rectangles.mtp1;
 number_rectangles_by_actions_for_decision_type3 <- number_rectangles_by_actions_for_decision_type4 <- number_rectangles_by_actions_for_decision_type1
-list_of_rectangles_mtp <- list()
+list.of.rectangles.mtp <- list()
 number_rectangles_by_actions_for_decision <- c()
 for(d in decisions){
-  list_of_rectangles_mtp <- c(list_of_rectangles_mtp,list(switch(d_type[d],list_of_rectangles_mtp1,list_of_rectangles_mtp2,list_of_rectangles_mtp3,list_of_rectangles_mtp4)));
+  list.of.rectangles.mtp <- c(list.of.rectangles.mtp,list(switch(d_type[d],list.of.rectangles.mtp1,list.of.rectangles.mtp2,list.of.rectangles.mtp3,list.of.rectangles.mtp4)));
   number_rectangles_by_actions_for_decision <- c(number_rectangles_by_actions_for_decision,switch(d_type[d],number_rectangles_by_actions_for_decision_type1,number_rectangles_by_actions_for_decision_type2,number_rectangles_by_actions_for_decision_type3,number_rectangles_by_actions_for_decision_type4))
 }
 #Can replace above loop if desired to have tailored rectangle sets for each possible enrollment choice.
-#save(list_of_rectangles_dec,file="list_of_rectangles.rdata")
+#save(list.of.rectangles.dec,file="list_of_rectangles.rdata")
 
 # compute number of variables in linear program
 number_of_variables <- 0
 current_rectangle <-1
-for(r in list_of_rectangles_dec){
+for(r in list.of.rectangles.dec){
     if(r$preset_decision == 0){# we do not encode variables corresponding to decision region rectangles that are preset, i.e, where preset_decision==1
-        list_of_rectangles_dec[[current_rectangle]]$stage_1_rectangle_offset <- number_of_variables
+        list.of.rectangles.dec[[current_rectangle]]$stage_1_rectangle_offset <- number_of_variables
         for(d in decisions){
             if(sum(d==r$allowed_decisions)>0){
-                list_of_rectangles_dec[[current_rectangle]]$stage_1_rectangle_and_decision_offset[[d]] <- number_of_variables
+                list.of.rectangles.dec[[current_rectangle]]$stage_1_rectangle_and_decision_offset[[d]] <- number_of_variables
                 number_of_variables <- number_of_variables+number_rectangles_by_actions_for_decision[d]
-            } else {list_of_rectangles_dec[[current_rectangle]]$stage_1_rectangle_and_decision_offset[[d]] <- NA}
+            } else {list.of.rectangles.dec[[current_rectangle]]$stage_1_rectangle_and_decision_offset[[d]] <- NA}
         }
     }
     current_rectangle <- current_rectangle+1
@@ -341,10 +341,10 @@ variable_location <- function(r,d,rprime,action){return(r$stage_1_rectangle_and_
 
 #compute number_equality_constraints_part2
 number_equality_constraints_part2 <- 0
-for(r in list_of_rectangles_dec){
+for(r in list.of.rectangles.dec){
     if(r$preset_decision==0){
         for(d in r$allowed_decisions){
-            number_equality_constraints_part2<-number_equality_constraints_part2+(length(list_of_rectangles_mtp[[d]])-1)
+            number_equality_constraints_part2<-number_equality_constraints_part2+(length(list.of.rectangles.mtp[[d]])-1)
 	}
     }
 }
@@ -353,7 +353,7 @@ print("number of variables")
 print(number_of_variables)
 print("number of familywise Type I error constraints")
 print(length(ncp.list))
-number_equality_constraints_part1 <- length(list_of_rectangles_dec)-number_preset_decision_rectangles
+number_equality_constraints_part1 <- length(list.of.rectangles.dec)-number_preset_decision_rectangles
 write(number_equality_constraints_part1,f=paste("number_equality_constraints_of_first_type.txt"))
 print("number of equality constraints of first type")
 print(number_equality_constraints_part1)
@@ -364,7 +364,7 @@ write(length(ncp.list),f=paste("number_A1_constraints.txt"))
 write(ceiling(length(ncp.list)/constraints_per_A1_file),f=paste("number_A1_files.txt"))
 power.constraints <- as.vector(power.constraints)
 save(power.constraints,file="power_constraints.rdata")
-save(list_of_rectangles_mtp,file=paste("list_of_rectangles_mtp",LP.iteration,".rdata",sep=""))
+save(list.of.rectangles.mtp,file=paste("list.of.rectangles.mtp",LP.iteration,".rdata",sep=""))
 
 ## Includes constraints the restrict multiple testing procedure not depend on stage 1 statistics (given cumulative statistics Z^C and decision d)
 ## Implements unequal rectangle sizes, with setting of rectangles to specific values
@@ -385,30 +385,30 @@ for(ncp in ncp.list[((task_id-1)*constraints_per_A1_file+1):min(length(ncp.list)
 {
                                         # construct vectors for storing reallocated probabilities for preset decision rectangles
     for(d in decisions){
-        for(rprime_counter in 1:length(list_of_rectangles_mtp[[d]])){
-            list_of_rectangles_mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles <- rep(0,length(list_of_rectangles_mtp[[d]][[rprime_counter]]$allowed_actions))
+        for(rprime_counter in 1:length(list.of.rectangles.mtp[[d]])){
+            list.of.rectangles.mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles <- rep(0,length(list.of.rectangles.mtp[[d]][[rprime_counter]]$allowed_actions))
         }
     }
 
     rvec <- c()
     ## Construct constraint that P_{ncp}(Type I error) \leq \alpha
     true_nulls_violated_by_action_set <- map_from_P_to_type_I_error_indicator_over_set_of_actions(ncp)
-    for(r in list_of_rectangles_dec[1:(length(list_of_rectangles_dec)-number_reference_rectangles)]){
+    for(r in list.of.rectangles.dec[1:(length(list.of.rectangles.dec)-number_reference_rectangles)]){
         for(d in r$allowed_decisions){
             if(d_type[d]==1){
-                for(rprime_counter in 1:length(list_of_rectangles_mtp[[d]])){
-                    rprime <- list_of_rectangles_mtp[[d]][[rprime_counter]]
+                for(rprime_counter in 1:length(list.of.rectangles.mtp[[d]])){
+                    rprime <- list.of.rectangles.mtp[[d]][[rprime_counter]]
                     ## Get P_{ncp_vec}(Z \in rectangle r)
                     prob_r <- mvtnorm::pmvnorm(mean=mean_vector(ncp,d),sigma=covariance_matrix[[d]],lower=c(r$lower_boundaries,rprime$lower_boundaries),upper=c(r$upper_boundaries,rprime$upper_boundaries),algorithm=mvtnorm::GenzBretz(abseps = 0.000000001,maxpts=100000))
                     if(attr(prob_r,"error") > max_error_prob){max_error_prob <- attr(prob_r,"error")}
                     if(r$preset_decision==0){rvec <- c(rvec,prob_r*true_nulls_violated_by_action_set[rprime$allowed_actions])}else{
-                        list_of_rectangles_mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles <- list_of_rectangles_mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles + r$preset_decision_value[d]*prob_r*true_nulls_violated_by_action_set[rprime$allowed_actions]
+                        list.of.rectangles.mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles <- list.of.rectangles.mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles + r$preset_decision_value[d]*prob_r*true_nulls_violated_by_action_set[rprime$allowed_actions]
                     }
                 }
             } else if(d_type[d]==2) {
                 ## Get P_{ncp_vec}(Z \in rectangle r)
-                 for(rprime_counter in 1:length(list_of_rectangles_mtp[[d]])){
-                    rprime <- list_of_rectangles_mtp[[d]][[rprime_counter]]
+                 for(rprime_counter in 1:length(list.of.rectangles.mtp[[d]])){
+                    rprime <- list.of.rectangles.mtp[[d]][[rprime_counter]]
                     ## compute overlap in rectangles in terms of z_2:
                     intersection_rectangle_lower_boundaries <- pmax(r$lower_boundaries,rprime$lower_boundaries)
                     intersection_rectangle_upper_boundaries <- pmin(r$upper_boundaries,rprime$upper_boundaries)
@@ -419,14 +419,14 @@ for(ncp in ncp.list[((task_id-1)*constraints_per_A1_file+1):min(length(ncp.list)
                         prob_r <- 0
                     }
                     if(r$preset_decision==0){rvec <- c(rvec,prob_r*true_nulls_violated_by_action_set[rprime$allowed_actions])}else{
-                            list_of_rectangles_mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles <- list_of_rectangles_mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles + r$preset_decision_value[d]*prob_r*true_nulls_violated_by_action_set[rprime$allowed_actions]
+                            list.of.rectangles.mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles <- list.of.rectangles.mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles + r$preset_decision_value[d]*prob_r*true_nulls_violated_by_action_set[rprime$allowed_actions]
                         }
                 }
             } else if(d_type[d]==3) {
                 r_lower_boundary_z_2 <- r$lower_boundaries[2]
                 r_upper_boundary_z_2 <- r$upper_boundaries[2]
-                for(rprime_counter in 1:length(list_of_rectangles_mtp[[d]])){
-                    rprime <- list_of_rectangles_mtp[[d]][[rprime_counter]]
+                for(rprime_counter in 1:length(list.of.rectangles.mtp[[d]])){
+                    rprime <- list.of.rectangles.mtp[[d]][[rprime_counter]]
                     ## compute overlap in rectangles in terms of z_2:
                     effective_z_2_lower_boundary <- max(c(r_lower_boundary_z_2,rprime$lower_boundaries[2]))
                     effective_z_2_upper_boundary <- min(c(r_upper_boundary_z_2,rprime$upper_boundaries[2]))
@@ -438,14 +438,14 @@ for(ncp in ncp.list[((task_id-1)*constraints_per_A1_file+1):min(length(ncp.list)
                         prob_r <- 0
                     }
                     if(r$preset_decision==0){rvec <- c(rvec,prob_r*true_nulls_violated_by_action_set[rprime$allowed_actions])}else{
-                        list_of_rectangles_mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles <- list_of_rectangles_mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles + r$preset_decision_value[d]*prob_r*true_nulls_violated_by_action_set[rprime$allowed_actions]
+                        list.of.rectangles.mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles <- list.of.rectangles.mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles + r$preset_decision_value[d]*prob_r*true_nulls_violated_by_action_set[rprime$allowed_actions]
                     }
                 }
             } else if(d_type[d]==4) { #only subpopulation 2 enrolled further
                 r_lower_boundary_z_1 <- r$lower_boundaries[1]
                 r_upper_boundary_z_1 <- r$upper_boundaries[1]
-                for(rprime_counter in 1:length(list_of_rectangles_mtp[[d]])){
-                    rprime <- list_of_rectangles_mtp[[d]][[rprime_counter]]
+                for(rprime_counter in 1:length(list.of.rectangles.mtp[[d]])){
+                    rprime <- list.of.rectangles.mtp[[d]][[rprime_counter]]
                     ## compute overlap in rectangles in terms of z_2:
                     effective_z_1_lower_boundary <- max(c(r_lower_boundary_z_1,rprime$lower_boundaries[1]))
                     effective_z_1_upper_boundary <- min(c(r_upper_boundary_z_1,rprime$upper_boundaries[1]))
@@ -457,17 +457,17 @@ for(ncp in ncp.list[((task_id-1)*constraints_per_A1_file+1):min(length(ncp.list)
                         prob_r <- 0
                     }
                     if(r$preset_decision==0){rvec <- c(rvec,prob_r*true_nulls_violated_by_action_set[rprime$allowed_actions])}else{
-                        list_of_rectangles_mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles <- list_of_rectangles_mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles + r$preset_decision_value[d]*prob_r*true_nulls_violated_by_action_set[rprime$allowed_actions]
+                        list.of.rectangles.mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles <- list.of.rectangles.mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles + r$preset_decision_value[d]*prob_r*true_nulls_violated_by_action_set[rprime$allowed_actions]
                     }
                 }
             }
         }
     }
     #Handle reference rectangle contributions
-    for(r in list_of_rectangles_dec[(length(list_of_rectangles_dec)+1-number_reference_rectangles):length(list_of_rectangles_dec)]){
+    for(r in list.of.rectangles.dec[(length(list.of.rectangles.dec)+1-number_reference_rectangles):length(list.of.rectangles.dec)]){
         for(d in r$allowed_decisions){
-            for(rprime_counter in 1:length(list_of_rectangles_mtp[[d]])){
-                rvec <- c(rvec,list_of_rectangles_mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles)
+            for(rprime_counter in 1:length(list.of.rectangles.mtp[[d]])){
+                rvec <- c(rvec,list.of.rectangles.mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles)
             }
         }
     }
@@ -497,30 +497,30 @@ for(ncp in prior_mean_support)
 {
                                         # construct vectors for storing reallocated probabilities for preset decision rectangles
     for(d in decisions){
-        for(rprime_counter in 1:length(list_of_rectangles_mtp[[d]])){
-            list_of_rectangles_mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles <- rep(0,length(list_of_rectangles_mtp[[d]][[rprime_counter]]$allowed_actions))
+        for(rprime_counter in 1:length(list.of.rectangles.mtp[[d]])){
+            list.of.rectangles.mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles <- rep(0,length(list.of.rectangles.mtp[[d]][[rprime_counter]]$allowed_actions))
         }
     }
 
     contribution_to_risk <- c()
-    for(r in list_of_rectangles_dec[1:(length(list_of_rectangles_dec)-number_reference_rectangles)]){
+    for(r in list.of.rectangles.dec[1:(length(list.of.rectangles.dec)-number_reference_rectangles)]){
         for(d in r$allowed_decisions){
             joint_distribution_parameters <- modified_joint_distribution(prior_component_index=counter,decision=d)
             modified_mean_vector <- joint_distribution_parameters[[1]]
             modified_covariance_matrix <- joint_distribution_parameters[[2]]
             if(d_type[d]==1){
-                for(rprime_counter in 1:length(list_of_rectangles_mtp[[d]])){
-                    rprime <- list_of_rectangles_mtp[[d]][[rprime_counter]]
+                for(rprime_counter in 1:length(list.of.rectangles.mtp[[d]])){
+                    rprime <- list.of.rectangles.mtp[[d]][[rprime_counter]]
                     ## Get P_{ncp_vec}(Z \in rectangle r)
                     prob_r <- mvtnorm::pmvnorm(mean=modified_mean_vector,sigma=modified_covariance_matrix,lower=c(r$lower_boundaries,rprime$lower_boundaries),upper=c(r$upper_boundaries,rprime$upper_boundaries),algorithm=mvtnorm::GenzBretz(abseps = 0.000000001,maxpts=100000))
                     if(attr(prob_r,"error") > max_error_prob){max_error_prob <- attr(prob_r,"error")}
                     if(r$preset_decision==0){contribution_to_risk <- c(contribution_to_risk,prob_r*prior_weights[counter]*loss_function_value[d,rprime$allowed_actions])}else{
-                        list_of_rectangles_mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles <- list_of_rectangles_mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles + r$preset_decision_value[d]*prob_r*prior_weights[counter]*loss_function_value[d,rprime$allowed_actions]}
+                        list.of.rectangles.mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles <- list.of.rectangles.mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles + r$preset_decision_value[d]*prob_r*prior_weights[counter]*loss_function_value[d,rprime$allowed_actions]}
                 }
             } else if(d_type[d]==2) {
                 ## Get P_{ncp_vec}(Z \in rectangle r)
-                 for(rprime_counter in 1:length(list_of_rectangles_mtp[[d]])){
-                    rprime <- list_of_rectangles_mtp[[d]][[rprime_counter]]
+                 for(rprime_counter in 1:length(list.of.rectangles.mtp[[d]])){
+                    rprime <- list.of.rectangles.mtp[[d]][[rprime_counter]]
                     ## compute overlap in rectangles in terms of z_2:
                     intersection_rectangle_lower_boundaries <- pmax(r$lower_boundaries,rprime$lower_boundaries)
                     intersection_rectangle_upper_boundaries <- pmin(r$upper_boundaries,rprime$upper_boundaries)
@@ -531,13 +531,13 @@ for(ncp in prior_mean_support)
                         prob_r <- 0
                     }
                     if(r$preset_decision==0){contribution_to_risk <- c(contribution_to_risk,prob_r*prior_weights[counter]*loss_function_value[d,rprime$allowed_actions])}else{
-                        list_of_rectangles_mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles <- list_of_rectangles_mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles + r$preset_decision_value[d]*prob_r*prior_weights[counter]*loss_function_value[d,rprime$allowed_actions]}
+                        list.of.rectangles.mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles <- list.of.rectangles.mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles + r$preset_decision_value[d]*prob_r*prior_weights[counter]*loss_function_value[d,rprime$allowed_actions]}
                 }
             } else if(d_type[d]==3) {
                 r_lower_boundary_z_2 <- r$lower_boundaries[2]
                 r_upper_boundary_z_2 <- r$upper_boundaries[2]
-                for(rprime_counter in 1:length(list_of_rectangles_mtp[[d]])){
-                    rprime <- list_of_rectangles_mtp[[d]][[rprime_counter]]
+                for(rprime_counter in 1:length(list.of.rectangles.mtp[[d]])){
+                    rprime <- list.of.rectangles.mtp[[d]][[rprime_counter]]
                     ## compute overlap in rectangles in terms of z_2:
                     effective_z_2_lower_boundary <- max(c(r_lower_boundary_z_2,rprime$lower_boundaries[2]))
                     effective_z_2_upper_boundary <- min(c(r_upper_boundary_z_2,rprime$upper_boundaries[2]))
@@ -549,13 +549,13 @@ for(ncp in prior_mean_support)
                         prob_r <- 0
                     }
                     if(r$preset_decision==0){contribution_to_risk <- c(contribution_to_risk,prob_r*prior_weights[counter]*loss_function_value[d,rprime$allowed_actions])}else{
-                        list_of_rectangles_mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles <- list_of_rectangles_mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles + r$preset_decision_value[d]*prob_r*prior_weights[counter]*loss_function_value[d,rprime$allowed_actions]}
+                        list.of.rectangles.mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles <- list.of.rectangles.mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles + r$preset_decision_value[d]*prob_r*prior_weights[counter]*loss_function_value[d,rprime$allowed_actions]}
                 }
             } else if(d_type[d]==4) { #only subpopulation 2 enrolled further
                 r_lower_boundary_z_1 <- r$lower_boundaries[1]
                 r_upper_boundary_z_1 <- r$upper_boundaries[1]
-                for(rprime_counter in 1:length(list_of_rectangles_mtp[[d]])){
-                    rprime <- list_of_rectangles_mtp[[d]][[rprime_counter]]
+                for(rprime_counter in 1:length(list.of.rectangles.mtp[[d]])){
+                    rprime <- list.of.rectangles.mtp[[d]][[rprime_counter]]
                     ## compute overlap in rectangles in terms of z_2:
                     effective_z_1_lower_boundary <- max(c(r_lower_boundary_z_1,rprime$lower_boundaries[1]))
                     effective_z_1_upper_boundary <- min(c(r_upper_boundary_z_1,rprime$upper_boundaries[1]))
@@ -566,17 +566,17 @@ for(ncp in prior_mean_support)
                     } else {# case where rectangle empty
                         prob_r <- 0
                     }
-                    if(r$preset_decision==0){contribution_to_risk <- c(contribution_to_risk,prob_r*prior_weights[counter]*loss_function_value[d,rprime$allowed_actions])}else{list_of_rectangles_mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles <- list_of_rectangles_mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles + r$preset_decision_value[d]*prob_r*prior_weights[counter]*loss_function_value[d,rprime$allowed_actions]}
+                    if(r$preset_decision==0){contribution_to_risk <- c(contribution_to_risk,prob_r*prior_weights[counter]*loss_function_value[d,rprime$allowed_actions])}else{list.of.rectangles.mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles <- list.of.rectangles.mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles + r$preset_decision_value[d]*prob_r*prior_weights[counter]*loss_function_value[d,rprime$allowed_actions]}
                 }
             }
         }
     }
 
     #Handle reference rectangle contributions
-    for(r in list_of_rectangles_dec[(length(list_of_rectangles_dec)+1-number_reference_rectangles):length(list_of_rectangles_dec)]){
+    for(r in list.of.rectangles.dec[(length(list.of.rectangles.dec)+1-number_reference_rectangles):length(list.of.rectangles.dec)]){
         for(d in r$allowed_decisions){
-            for(rprime_counter in 1:length(list_of_rectangles_mtp[[d]])){
-                contribution_to_risk <- c(contribution_to_risk,list_of_rectangles_mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles)
+            for(rprime_counter in 1:length(list.of.rectangles.mtp[[d]])){
+                contribution_to_risk <- c(contribution_to_risk,list.of.rectangles.mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles)
             }
         }
     }
@@ -600,14 +600,14 @@ print(max_error_prob); save(max_error_prob,file=paste("max_error_prob",task_id,"
 # Generate matrix A^2:
 # Format: (row,column,value)
 # First generate equality constraints representing (24)
-equality_constraints_part1 <- array(0,c(length(list_of_rectangles_dec)*number_decisions*number_actions,3))
+equality_constraints_part1 <- array(0,c(length(list.of.rectangles.dec)*number_decisions*number_actions,3))
 counter <- 1
 constraint_number <- 1
-for(r in list_of_rectangles_dec){
+for(r in list.of.rectangles.dec){
     if(r$preset_decision==0){
         for(d in r$allowed_decisions){
-                                        # use first rectangle in list_of_rectangles_mtp[[d]] as rprime_d in constraint
-            rprime <- list_of_rectangles_mtp[[d]][[1]]
+                                        # use first rectangle in list.of.rectangles.mtp[[d]] as rprime_d in constraint
+            rprime <- list.of.rectangles.mtp[[d]][[1]]
             for(action in rprime$allowed_actions){
                 equality_constraints_part1[counter,] <- c(constraint_number,variable_location(r,d,rprime,action),1)
                 counter <- counter+1
@@ -620,16 +620,16 @@ equality_constraints_part1 <- equality_constraints_part1[1:(counter-1),]
 
 # Next generate equality constraints representing (25)
 total_number_stage2_rectangles <- 0
-for(d in decisions){total_number_stage2_rectangles <- total_number_stage2_rectangles + length(list_of_rectangles_mtp[[d]])}
+for(d in decisions){total_number_stage2_rectangles <- total_number_stage2_rectangles + length(list.of.rectangles.mtp[[d]])}
 
-equality_constraints_part2 <- array(0,c(length(list_of_rectangles_dec)*total_number_stage2_rectangles*2*number_actions,3))
+equality_constraints_part2 <- array(0,c(length(list.of.rectangles.dec)*total_number_stage2_rectangles*2*number_actions,3))
 counter <- 1
-for(r in list_of_rectangles_dec){
+for(r in list.of.rectangles.dec){
     if(r$preset_decision==0){
         for(d in r$allowed_decisions){
-                                        # use first rectangle in list_of_rectangles_mtp[[d]] as rprime_d in constraint
-            rprime_1 <- list_of_rectangles_mtp[[d]][[1]]
-            for(rprime_2 in list_of_rectangles_mtp[[d]][2:length(list_of_rectangles_mtp[[d]])]){
+                                        # use first rectangle in list.of.rectangles.mtp[[d]] as rprime_d in constraint
+            rprime_1 <- list.of.rectangles.mtp[[d]][[1]]
+            for(rprime_2 in list.of.rectangles.mtp[[d]][2:length(list.of.rectangles.mtp[[d]])]){
                 for(action in rprime_1$allowed_actions){
                     equality_constraints_part2[counter,] <- c(constraint_number,variable_location(r,d,rprime_1,action),1)
                     counter <- counter+1
@@ -664,17 +664,17 @@ for(ncp in power_constraint_list){
 #    indicator_contribute_to_power <- power_constraint_null_hyp_contribution_list[[power_constraint_counter]]
     # construct vectors for storing reallocated probabilities for preset decision rectangles
     for(d in decisions){
-        for(rprime_counter in 1:length(list_of_rectangles_mtp[[d]])){
-            list_of_rectangles_mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles_H01 <- rep(0,length(list_of_rectangles_mtp[[d]][[rprime_counter]]$allowed_actions));
-            list_of_rectangles_mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles_H02 <- rep(0,length(list_of_rectangles_mtp[[d]][[rprime_counter]]$allowed_actions));
-            list_of_rectangles_mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles_H0C <- rep(0,length(list_of_rectangles_mtp[[d]][[rprime_counter]]$allowed_actions));
+        for(rprime_counter in 1:length(list.of.rectangles.mtp[[d]])){
+            list.of.rectangles.mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles_H01 <- rep(0,length(list.of.rectangles.mtp[[d]][[rprime_counter]]$allowed_actions));
+            list.of.rectangles.mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles_H02 <- rep(0,length(list.of.rectangles.mtp[[d]][[rprime_counter]]$allowed_actions));
+            list.of.rectangles.mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles_H0C <- rep(0,length(list.of.rectangles.mtp[[d]][[rprime_counter]]$allowed_actions));
         }
     }
-    for(r in list_of_rectangles_dec[1:(length(list_of_rectangles_dec)-number_reference_rectangles)]){
+    for(r in list.of.rectangles.dec[1:(length(list.of.rectangles.dec)-number_reference_rectangles)]){
         for(d in r$allowed_decisions){
             if(d_type[d]==1){
-                for(rprime_counter in 1:length(list_of_rectangles_mtp[[d]])){
-                    rprime <- list_of_rectangles_mtp[[d]][[rprime_counter]]
+                for(rprime_counter in 1:length(list.of.rectangles.mtp[[d]])){
+                    rprime <- list.of.rectangles.mtp[[d]][[rprime_counter]]
                     ## Get P_{ncp_vec}(Z \in rectangle r)
                     prob_r <- mvtnorm::pmvnorm(mean=mean_vector(ncp,d),sigma=covariance_matrix[[d]],lower=c(r$lower_boundaries,rprime$lower_boundaries),upper=c(r$upper_boundaries,rprime$upper_boundaries),algorithm=mvtnorm::GenzBretz(abseps = 0.000000001,maxpts=100000)); if(attr(prob_r,"error") > max_error_prob){max_error_prob <- attr(prob_r,"error")}
                     if(r$preset_decision==0){
@@ -682,15 +682,15 @@ for(ncp in power_constraint_list){
                       power_constraint_vector_H02 <- c(power_constraint_vector_H02,prob_r*indicator_contribute_to_H02_power[rprime$allowed_actions]);
                       power_constraint_vector_H0C <- c(power_constraint_vector_H0C,prob_r*indicator_contribute_to_H0C_power[rprime$allowed_actions]);
                     }else{
-                      list_of_rectangles_mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles_H01 <- list_of_rectangles_mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles_H01 + r$preset_decision_value[d]*prob_r*indicator_contribute_to_H01_power[rprime$allowed_actions];
-                      list_of_rectangles_mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles_H02 <- list_of_rectangles_mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles_H02 + r$preset_decision_value[d]*prob_r*indicator_contribute_to_H02_power[rprime$allowed_actions];
-                      list_of_rectangles_mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles_H0C <- list_of_rectangles_mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles_H0C + r$preset_decision_value[d]*prob_r*indicator_contribute_to_H0C_power[rprime$allowed_actions];
+                      list.of.rectangles.mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles_H01 <- list.of.rectangles.mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles_H01 + r$preset_decision_value[d]*prob_r*indicator_contribute_to_H01_power[rprime$allowed_actions];
+                      list.of.rectangles.mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles_H02 <- list.of.rectangles.mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles_H02 + r$preset_decision_value[d]*prob_r*indicator_contribute_to_H02_power[rprime$allowed_actions];
+                      list.of.rectangles.mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles_H0C <- list.of.rectangles.mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles_H0C + r$preset_decision_value[d]*prob_r*indicator_contribute_to_H0C_power[rprime$allowed_actions];
                       }
                 }
             } else if(d_type[d]==2) {
                 ## Get P_{ncp_vec}(Z \in rectangle r)
-                for(rprime_counter in 1:length(list_of_rectangles_mtp[[d]])){
-                    rprime <- list_of_rectangles_mtp[[d]][[rprime_counter]]
+                for(rprime_counter in 1:length(list.of.rectangles.mtp[[d]])){
+                    rprime <- list.of.rectangles.mtp[[d]][[rprime_counter]]
                     ## compute overlap in rectangles in terms of z_2:
                     intersection_rectangle_lower_boundaries <- pmax(r$lower_boundaries,rprime$lower_boundaries)
                     intersection_rectangle_upper_boundaries <- pmin(r$upper_boundaries,rprime$upper_boundaries)
@@ -704,16 +704,16 @@ for(ncp in power_constraint_list){
                       power_constraint_vector_H01 <- c(power_constraint_vector_H01,prob_r*indicator_contribute_to_H01_power[rprime$allowed_actions]);
                       power_constraint_vector_H02 <- c(power_constraint_vector_H02,prob_r*indicator_contribute_to_H02_power[rprime$allowed_actions]);
                       power_constraint_vector_H0C <- c(power_constraint_vector_H0C,prob_r*indicator_contribute_to_H0C_power[rprime$allowed_actions]);} else{
-                        list_of_rectangles_mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles_H01 <- list_of_rectangles_mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles_H01 + r$preset_decision_value[d]*prob_r*indicator_contribute_to_H01_power[rprime$allowed_actions];
-                        list_of_rectangles_mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles_H02 <- list_of_rectangles_mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles_H02 + r$preset_decision_value[d]*prob_r*indicator_contribute_to_H02_power[rprime$allowed_actions];
-                        list_of_rectangles_mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles_H0C <- list_of_rectangles_mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles_H0C + r$preset_decision_value[d]*prob_r*indicator_contribute_to_H0C_power[rprime$allowed_actions];
+                        list.of.rectangles.mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles_H01 <- list.of.rectangles.mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles_H01 + r$preset_decision_value[d]*prob_r*indicator_contribute_to_H01_power[rprime$allowed_actions];
+                        list.of.rectangles.mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles_H02 <- list.of.rectangles.mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles_H02 + r$preset_decision_value[d]*prob_r*indicator_contribute_to_H02_power[rprime$allowed_actions];
+                        list.of.rectangles.mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles_H0C <- list.of.rectangles.mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles_H0C + r$preset_decision_value[d]*prob_r*indicator_contribute_to_H0C_power[rprime$allowed_actions];
                       }
                 }
             } else if(d_type[d]==3) {
                 r_lower_boundary_z_2 <- r$lower_boundaries[2]
                 r_upper_boundary_z_2 <- r$upper_boundaries[2]
-                for(rprime_counter in 1:length(list_of_rectangles_mtp[[d]])){
-                    rprime <- list_of_rectangles_mtp[[d]][[rprime_counter]]
+                for(rprime_counter in 1:length(list.of.rectangles.mtp[[d]])){
+                    rprime <- list.of.rectangles.mtp[[d]][[rprime_counter]]
                     ## compute overlap in rectangles in terms of z_2:
                     effective_z_2_lower_boundary <- max(c(r_lower_boundary_z_2,rprime$lower_boundaries[2]))
                     effective_z_2_upper_boundary <- min(c(r_upper_boundary_z_2,rprime$upper_boundaries[2]))
@@ -728,16 +728,16 @@ for(ncp in power_constraint_list){
                       power_constraint_vector_H01 <- c(power_constraint_vector_H01,prob_r*indicator_contribute_to_H01_power[rprime$allowed_actions]);
                       power_constraint_vector_H02 <- c(power_constraint_vector_H02,prob_r*indicator_contribute_to_H02_power[rprime$allowed_actions]);
                       power_constraint_vector_H0C <- c(power_constraint_vector_H0C,prob_r*indicator_contribute_to_H0C_power[rprime$allowed_actions]);} else{
-                        list_of_rectangles_mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles_H01 <- list_of_rectangles_mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles_H01 + r$preset_decision_value[d]*prob_r*indicator_contribute_to_H01_power[rprime$allowed_actions];
-                        list_of_rectangles_mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles_H02 <- list_of_rectangles_mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles_H02 + r$preset_decision_value[d]*prob_r*indicator_contribute_to_H02_power[rprime$allowed_actions];
-                        list_of_rectangles_mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles_H0C <- list_of_rectangles_mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles_H0C + r$preset_decision_value[d]*prob_r*indicator_contribute_to_H0C_power[rprime$allowed_actions];
+                        list.of.rectangles.mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles_H01 <- list.of.rectangles.mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles_H01 + r$preset_decision_value[d]*prob_r*indicator_contribute_to_H01_power[rprime$allowed_actions];
+                        list.of.rectangles.mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles_H02 <- list.of.rectangles.mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles_H02 + r$preset_decision_value[d]*prob_r*indicator_contribute_to_H02_power[rprime$allowed_actions];
+                        list.of.rectangles.mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles_H0C <- list.of.rectangles.mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles_H0C + r$preset_decision_value[d]*prob_r*indicator_contribute_to_H0C_power[rprime$allowed_actions];
                       }
                 }
             } else if(d_type[d]==4) { #only subpopulation 2 enrolled further
                 r_lower_boundary_z_1 <- r$lower_boundaries[1]
                 r_upper_boundary_z_1 <- r$upper_boundaries[1]
-                for(rprime_counter in 1:length(list_of_rectangles_mtp[[d]])){
-                    rprime <- list_of_rectangles_mtp[[d]][[rprime_counter]]
+                for(rprime_counter in 1:length(list.of.rectangles.mtp[[d]])){
+                    rprime <- list.of.rectangles.mtp[[d]][[rprime_counter]]
                     ## compute overlap in rectangles in terms of z_2:
                     effective_z_1_lower_boundary <- max(c(r_lower_boundary_z_1,rprime$lower_boundaries[1]))
                     effective_z_1_upper_boundary <- min(c(r_upper_boundary_z_1,rprime$upper_boundaries[1]))
@@ -752,21 +752,21 @@ for(ncp in power_constraint_list){
                       power_constraint_vector_H01 <- c(power_constraint_vector_H01,prob_r*indicator_contribute_to_H01_power[rprime$allowed_actions]);
                       power_constraint_vector_H02 <- c(power_constraint_vector_H02,prob_r*indicator_contribute_to_H02_power[rprime$allowed_actions]);
                       power_constraint_vector_H0C <- c(power_constraint_vector_H0C,prob_r*indicator_contribute_to_H0C_power[rprime$allowed_actions]);} else{
-                        list_of_rectangles_mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles_H01 <- list_of_rectangles_mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles_H01 + r$preset_decision_value[d]*prob_r*indicator_contribute_to_H01_power[rprime$allowed_actions];
-                        list_of_rectangles_mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles_H02 <- list_of_rectangles_mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles_H02 + r$preset_decision_value[d]*prob_r*indicator_contribute_to_H02_power[rprime$allowed_actions];
-                        list_of_rectangles_mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles_H0C <- list_of_rectangles_mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles_H0C + r$preset_decision_value[d]*prob_r*indicator_contribute_to_H0C_power[rprime$allowed_actions];
+                        list.of.rectangles.mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles_H01 <- list.of.rectangles.mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles_H01 + r$preset_decision_value[d]*prob_r*indicator_contribute_to_H01_power[rprime$allowed_actions];
+                        list.of.rectangles.mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles_H02 <- list.of.rectangles.mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles_H02 + r$preset_decision_value[d]*prob_r*indicator_contribute_to_H02_power[rprime$allowed_actions];
+                        list.of.rectangles.mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles_H0C <- list.of.rectangles.mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles_H0C + r$preset_decision_value[d]*prob_r*indicator_contribute_to_H0C_power[rprime$allowed_actions];
                       }
                 }
             }
         }
     }
     #Handle reference rectangle contributions
-    for(r in list_of_rectangles_dec[(length(list_of_rectangles_dec)+1-number_reference_rectangles):length(list_of_rectangles_dec)]){
+    for(r in list.of.rectangles.dec[(length(list.of.rectangles.dec)+1-number_reference_rectangles):length(list.of.rectangles.dec)]){
         for(d in r$allowed_decisions){
-            for(rprime_counter in 1:length(list_of_rectangles_mtp[[d]])){
-                    power_constraint_vector_H01 <- c(power_constraint_vector_H01,list_of_rectangles_mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles_H01);
-                    power_constraint_vector_H02 <- c(power_constraint_vector_H02,list_of_rectangles_mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles_H02);
-                    power_constraint_vector_H0C <- c(power_constraint_vector_H0C,list_of_rectangles_mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles_H0C)
+            for(rprime_counter in 1:length(list.of.rectangles.mtp[[d]])){
+                    power_constraint_vector_H01 <- c(power_constraint_vector_H01,list.of.rectangles.mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles_H01);
+                    power_constraint_vector_H02 <- c(power_constraint_vector_H02,list.of.rectangles.mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles_H02);
+                    power_constraint_vector_H0C <- c(power_constraint_vector_H0C,list.of.rectangles.mtp[[d]][[rprime_counter]]$reallocated_probability_from_preset_decision_rectangles_H0C)
             }
         }
     }
@@ -784,15 +784,15 @@ print(max_error_prob); save(max_error_prob,file=paste("max_error_prob",task_id,"
 } else if(task_id==max_task_id_for_computing_FWER_constraints+4){
 # Generate sparse inequality constraints (32) and (33) in Section 4.1 that restrict multiple testing procedure not depend on stage 1 statistics (given cumulative statistics Z^C and decision d)
 
-additional_inequality_constraints_part1 <- array(0,c(length(list_of_rectangles_dec)*sum(number_rectangles_by_actions_for_decision)*(2+number_actions*(number_decisions-1)),3))
+additional_inequality_constraints_part1 <- array(0,c(length(list.of.rectangles.dec)*sum(number_rectangles_by_actions_for_decision)*(2+number_actions*(number_decisions-1)),3))
 constraint_number <- 1
 counter <- 1
-for(r in list_of_rectangles_dec[1:(length(list_of_rectangles_dec)-number_reference_rectangles)]){
+for(r in list.of.rectangles.dec[1:(length(list.of.rectangles.dec)-number_reference_rectangles)]){
     if(r$preset_decision==0){
         for(d in r$allowed_decisions){
             ## first set r_reference to be reference rectangle corresponding to r
-            r_reference<-list_of_rectangles_dec[[length(list_of_rectangles_dec)-number_reference_rectangles+d]]
-            for(rprime in list_of_rectangles_mtp[[d]]){
+            r_reference<-list.of.rectangles.dec[[length(list.of.rectangles.dec)-number_reference_rectangles+d]]
+            for(rprime in list.of.rectangles.mtp[[d]]){
                 for(action in rprime$allowed_actions){
                                         # Constraint (33):
                     additional_inequality_constraints_part1[counter,] <- c(constraint_number,variable_location(r_reference,d,rprime,action),1)
@@ -802,7 +802,7 @@ for(r in list_of_rectangles_dec[1:(length(list_of_rectangles_dec)-number_referen
                     r_tilde_position <- r$position_offset
                     for(d_tilde in r$allowed_decisions){
                         if(d_tilde != d){
-                            rprime_tilde <- list_of_rectangles_mtp[[d_tilde]][[1]]
+                            rprime_tilde <- list.of.rectangles.mtp[[d_tilde]][[1]]
                             for(action in rprime_tilde$allowed_actions){
                                 additional_inequality_constraints_part1[counter,] <- c(constraint_number,variable_location(r,d_tilde,rprime_tilde,action),-1)
                                 counter <- counter +1
@@ -830,9 +830,9 @@ save(additional_inequality_constraints_part1,file=paste("Inequality_Constraints_
 additional_inequality_constraints_part2 <- array(0,c(sum(number_rectangles_by_actions_for_decision)*2*number_actions*4,3))
 constraint_number <- 1
 counter <- 1
-for(r in list_of_rectangles_dec[(length(list_of_rectangles_dec)-number_reference_rectangles+1):length(list_of_rectangles_dec)]){## only need to set for reference rectangles
+for(r in list.of.rectangles.dec[(length(list.of.rectangles.dec)-number_reference_rectangles+1):length(list.of.rectangles.dec)]){## only need to set for reference rectangles
     for(d in r$allowed_decisions){
-        for(rprime in list_of_rectangles_mtp[[d]]){
+        for(rprime in list.of.rectangles.mtp[[d]]){
             if((sum(rprime$allowed_actions==2)>0 || sum(rprime$allowed_actions==5)>0 || sum(rprime$allowed_actions==7)>0) && !is.null(rprime$right_neighbor)){ # if possitlbe to reject H01 and exists a right neighbor
                 for(action in c(2,5,7)){
                     if(sum(rprime$allowed_actions==action)>0){
@@ -840,7 +840,7 @@ for(r in list_of_rectangles_dec[(length(list_of_rectangles_dec)-number_reference
                         counter <- counter +1
                     }
                 }
-                rprime_right_neighbor <-  list_of_rectangles_mtp[[d]][[rprime$right_neighbor]]
+                rprime_right_neighbor <-  list.of.rectangles.mtp[[d]][[rprime$right_neighbor]]
                 for(action in c(2,5,7)){
                     if(sum(rprime_right_neighbor$allowed_actions==action)>0){
                         additional_inequality_constraints_part2[counter,] <- c(constraint_number,variable_location(r,d,rprime_right_neighbor,action),-1)
@@ -856,7 +856,7 @@ for(r in list_of_rectangles_dec[(length(list_of_rectangles_dec)-number_reference
                         counter <- counter +1
                     }
                 }
-                rprime_upper_neighbor <-  list_of_rectangles_mtp[[d]][[rprime$upper_neighbor]]
+                rprime_upper_neighbor <-  list.of.rectangles.mtp[[d]][[rprime$upper_neighbor]]
                 for(action in c(3,6,7)){
                     if(sum(rprime_upper_neighbor$allowed_actions==action)>0){
                         additional_inequality_constraints_part2[counter,] <- c(constraint_number,variable_location(r,d,rprime_upper_neighbor,action),-1)
@@ -874,7 +874,7 @@ for(r in list_of_rectangles_dec[(length(list_of_rectangles_dec)-number_reference
                             counter <- counter +1
                         }
                     }
-                    rprime_right_neighbor <-  list_of_rectangles_mtp[[d]][[rprime$right_neighbor]]
+                    rprime_right_neighbor <-  list.of.rectangles.mtp[[d]][[rprime$right_neighbor]]
                     for(action in c(4,5,6,7)){
                         if(sum(rprime_right_neighbor$allowed_actions==action)>0){
                             additional_inequality_constraints_part2[counter,] <- c(constraint_number,variable_location(r,d,rprime_right_neighbor,action),-1)
@@ -891,7 +891,7 @@ for(r in list_of_rectangles_dec[(length(list_of_rectangles_dec)-number_reference
                             counter <- counter +1
                         }
                     }
-                    rprime_upper_neighbor <-  list_of_rectangles_mtp[[d]][[rprime$upper_neighbor]]
+                    rprime_upper_neighbor <-  list.of.rectangles.mtp[[d]][[rprime$upper_neighbor]]
                     for(action in c(4,5,6,7)){
                         if(sum(rprime_upper_neighbor$allowed_actions==action)>0){
                             additional_inequality_constraints_part2[counter,] <- c(constraint_number,variable_location(r,d,rprime_upper_neighbor,action),-1)
@@ -978,9 +978,13 @@ system('matlab -nojvm -r "siterprl()" > output_LP_solver')
 
 sln = R.matlab::readMat(paste("sln2M",LP.iteration,".mat",sep=""))
 save(sln,file=paste("sln2M",LP.iteration,".rdata",sep=""))
+input_parameters <- as.list(environment())
+print(paste("Adaptive Design Optimization Completed. Optimal design is stored in the file: optimized_design.rdata"))
+save(input_parameters,list.of.rectangles.dec,list.of.rectangles.mtp,ncp.list,sln,file=paste("optimized.design",LP.iteration,".rdata"))
 
-if(sln$status==(-9)){return("Linear Program was Infeasible; Please Try Again e.g., With Greater Sample Sizes")} else if(sln$status==1 || sln$status==5){
-print(paste("Linear Program at Iteration ",LP.iteration," Solved. Now Evaluating New Linear Program with Finer Discretization of Decision Regions"))} else{return(paste("Error in linear program; see solver output: see sln2M",LP.iteration,".rdata"))}
+if(sln$status==1 || sln$status==5){
+  print(paste("Feasible Solution was Found and Optimal Expected Sample Size is",sln$val))
+} else {print("Problem was Infeasible")}
 
 if(round.each.decision.rectangle.to.integer){## If Final iteration, round solution and save; only does this if decision rule was rounded and set to be deterministic
 print("Fraction of solution components with integral value solutions")
@@ -998,10 +1002,10 @@ for(d_plot in decisions){
 	rounding_threshold_H01 <- rounding_threshold <- 0.9
 	rounding_threshold_H02 <- rounding_threshold <- 0.9
 	rounding_threshold_H0C <- rounding_threshold <- 0.9
-	r_reference_index <- length(list_of_rectangles_dec) - number_reference_rectangles + d_plot
-	r_reference <- list_of_rectangles_dec[[r_reference_index]]
+	r_reference_index <- length(list.of.rectangles.dec) - number_reference_rectangles + d_plot
+	r_reference <- list.of.rectangles.dec[[r_reference_index]]
 	for(d in r_reference$allowed_decisions){
-	      for(rprime in list_of_rectangles_mtp[[d]]){
+	      for(rprime in list.of.rectangles.mtp[[d]]){
 		 variable_start_position <- variable_location(r_reference,d,rprime,rprime$allowed_actions[1])
 		 variable_end_position <- variable_location(r_reference,d,rprime,rprime$allowed_actions[length(rprime$allowed_actions)])
 		 action_indicator <-z_solution[variable_start_position:variable_end_position]
@@ -1064,16 +1068,6 @@ system('rm number_equality_constraints_of_second_type.txt')
 system('rm number_A1_constraints.txt')
 system('rm number_A1_files.txt')
 system('rm power_constraints.rdata')
-
-## Check if feasible solution was found; if no, return "problem infeasible"; if yes, construct finer solution
-
-if(sln$status==1 || sln$status==5){
-  save(sln,file=paste("optimized_design.rdata"))
-  save(sln$val,file=paste("optimized_design_expected_sample_size.rdata"))
-  print(paste("Adaptive Design Optimization Completed. Optimal design is stored in the file: optimized_design.rdata"))
-  print(paste("Its optimal value (expected sample size) is stored in the file: optimized_design_expected_sample_size.rdata"))
-  print(paste("Optimal Expected Sample Size is",sln$val))
-}
 
   #Clean up files
   system('rm max_error_prob*')
