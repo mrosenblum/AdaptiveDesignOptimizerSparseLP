@@ -212,7 +212,10 @@ if(is.null(ncp.list)){
   ## List of rectangles defining decision boundaries
   ## Each rectangle is encoded by c(lower left (x,y) coordinates, upper right (x,y) coordinates)
 
-if(is.null(list.of.rectangles.dec)){
+if(!is.null(list.of.rectangles.dec)){
+	number_preset_decision_rectangles <- 0
+        for(r1_counter in 1:(length(list.of.rectangles.dec))){if(list_of_rectangles_dec[[r1_counter]]$preset_decision>0){number_preset_decision_rectangles <- number_preset_decision_rectangles+1}}
+} else{
   list.of.rectangles.dec <- list()
 
   number_preset_decision_rectangles <- 0
@@ -978,17 +981,20 @@ system('matlab -nojvm -r "siterprl()" > output_LP_solver')
 
 sln = R.matlab::readMat(paste("sln2M",LP.iteration,".mat",sep=""))
 save(sln,file=paste("sln2M",LP.iteration,".rdata",sep=""))
-input_parameters <- as.list(environment())
+ncp.active.FWER.constraints <- ncp.list[which(sln$dual[1:length(ncp.list)]>0.01)]
+input.parameters <- as.list(environment())
 print(paste("Adaptive Design Optimization Completed. Optimal design is stored in the file: optimized_design.rdata"))
-save(input_parameters,list.of.rectangles.dec,list.of.rectangles.mtp,ncp.list,sln,file=paste("optimized.design",LP.iteration,".rdata"))
+save(input.parameters,ncp.active.FWER.constraints,list.of.rectangles.dec,list.of.rectangles.mtp,ncp.list,sln,file=paste("optimized.design",LP.iteration,".rdata"))
 
 if(sln$status==1 || sln$status==5){
   print(paste("Feasible Solution was Found and Optimal Expected Sample Size is",sln$val))
+  print("Fraction of solution components with integral value solutions")
+  print(sum(sln$z>1-1e-10 | sln$z<10e-10)/length(sln$z))
+  print("Active Type I error constraints")
+  print(ncp.active.FWER.constraints)
 } else {print("Problem was Infeasible")}
 
 if(round.each.decision.rectangle.to.integer){## If Final iteration, round solution and save; only does this if decision rule was rounded and set to be deterministic
-print("Fraction of solution components with integral value solutions")
-print(sum(sln$z>1-1e-10 | sln$z<10e-10)/length(sln$z))
 
 postscript(paste("rejection_regions.eps"),height=8,horizontal=FALSE,onefile=FALSE,width=8)
 plot(0,type="n",xaxt="n",yaxt="n",xlim=c(-2.78,2.78),ylim=c(-2.78,2.78),main="Rejection Regions",xlab=expression(paste(Z[1])),ylab=expression(paste(Z[2])),cex.lab=2,
