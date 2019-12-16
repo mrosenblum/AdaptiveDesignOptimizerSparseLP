@@ -214,7 +214,7 @@ if(is.null(ncp.list)){
 
 if(!is.null(list.of.rectangles.dec)){
 	number_preset_decision_rectangles <- 0
-        for(r1_counter in 1:(length(list.of.rectangles.dec))){if(list_of_rectangles_dec[[r1_counter]]$preset_decision>0){number_preset_decision_rectangles <- number_preset_decision_rectangles+1}}
+        for(r1_counter in 1:(length(list.of.rectangles.dec))){if(list.of.rectangles.dec[[r1_counter]]$preset_decision>0){number_preset_decision_rectangles <- number_preset_decision_rectangles+1}}
 } else{
   list.of.rectangles.dec <- list()
 
@@ -984,7 +984,7 @@ save(sln,file=paste("sln2M",LP.iteration,".rdata",sep=""))
 ncp.active.FWER.constraints <- ncp.list[which(sln$dual[1:length(ncp.list)]>0.01)]
 input.parameters <- as.list(environment())
 print(paste("Adaptive Design Optimization Completed. Optimal design is stored in the file: optimized_design.rdata"))
-save(input.parameters,ncp.active.FWER.constraints,list.of.rectangles.dec,list.of.rectangles.mtp,ncp.list,sln,file=paste("optimized.design",LP.iteration,".rdata"))
+save(input.parameters,ncp.active.FWER.constraints,list.of.rectangles.dec,list.of.rectangles.mtp,ncp.list,sln,file=paste("optimized.design",LP.iteration,".rdata",sep=""))
 
 if(sln$status==1 || sln$status==5){
   print(paste("Feasible Solution was Found and Optimal Expected Sample Size is",sln$val))
