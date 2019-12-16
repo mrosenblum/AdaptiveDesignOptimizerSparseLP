@@ -18,11 +18,13 @@ optimize_design(subpopulation.1.proportion = 0.5, total.alpha = 0.05 -
   150, 0, 0, 150), nrow = 4, ncol = 2, byrow = TRUE, dimnames = list(c(),
   c("Subpopulation1Stage2SampleSize", "Subpopulation2Stage2SampleSize"))),
   objective.function.weights = 0.25 * c(1, 1, 1, 1),
-  power.constraints = matrix(c(0, 0, 0, 0, 0.8, 0, 0.8, 0, 0, 0, 0, 0.8),
-  nrow = 4, ncol = 3, byrow = TRUE, dimnames = list(c(), c("PowerH01",
-  "PowerH02", "PowerH0C"))), type.of.LP.solver = "matlab",
-  number_of_LP_refinements = 5, discretization_parameter = c(1, 1, 10),
-  number_cores = 30)
+  power.constraints = matrix(c(0, 0, 0, 0, 0.82, 0, 0.82, 0, 0, 0, 0,
+  0.82), nrow = 4, ncol = 3, byrow = TRUE, dimnames = list(c(),
+  c("PowerH01", "PowerH02", "PowerH0C"))), type.of.LP.solver = "matlab",
+  discretization.parameter = c(1, 1, 10), number.cores = 30,
+  ncp.list = c(), list.of.rectangles.dec = c(), LP.iteration = 1,
+  round.each.decision.rectangle.to.integer = FALSE,
+  set.rectangles.with.identically.valued.neighbors.and.split.others = FALSE)
 }
 \arguments{
 \item{subpopulation.1.proportion}{Proportion of overall population in subpopulation 1. Must be between 0 and 1.}
@@ -41,11 +43,16 @@ optimize_design(subpopulation.1.proportion = 0.5, total.alpha = 0.05 -
 
 \item{type.of.LP.solver}{"matlab", "cplex", "GLPK", or "Gurobi" The linear program solve that you want to use; assumes that you have installed this already and that path is set}
 
-\item{number_of_LP_refinements}{positive integer indicating how many iterations to run of solving the linear program followed by refining the discretization}
+\item{discretization.parameter}{vector with 3 elements representing initial discretization of decision region, rejection regions, and grid representing Type I error constraints}
 
-\item{discretization_parameter}{vector with 3 elements representing initial discretization of decision region, rejection regions, and grid representing Type I error constraints}
+\item{number.cores}{the number of cores available for parallelization using the parallel R package}
 
-\item{number_cores}{the number of cores available for parallelization using the parallel R package}
+\item{ncp.list}{list of pairs of real numbers representing the non-centrality parameters to be used in the Type I error constraints; if list is empty, then default list is used.}
+
+\item{list.of.rectangles.dec}{list of rectangles representing decision region partition, encoded as a list with each element of the list having fields $lower_boundaries (pair of real numbers representing coordinates of lower left corner of rectangle), $upper_boundaries (pair of real numbers representing upper right corner of rectangle), $allowed_decisions (subset of stage.2.sample.sizes.per.enrollment.choice representing which decisions allowed if first stage z-statistics are in corresponding rectangle; default is entire list stage.2.sample.sizes.per.enrollment.choice), $preset_decision (indicator of whether the decision probabilities are hard-coded by the user; default is 0), $d_probs (empty unless $preset_decision==1, in which case it is a vector representing the probabilities of each decision); if list.or.rectangles.dec is empty, then a default partition is used based on discretization.parameter.
+LP.iteration positive integer used in file name to store output; can be used to avoid overwriting previous computations
+round.each.decision.rectangle.to.integer TRUE/FALSE indicator of whether decision probabilities encoded in list.of.rectangles.dec should be rounded to integer values
+set.rectangles.with.identically.valued.neighbors.and.split.others  TRUE/FALSE indicator of whether decision probabilities encoded in list.of.rectangles.dec should be modified for use in next iteration}
 }
 \value{
 4 element list containing optimized designs from four classes (with increasing complexity):
@@ -56,5 +63,5 @@ Authors: Michael Rosenblum, Ethan Fang, Han Liu
 }
 \examples{
 #For demonstration purposes, the examples below use a coarse discretization.
-optimize_design(number_of_LP_refinements=5,discretization_parameter=c(3,3,1),number_cores=1)
+optimize_design(discretization.parameter=c(3,3,1),number.cores=1)
 }
