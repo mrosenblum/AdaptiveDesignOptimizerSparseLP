@@ -344,19 +344,6 @@ for(r in list.of.rectangles.dec){
 print("number of variables")
 print(number_of_variables)
 print("number of familywise Type I error constraints")
-print(length(ncp.list))
-number_equality_constraints_part1 <- length(list.of.rectangles.dec)-number_preset_decision_rectangles
-write(number_equality_constraints_part1,f=paste("number_equality_constraints_of_first_type.txt"))
-print("number of equality constraints of first type")
-print(number_equality_constraints_part1)
-print("number of equality constraints of second type")
-print(number_equality_constraints_part2)
-write(number_equality_constraints_part2,f=paste("number_equality_constraints_of_second_type.txt"))
-write(length(ncp.list),f=paste("number_A1_constraints.txt"))
-write(ceiling(length(ncp.list)/constraints_per_A1_file),f=paste("number_A1_files.txt"))
-power.constraints <- as.vector(power.constraints)
-save(power.constraints,file="power_constraints.rdata")
-save(list_of_rectangles_mtp,file=paste("list_of_rectangles_mtp",LP.iteration,".rdata",sep=""))
 
 if(sln$status==(-9)){return("Linear Program was Infeasible; Please Try Again e.g., With Greater Sample Sizes")} else if(sln$status==1 || sln$status==5){
 print(paste("Linear Program at Iteration ",LP.iteration," Solved. Now Evaluating New Linear Program with Finer Discretization of Decision Regions"))} else{return(paste("Error in linear program; see solver output: see sln2M",LP.iteration,".rdata"))}
