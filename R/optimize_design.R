@@ -14,8 +14,8 @@
 #' @param ncp.list list of pairs of real numbers representing the non-centrality parameters to be used in the Type I error constraints; if list is empty, then default list is used.
 #' @param list.of.rectangles.dec list of rectangles representing decision region partition, encoded as a list with each element of the list having fields $lower_boundaries (pair of real numbers representing coordinates of lower left corner of rectangle), $upper_boundaries (pair of real numbers representing upper right corner of rectangle), $allowed_decisions (subset of stage.2.sample.sizes.per.enrollment.choice representing which decisions allowed if first stage z-statistics are in corresponding rectangle; default is entire list stage.2.sample.sizes.per.enrollment.choice), $preset_decision (indicator of whether the decision probabilities are hard-coded by the user; default is 0), $d_probs (empty unless $preset_decision==1, in which case it is a vector representing the probabilities of each decision); if list.or.rectangles.dec is empty, then a default partition is used based on discretization.parameter.
 #' @param LP.iteration positive integer used in file name to store output; can be used to avoid overwriting previous computations
-#' @param prior_covariance_matrix 2x2 positive semidefinite matrix representing the covariance corresponding to each component of the mixture of multivariate normals prior distribution (used only in defining the objective function); the default is the matrix of all 0's, corresponding to the prior being a mixture of point masses
-#' @param round.each.multiple.testing.procedure.rectangle.to.integer TRUE/FALSE indicator of whether to round the multiple testing procedure to integer values and save; only can be done if the procedure is passed a decision rule (encoded in list.of.rectangles.dec) that has all probabilities set as would typically be the case in the final refinement of the original problem
+#' @param prior.covariance.matrix 2x2 positive semidefinite matrix representing the covariance corresponding to each component of the mixture of multivariate normals prior distribution (used only in defining the objective function); the default is the matrix of all 0's, corresponding to the prior being a mixture of point masses
+#' @param round.each.multiple.testing.procedure.rectangle.to.integer TRUE/FALSE indicator of whether to round the multiple testing proce ure to integer values and save; only can be done if the procedure is passed a decision rule (encoded in list.of.rectangles.dec) that has all probabilities set as would typically be the case in the final refinement of the original problem
 #' @return 4 element list containing optimized designs from four classes (with increasing complexity):
 #' @section Output
 #' The software computes and optimized design saved as "optimized_design.rdata" and the corresponding expected sample size is
@@ -46,7 +46,7 @@ optimize_design <- function(subpopulation.1.proportion=0.5,
 		ncp.list=c(),
 		list.of.rectangles.dec=c(),
 		LP.iteration=1,
-		prior_covariance_matrix=diag(2)*0,
+		prior.covariance.matrix=diag(2)*0,
 		round.each.multiple.testing.procedure.rectangle.to.integer=FALSE
 		){
 max_error_prob <- 0 # track approximation errors in problem construction; initialize to 0 here
@@ -176,7 +176,7 @@ mean_vector <- function(ncp,d){
 ## Handles case of prior distribution used in objective function
 modified_joint_distribution <- function(prior_component_index,decision){
 	modified_mean_vector <- mean_vector(ncp=prior_mean_support[[prior_component_index]],d=decision)
-	modified_covariance_matrix <-  (array(c(mean_vector(ncp=c(1,0),d=decision),mean_vector(ncp=c(0,1),d=decision)),c(length(mean_vector(ncp=c(1,0),d=decision)),2))  %*% prior_covariance_matrix %*% t(array(c(mean_vector(ncp=c(1,0),d=decision),mean_vector(ncp=c(0,1),d=decision)),c(length(mean_vector(ncp=c(1,0),d=decision)),2)))) +  covariance_matrix[[decision]]
+	modified_covariance_matrix <-  (array(c(mean_vector(ncp=c(1,0),d=decision),mean_vector(ncp=c(0,1),d=decision)),c(length(mean_vector(ncp=c(1,0),d=decision)),2))  %*% prior.covariance.matrix %*% t(array(c(mean_vector(ncp=c(1,0),d=decision),mean_vector(ncp=c(0,1),d=decision)),c(length(mean_vector(ncp=c(1,0),d=decision)),2)))) +  covariance_matrix[[decision]]
 	return(list(modified_mean_vector,modified_covariance_matrix))
 }
 
@@ -1081,7 +1081,5 @@ system('rm number_equality_constraints_of_second_type.txt')
 system('rm number_A1_constraints.txt')
 system('rm number_A1_files.txt')
 system('rm power_constraints.rdata')
-
-  #Clean up files
-  system('rm max_error_prob*')
+system('rm max_error_prob*')
 }
