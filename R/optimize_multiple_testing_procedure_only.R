@@ -982,11 +982,28 @@ if(sln$status==1 || sln$status==5){
 
 if(round.each.multiple.testing.procedure.rectangle.to.integer){## If Final iteration, round solution and save; only does this if decision rule was rounded and set to be deterministic
 
-postscript(paste("rejection_regions.eps"),height=8,horizontal=FALSE,onefile=FALSE,width=8)
-plot(0,type="n",xaxt="n",yaxt="n",xlim=c(-2.78,2.78),ylim=c(-2.78,2.78),main="Rejection Regions",xlab=expression(paste(Z[1])),ylab=expression(paste(Z[2])),cex.lab=2,
- cex.axis=2, cex.main=2, cex.sub=2)
-
 z_solution <- sln$z
+
+postscript(paste("decision_rule.eps"),height=8,horizontal=FALSE,onefile=FALSE,width=8)
+  par(mfrow=c(1,1),las=1)
+  par(mar=c(7,6.5,5.6,2.1))
+  plot(0,type="n",xaxt="n",xlim=c(-3,3),ylim=c(-3,3),main="Decision Regions for Stage 2 Enrollment",xlab=expression(paste(Z[1]^1)),ylab=expression(paste(Z[2]^1)),cex.lab=2, cex.axis=2, cex.main=2, cex.sub=2)
+  axis(1,at=seq(-3,3,by=1),labels=(-3:3),cex.axis=2)
+  axis(2,at=seq(-3,3,by=1),labels=(-3:3),cex.axis=2)
+  par(las=0)
+  for(r in list_of_rectangles_dec){
+    tau <- 0
+    rect(max(r$lower_boundaries[1]-tau,-10),max(r$lower_boundaries[2]-tau,-10),min(r$upper_boundaries[1]+tau,10),min(r$upper_boundaries[2]+tau,10),col=r$allowed_decisions, border=NA)
+    print(r$allowed_decisions)
+  }
+  decision_list <- c()
+  for(d in decisions){decision_list <- c(decision_list,list(as.vector(stage.2.sample.sizes.per.enrollment.choice[d,])))}
+  legend("bottomleft",legend=decision_list,title = "Stage 2 sample size per subpop.",pch=c(15,15,15,15),col=decisions,cex=1,bg="white")
+dev.off()
+
+postscript(paste("rejection_regions.eps"),height=8,horizontal=FALSE,onefile=FALSE,width=8)
+plot(0,type="n",xaxt="n",yaxt="n",xlim=c(-2.78,2.78),ylim=c(-2.78,2.78),main="Rejection Regions at End of Stage 2",xlab=expression(paste(Z[1])),ylab=expression(paste(Z[2])),cex.lab=2,
+ cex.axis=2, cex.main=2, cex.sub=2)
 axis(1,at=seq(-3,3,by=1),labels=-3:3,cex.axis=2)
 axis(2,at=seq(-3,3,by=1),labels=-3:3,cex.axis=2)
 z_rounded <- rep(0,length(z_solution))
@@ -1018,7 +1035,8 @@ for(d_plot in decisions){
                  z_rounded[variable_start_position+(col_value-1)] <- 1
 	         rect(max(rprime$lower_boundaries[1]-tau,-10),max(rprime$lower_boundaries[2]-tau,-10),min(rprime$upper_boundaries[1]+tau,10),min(rprime$upper_boundaries[2]+tau,10),col=col_value-1,border=NA)
              }
-        }
+	}
+	legend("bottomleft",legend=c("none", "H01", "H02", "H0C", "H01 and H0C", "H02 and H0C", "all"),title = "Reject Null Hypotheses:",pch=c(15,15,15,15,15,15,15),col=actions-1,cex=1,bg="white")
 }
 par(las=0)
 dev.off()
