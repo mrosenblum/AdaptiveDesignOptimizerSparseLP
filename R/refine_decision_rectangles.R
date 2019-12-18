@@ -690,7 +690,7 @@ rm(list.of.rectangles.dec.with.decision.probs.merged)
   for(r1_counter in 1:(length(list_of_rectangles_dec_with_decision_probs_augmented))){if(list_of_rectangles_dec_with_decision_probs_augmented[[r1_counter]]$preset_decision>0){set_counter<-set_counter+1}}
   print(set_counter)
 
-  for( r in list_of_rectangles_dec_merged){if(r$lower_boundaries[1]==r$upper_boundaries[1]) print(r)}
+  for( r in list.of.rectangles.dec){if(r$lower_boundaries[1]==r$upper_boundaries[1]) print(r)}
 }
 ## In either case (rounding to integer or set and split):
 
