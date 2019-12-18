@@ -1,7 +1,9 @@
+refine_FWER_constraints <- function(){
    # list of pairs of non-centrality parameters in G_{tau,w}
-   load("sln2M1.rdata") #TOFIX
-   load("ncp.list1.rdata") #TOFIX
-   load("list_of_rectangles_dec1.rdata") # Use same discretization of decision region as in iteration 1
+   ##need to input following information:
+   #load("sln2M1.rdata") #TOFIX
+   #load("ncp.list1.rdata") #TOFIX
+   #load("list_of_rectangles_dec1.rdata") # Use same discretization of decision region as in iteration 1
    number_preset_decision_rectangles <- 0
    z_solution <- sln$z
    # Get active FWER constraints
@@ -46,5 +48,5 @@
 
    save(list_of_rectangles_dec,file=paste("list_of_rectangles_dec",LP.iteration,".rdata",sep="")) # list of rectangles for decision region same as LP.iteration 1
    save(ncp.list,file=paste("ncp.list",LP.iteration,".rdata",sep=""))
- 
+} 
 
