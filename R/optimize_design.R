@@ -14,8 +14,8 @@
 #' @param ncp.list list of pairs of real numbers representing the non-centrality parameters to be used in the Type I error constraints; if list is empty, then default list is used.
 #' @param list.of.rectangles.dec list of rectangles representing decision region partition, encoded as a list with each element of the list having fields $lower_boundaries (pair of real numbers representing coordinates of lower left corner of rectangle), $upper_boundaries (pair of real numbers representing upper right corner of rectangle), $allowed_decisions (subset of stage.2.sample.sizes.per.enrollment.choice representing which decisions allowed if first stage z-statistics are in corresponding rectangle; default is entire list stage.2.sample.sizes.per.enrollment.choice), $preset_decision (indicator of whether the decision probabilities are hard-coded by the user; default is 0), $d_probs (empty unless $preset_decision==1, in which case it is a vector representing the probabilities of each decision); if list.or.rectangles.dec is empty, then a default partition is used based on discretization.parameter.
 #' @param LP.iteration positive integer used in file name to store output; can be used to avoid overwriting previous computations
-#' @param round.each.decision.rectangle.to.integer TRUE/FALSE indicator of whether decision probabilities encoded in list.of.rectangles.dec should be rounded to integer values
-#' @param set.rectangles.with.identically.valued.neighbors.and.split.others  TRUE/FALSE indicator of whether decision probabilities encoded in list.of.rectangles.dec should be modified for use in next iteration
+#' @param prior_covariance_matrix 2x2 positive semidefinite matrix representing the covariance corresponding to each component of the prior distribution (used only in defining the objective function); the default is the matrix of all 0's, corresponding to the prior being a mixture of point masses 
+#' @param round.each.multiple.testing.procedure.rectangle.to.integer TRUE/FALSE indicator of whether to round the multiple testing procedure to integer values and save; only can be done if the procedure is passed a decision rule (encoded in list.of.rectangles.dec) that has all probabilities set as would typically be the case in the final refinement of the original problem
 #' @return 4 element list containing optimized designs from four classes (with increasing complexity):
 #' @section Output
 #' The software computes and optimized design saved as "optimized_design.rdata" and the corresponding expected sample size is
@@ -46,10 +46,9 @@ optimize_design <- function(subpopulation.1.proportion=0.5,
 		ncp.list=c(),
 		list.of.rectangles.dec=c(),
 		LP.iteration=1,
-		round.each.decision.rectangle.to.integer=FALSE,
-		set.rectangles.with.identically.valued.neighbors.and.split.others=FALSE
+		prior_covariance_matrix=diag(2)*0,
+		round.each.multiple.testing.procedure.rectangle.to.integer=FALSE
 		){
-
 max_error_prob <- 0 # track approximation errors in problem construction; initialize to 0 here
 covariance_Z_1_Z_2 <-  0 # covariance_due_to overlap of subpopulations (generally we assume no overlap)
 p1 <- subpopulation.1.proportion;
@@ -96,7 +95,6 @@ for(count in 1:dim(data.generating.distributions)[1]){
 
 # Prior information used in constructing objective function
 prior_weights <- objective.function.weights
-prior_covariance_matrix <- diag(2)*0
 # List of non-centrality parameters to use for power constraints:
 # WARNING: If following line is modified, need to modify the line that follows it as well, and also the line:
 # switch(power_constraint_counter,power_constraint_vector_subpopulation1<-power_constraint_vector,power_constraint_vector_subpopulation2<-power_constraint_vector,power_constraint_vector_combined_population<-power_constraint_vector)
@@ -994,7 +992,7 @@ if(sln$status==1 || sln$status==5){
   print(ncp.active.FWER.constraints)
 } else {print("Problem was Infeasible")}
 
-if(round.each.decision.rectangle.to.integer){## If Final iteration, round solution and save; only does this if decision rule was rounded and set to be deterministic
+if(round.each.multiple.testing.procedure.rectangle.to.integer){## If Final iteration, round solution and save; only does this if decision rule was rounded and set to be deterministic
 
 postscript(paste("rejection_regions.eps"),height=8,horizontal=FALSE,onefile=FALSE,width=8)
 plot(0,type="n",xaxt="n",yaxt="n",xlim=c(-2.78,2.78),ylim=c(-2.78,2.78),main="Rejection Regions",xlab=expression(paste(Z[1])),ylab=expression(paste(Z[2])),cex.lab=2,
