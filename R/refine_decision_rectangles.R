@@ -243,8 +243,8 @@ if(!is.null(list.of.rectangles.dec)){list.of.rectangles.dec <- list.of.rectangle
 	while(count_value <= length(list.of.rectangles.dec) && (!(r$upper_boundaries[2]== list.of.rectangles.dec[[count_value]]$lower_boundaries[2] && r$lower_boundaries[1]== list.of.rectangles.dec[[count_value]]$lower_boundaries[1] && r$upper_boundaries[1]== list.of.rectangles.dec[[count_value]]$upper_boundaries[1]))){count_value <- count_value +1}
 	if(count_value <= length(list.of.rectangles.dec)){list.of.rectangles.dec[[counter_for_r]]$upper_neighbor <- count_value}
    }
-   save(list.of.rectangles.dec,file=paste("list.of.rectangles.dec",LP.iteration,".rdata",sep=""))
-   save(ncp.list,file=paste("ncp.list",LP.iteration,".rdata",sep=""))
+   #save(list.of.rectangles.dec,file=paste("list.of.rectangles.dec",LP.iteration,".rdata",sep=""))
+   #save(ncp.list,file=paste("ncp.list",LP.iteration,".rdata",sep=""))
 }
 
 ## Set multiple testing procedure rectangle partition
@@ -699,13 +699,14 @@ for(d in decisions){list.of.rectangles.dec <- c(list.of.rectangles.dec,list(list
 	   ## Set upper neighbors
 	        counter_for_r <- 1
   		for(counter_for_r in 1:(length(list.of.rectangles.dec)-number_reference_rectangles)){
-		 	r <- list.of.rectangles.dec[[counter_for_r]]
+  		  list.of.rectangles.dec[[counter_for_r]]$upper_neighbor <- NULL
+  		  r <- list.of.rectangles.dec[[counter_for_r]]
 			count_value <- 1
 		while(count_value <= length(list.of.rectangles.dec) && (!(r$upper_boundaries[2]== list.of.rectangles.dec[[count_value]]$lower_boundaries[2] && r$lower_boundaries[1]== list.of.rectangles.dec[[count_value]]$lower_boundaries[1] && r$upper_boundaries[1]== list.of.rectangles.dec[[count_value]]$upper_boundaries[1]))){count_value <- count_value +1}
 		if(count_value <= length(list.of.rectangles.dec)){list.of.rectangles.dec[[counter_for_r]]$upper_neighbor <- count_value}
 		}
 
-        save(list.of.rectangles.dec,file=paste("list.of.rectangles.dec",LP.iteration,".rdata",sep="")) # modified list of rectangles constructed
+    #save(list.of.rectangles.dec,file=paste("list.of.rectangles.dec",LP.iteration,".rdata",sep="")) # modified list of rectangles constructed
 
 	set_counter <- 0
 	for(r1_counter in 1:(length(list.of.rectangles.dec))){if(list.of.rectangles.dec[[r1_counter]]$preset_decision>0){set_counter<-set_counter+1}}
