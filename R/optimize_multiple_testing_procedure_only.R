@@ -24,7 +24,7 @@
 #' #For demonstration purposes, the examples below use a coarse discretization.
 #' optimize_design(discretization.parameter=c(3,3,1),number.cores=1)
 #' @export
-optimize_design <- function(subpopulation.1.proportion=0.5,
+optimize_multiple_testing_procedure <- function(subpopulation.1.proportion=0.5,
 		total.alpha=0.05-(1e-4),
 		data.generating.distributions=matrix(data=c(0,0,1,1,1,1,
 					       0,sqrt(1/2)*(qnorm(0.95+1e-4)+qnorm(0.95))/5,1,1,1,1,
