@@ -351,68 +351,73 @@ print("Fraction of solution components with integral value solutions")
 print(sum(sln$z>1-1e-10 | sln$z<10e-10)/length(sln$z))
 
 z_solution <- sln$z
-   #
-   # Either (i) round all decision region rectangles to be integer valued or (ii) set rectangles surrounded by identically valued rectanges and split others.
-   #
-
+list_of_rectangles_dec <- list.of.rectangles.dec
 
 #
-#  Decide whether to round all, or round some and split others (depending on which iteration of refinement process)
+# Either (i) round all decision region rectangles to be integer valued or (ii) set rectangles surrounded by identically valued rectanges and split others.
 #
 
 if(round.each.decision.rectangle.to.integer){
-  list.of.rectangles.dec.with.decision.probs <- list.of.rectangles.dec[1:(length(list.of.rectangles.dec)-number_reference_rectangles)]
-  counter <- 1
-  for(r_counter in 1:(length(list.of.rectangles.dec)-number_reference_rectangles)){
-    r <- list.of.rectangles.dec.with.decision.probs[[r_counter]]
-    if(r$preset_decision==1){
-      list.of.rectangles.dec.with.decision.probs[[counter]]$d_probs <- r$preset_decision_value
-    } else{
-      for(d in decisions){
-        if(sum(d==r$allowed_decisions)>0){
-          # use first rectangle in list_of_rectangles_mtp[[d]] as rprime_d in constraint
-          rprime <- list_of_rectangles_mtp[[d]][[1]]
-          variable_start_position <- variable_location(r,d,rprime,rprime$allowed_actions[1])
-          variable_end_position <- variable_location(r,d,rprime,rprime$allowed_actions[length(rprime$allowed_actions)])
-          list.of.rectangles.dec.with.decision.probs[[counter]]$d_probs[[d]] <-sum(z_solution[variable_start_position:variable_end_position])
-        } else{list.of.rectangles.dec.with.decision.probs[[counter]]$d_probs[[d]] <- 0}
+  generate_list_of_rectangles_dec_with_decision_probs <- function(){
+    list_of_rectangles_dec_with_decision_probs <- list_of_rectangles_dec[1:(length(list_of_rectangles_dec)-number_reference_rectangles)]
+    counter <- 1
+    for(r_counter in 1:(length(list_of_rectangles_dec)-number_reference_rectangles)){
+      r <- list_of_rectangles_dec_with_decision_probs[[r_counter]]
+      if(r$preset_decision==1){
+        list_of_rectangles_dec_with_decision_probs[[counter]]$d_probs <- r$preset_decision_value
+      } else{
+        for(d in decisions){
+          if(sum(d==r$allowed_decisions)>0){
+            # use first rectangle in list_of_rectangles_mtp[[d]] as rprime_d in constraint
+            rprime <- list_of_rectangles_mtp[[d]][[1]]
+            variable_start_position <- variable_location(r,d,rprime,rprime$allowed_actions[1])
+            variable_end_position <- variable_location(r,d,rprime,rprime$allowed_actions[length(rprime$allowed_actions)])
+            list_of_rectangles_dec_with_decision_probs[[counter]]$d_probs[[d]] <-sum(z_solution[variable_start_position:variable_end_position])
+          } else{list_of_rectangles_dec_with_decision_probs[[counter]]$d_probs[[d]] <- 0}
+        }
       }
+      counter<- counter+1
     }
-    counter<- counter+1
+    return(list_of_rectangles_dec_with_decision_probs )
   }
 
-## Code to check neighbor_check works
-#for(r in list.of.rectangles.dec.with.decision.probs){
-#plot(0,type="n",xlim=c(-10,10),ylim=c(-10,10),main=paste("Decision Rule for Stage 2 enrollment"),xlab="Z_stage_1_subpop_1",ylab="Z_stage_1_subpop_2",cex=2)
-#for(r2 in list.of.rectangles.dec.with.decision.probs){
-#	if(neighbor_check(r,r2) && r$lower_boundaries[1]>=(-3) && r$lower_boundaries[2]>=(-3) && r$upper_boundaries[1]<=3 && r$upper_boundaries[2]<=3){
-#		col_value <- 2
-#	rect(max(r$lower_boundaries[1],-10),max(r$lower_boundaries[2],-10),min(r$upper_boundaries[1],10),min(r$upper_boundaries[2],10),col=2)
-#	rect(max(r2$lower_boundaries[1],-10),max(r2$lower_boundaries[2],-10),min(r2$upper_boundaries[1],10),min(r2$upper_boundaries[2],10),col=3)
-#	browser()
-#	}
-#}}
+  list_of_rectangles_dec_with_decision_probs <- generate_list_of_rectangles_dec_with_decision_probs()
 
-for(counter in 1:length(list.of.rectangles.dec.with.decision.probs)){
-  list.of.rectangles.dec.with.decision.probs[[counter]]$preset_decision <- 1
-  list.of.rectangles.dec.with.decision.probs[[counter]]$preset_decision_value <- list.of.rectangles.dec.with.decision.probs[[counter]]$d_probs
-}
+  ## Code to check neighbor_check works
+  #for(r in list_of_rectangles_dec_with_decision_probs){
+  #plot(0,type="n",xlim=c(-10,10),ylim=c(-10,10),main=paste("Decision Rule for Stage 2 enrollment"),xlab="Z_stage_1_subpop_1",ylab="Z_stage_1_subpop_2",cex=2)
+  #for(r2 in list_of_rectangles_dec_with_decision_probs){
+  #	if(neighbor_check(r,r2) && r$lower_boundaries[1]>=(-3) && r$lower_boundaries[2]>=(-3) && r$upper_boundaries[1]<=3 && r$upper_boundaries[2]<=3){
+  #		col_value <- 2
+  #	rect(max(r$lower_boundaries[1],-10),max(r$lower_boundaries[2],-10),min(r$upper_boundaries[1],10),min(r$upper_boundaries[2],10),col=2)
+  #	rect(max(r2$lower_boundaries[1],-10),max(r2$lower_boundaries[2],-10),min(r2$upper_boundaries[1],10),min(r2$upper_boundaries[2],10),col=3)
+  #	browser()
+  #	}
+  #}}
 
-## Round all values
-for(counter in 1:length(list.of.rectangles.dec.with.decision.probs)){
-    d <- which(list.of.rectangles.dec.with.decision.probs[[counter]]$preset_decision_value==max(list.of.rectangles.dec.with.decision.probs[[counter]]$preset_decision_value))
-    list.of.rectangles.dec.with.decision.probs[[counter]]$preset_decision_value <- rep(0,length(decisions))
-    list.of.rectangles.dec.with.decision.probs[[counter]]$preset_decision_value[d] <- 1
-    list.of.rectangles.dec.with.decision.probs[[counter]]$allowed_decisions <- c(d)
-    list.of.rectangles.dec.with.decision.probs[[counter]]$d_probs <- rep(0,length(decisions))
-    list.of.rectangles.dec.with.decision.probs[[counter]]$d_probs[d] <- 1
-}
 
-merge_final_round_decision_rectangles <- 0
-if(merge_final_round_decision_rectangles==1){
-merge_rectangles <- function(rectangle_list_to_be_merged){
-	lgth = length(rectangle_list_to_be_merged)
-	xl   = rep(0,lgth)
+  for(counter in 1:length(list_of_rectangles_dec_with_decision_probs)){
+    list_of_rectangles_dec_with_decision_probs[[counter]]$preset_decision <- 1
+    list_of_rectangles_dec_with_decision_probs[[counter]]$preset_decision_value <- list_of_rectangles_dec_with_decision_probs[[counter]]$d_probs
+  }
+
+  ## Round all values
+  for(counter in 1:length(list_of_rectangles_dec_with_decision_probs)){
+    #if(r$preset_decision==1){
+    #if(max(list_of_rectangles_dec_with_decision_probs[[counter]]$preset_decision_value)>=0.8){
+    d <- which(list_of_rectangles_dec_with_decision_probs[[counter]]$preset_decision_value==max(list_of_rectangles_dec_with_decision_probs[[counter]]$preset_decision_value))
+    list_of_rectangles_dec_with_decision_probs[[counter]]$preset_decision_value <- rep(0,length(decisions))
+    list_of_rectangles_dec_with_decision_probs[[counter]]$preset_decision_value[d] <- 1
+    list_of_rectangles_dec_with_decision_probs[[counter]]$allowed_decisions <- c(d)
+    list_of_rectangles_dec_with_decision_probs[[counter]]$d_probs <- rep(0,length(decisions))
+    list_of_rectangles_dec_with_decision_probs[[counter]]$d_probs[d] <- 1
+    #    rect(max(r$lower_boundaries[1]-tau,-10),max(r$lower_boundaries[2]-tau,-10),min(r$upper_boundaries[1]+tau,10),min(r$upper_boundaries[2]+tau,10),col=d) #, border=NA)
+  }
+
+
+  merge_rectangles <- function(rectangle_list_to_be_merged){
+    lgth = length(rectangle_list_to_be_merged)
+    xl   = rep(0,lgth)
     xu   = rep(0,lgth)
     yl   = rep(0,lgth)
     yu   = rep(0,lgth)
@@ -422,13 +427,13 @@ merge_rectangles <- function(rectangle_list_to_be_merged){
 
     for (i in 1:lgth)
     {
-	    xl[i]  = rectangle_list_to_be_merged[[i]]$lower_boundaries[1]
-	    xu[i]  = rectangle_list_to_be_merged[[i]]$upper_boundaries[1]
-	    yl[i]  = rectangle_list_to_be_merged[[i]]$lower_boundaries[2]
-	    yu[i]  = rectangle_list_to_be_merged[[i]]$upper_boundaries[2]
-	    dec[i] = rectangle_list_to_be_merged[[i]]$allowed_decisions
-	    d_probs[[i]] = rectangle_list_to_be_merged[[i]]$d_probs
-	    allowed_decisions[[i]] = rectangle_list_to_be_merged[[i]]$allowed_decisions
+      xl[i]  = rectangle_list_to_be_merged[[i]]$lower_boundaries[1]
+      xu[i]  = rectangle_list_to_be_merged[[i]]$upper_boundaries[1]
+      yl[i]  = rectangle_list_to_be_merged[[i]]$lower_boundaries[2]
+      yu[i]  = rectangle_list_to_be_merged[[i]]$upper_boundaries[2]
+      dec[i] = rectangle_list_to_be_merged[[i]]$allowed_decisions
+      d_probs[[i]] = rectangle_list_to_be_merged[[i]]$d_probs
+      allowed_decisions[[i]] = rectangle_list_to_be_merged[[i]]$allowed_decisions
     }
 
     nxl  = c()
@@ -455,82 +460,79 @@ merge_rectangles <- function(rectangle_list_to_be_merged){
     w = 1
     for (i in 1:lgth)
     {
-	    if (done[i]==0)
-	    {
-		    nxl[w]  = xl[i]
-		    nxu[w]  = xu[i]
-		    nyl[w]  = yl[i]
-		    nyu[w]  = yu[i]
-		    ndec[w] = dec[i]
-		    if (length(d_probs)>=i)
-		    {
-		    	if (!is.null(d_probs[[i]]))
-		    	{
-		        nd_probs[[w]] = d_probs[[i]]
-		        }
-		    }
-		    nallowed_decisions[[w]] = allowed_decisions[[i]]
-		    if (i < lgth)
-		    {
-		    for (j in (i+1):lgth)
-		    {
-			   if ((yl[j]==yl[i])&(yu[j]==yu[i])&(xl[j]==nxu[w])&(abs(dec[j]-dec[i])<1e-3)&&(dec[j]>0.1))
-			   {
-			     	nxu[w]  = xu[j]
-			    	done[j] = 1
-			    }
-		     }
-		     }
-	     w = w + 1
-	     }
-     }
-     n = length(nxu)
-     combined_rectangles= list()
-     for (i in 1:n)
-     {
-	     tmp = list()
-	     tmp$lower_boundaries       = c(nxl[i],nyl[i])
-	     tmp$upper_boundaries       = c(nxu[i],nyu[i])
-	     if (length(nd_probs)>=i)
-	     {
-	     	if (!is.null(nd_probs[[i]]))
-	     	{
-	     tmp$d_probs                = nd_probs[[i]]
-	        }
-	     }
-	     tmp$allowed_decisions      = nallowed_decisions[[i]]
-	     if (ndec[i]>0){
-             tmp$preset_decision = ndec[i]
-	     }
-	     combined_rectangles[[i]]   = tmp
+      if (done[i]==0)
+      {
+        nxl[w]  = xl[i]
+        nxu[w]  = xu[i]
+        nyl[w]  = yl[i]
+        nyu[w]  = yu[i]
+        ndec[w] = dec[i]
+        if (length(d_probs)>=i)
+        {
+          if (!is.null(d_probs[[i]]))
+          {
+            nd_probs[[w]] = d_probs[[i]]
+          }
+        }
+        nallowed_decisions[[w]] = allowed_decisions[[i]]
+        if (i < lgth)
+        {
+          for (j in (i+1):lgth)
+          {
+            if ((yl[j]==yl[i])&(yu[j]==yu[i])&(xl[j]==nxu[w])&(abs(dec[j]-dec[i])<1e-3)&&(dec[j]>0.1))
+            {
+              nxu[w]  = xu[j]
+              done[j] = 1
+            }
+          }
+        }
+        w = w + 1
       }
-return(combined_rectangles)
-}
+    }
+    n = length(nxu)
+    combined_rectangles= list()
+    for (i in 1:n)
+    {
+      tmp = list()
+      tmp$lower_boundaries       = c(nxl[i],nyl[i])
+      tmp$upper_boundaries       = c(nxu[i],nyu[i])
+      if (length(nd_probs)>=i)
+      {
+        if (!is.null(nd_probs[[i]]))
+        {
+          tmp$d_probs                = nd_probs[[i]]
+        }
+      }
+      tmp$allowed_decisions      = nallowed_decisions[[i]]
+      if (ndec[i]>0){
+        tmp$preset_decision = ndec[i]
+      }
+      combined_rectangles[[i]]   = tmp
+    }
+    return(combined_rectangles)
 
-list.of.rectangles.dec.with.decision.probs.merged <- merge_rectangles(list.of.rectangles.dec.with.decision.probs)
-} else {list.of.rectangles.dec.with.decision.probs.merged <- list.of.rectangles.dec.with.decision.probs}
+  }
 
+  list_of_rectangles_dec_with_decision_probs_merged <- merge_rectangles(list_of_rectangles_dec_with_decision_probs)
 
-for(counter in 1:length(list.of.rectangles.dec.with.decision.probs.merged)){
-  list.of.rectangles.dec.with.decision.probs.merged[[counter]]$preset_decision_value <- list.of.rectangles.dec.with.decision.probs.merged[[counter]]$d_probs
-}
-
+  for(counter in 1:length(list_of_rectangles_dec_with_decision_probs_merged)){
+    list_of_rectangles_dec_with_decision_probs_merged[[counter]]$preset_decision_value <- list_of_rectangles_dec_with_decision_probs_merged[[counter]]$d_probs
+  }
 
 #save(list.of.rectangles.dec.with.decision.probs.merged,file=paste("list.of.rectangles.dec.rounded.to.integer.rdata",sep=""))
-list.of.rectangles.dec <- list.of.rectangles.dec.with.decision.probs.merged
+list.of.rectangles.dec <- list_of_rectangles_dec_with_decision_probs_merged
 
 ## To view results of rounding and merging
 postscript(paste("decision_rectangles.eps"),height=8,horizontal=FALSE,onefile=FALSE,width=8)
 plot(0,type="n",xlim=c(-8,8),ylim=c(-8,8),main=paste("Decision Rule for Stage 2 enrollment"),xlab="Z_stage_1_subpop_1",ylab="Z_stage_1_subpop_2",cex=2)
 
-for(counter in 1:length(list.of.rectangles.dec.with.decision.probs.merged))
+for(counter in 1:length(list.of.rectangles.dec))
 {
-  r <- list.of.rectangles.dec.with.decision.probs.merged[[counter]]
+  r <- list.of.rectangles.dec[[counter]]
   if(r$preset_decision>0){color_value <- r$preset_decision}else{color_value <- 5}
   rect(max(r$lower_boundaries[1],-10),max(r$lower_boundaries[2],-10),min(r$upper_boundaries[1],10),min(r$upper_boundaries[2],10),col=color_value)
 }
 dev.off()
-rm(list.of.rectangles.dec.with.decision.probs.merged)
 
 #
 ## run set and split to construct new list.of.rectangles.dec, save it, and proceed
@@ -538,8 +540,6 @@ rm(list.of.rectangles.dec.with.decision.probs.merged)
 
 } else if(set.rectangles.with.identically.valued.neighbors.and.split.others){
    #source("set_fixed_rectangles_and_split_border_rectangles.R")
-  list_of_rectangles_dec <- list.of.rectangles.dec
-
   generate_list_of_rectangles_dec_with_decision_probs <- function(){
     list_of_rectangles_dec_with_decision_probs <- list_of_rectangles_dec[1:(length(list_of_rectangles_dec)-number_reference_rectangles)]
     counter <- 1
