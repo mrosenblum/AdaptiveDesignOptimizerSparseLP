@@ -1,9 +1,9 @@
+solve_linear_program_gurobi <- function(total.alpha){
 number_A1_files <- scan("number_A1_files.txt")
 A1 = numeric(0)
 for(i in 1:number_A1_files){
         tmp = load(paste("A1",i,".rdata",sep=""))
         tmp = constraint_list
-
         A1 = rbind(A1,tmp)
 }
 
@@ -55,7 +55,7 @@ cc   = objective_function_vector
 
 AA  = rbind(A1,A4,-A3,A5)
 
-a1  = rep(0.05,dim(A1)[1])
+a1  = rep(total.alpha,dim(A1)[1])
 
 a4  = rep(0,dim(A4)[1])
 
@@ -87,4 +87,5 @@ sln$status = result$status
 sln$dual   = result$pi
 sln$val    = result$objval
 
-save(sln=sln,file=paste("sln2M",LP.iteration,".rdata",sep=""))
+return(sln)
+}

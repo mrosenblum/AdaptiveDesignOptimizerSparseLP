@@ -40,7 +40,7 @@ optimize_design <- function(subpopulation.1.proportion=0.5,
 					   0,0.82,0,
 					   0.82,0,0,
 					   0,0,0.82),nrow=4,ncol=3,byrow=TRUE,dimnames=list(c(),c("PowerH01","PowerH02","PowerH0C"))),
-	        type.of.LP.solver="matlab",
+	  type.of.LP.solver="matlab",
 		discretization.parameter=c(1,1,10),
 		number.cores=30,
 		ncp.list=c(),
@@ -920,6 +920,8 @@ parallel::mclapply(c((number_jobs-5):number_jobs,1:(number_jobs-6)),generate_LP,
 
 # Convert linear program to matlab format
 
+if(type.of.LP.solver=="matlab"){
+
 R.matlab::writeMat("alphaValue.mat",alphaValue=total.alpha)
 
 number_A1_files <- scan("number_A1_files.txt")
@@ -967,17 +969,15 @@ tmp = load("c.rdata")
 obj = objective_function_vector
 R.matlab::writeMat("cc.mat",cc = obj)
 
-#
 # Solve linear program by call to cplex via matlab
-#
-
 system('matlab -nojvm -r "siterprl()" > output_LP_solver')
 
-#
 # Extract results from linear program solver and examine whether feasible solution was found
-#
-
 sln = R.matlab::readMat(paste("sln2M",LP.iteration,".mat",sep=""))
+} else if(type.of.LP.solver=="gurobi") {
+  sln = solve_linear_program_gurobi(total.alpha)
+}
+
 save(sln,file=paste("sln2M",LP.iteration,".rdata",sep=""))
 ncp.active.FWER.constraints <- ncp.list[which(sln$dual[1:length(ncp.list)]>0.01)]
 input.parameters <- as.list(environment())
@@ -1013,27 +1013,27 @@ for(d_plot in decisions){
 		 variable_start_position <- variable_location(r_reference,d,rprime,rprime$allowed_actions[1])
 		 variable_end_position <- variable_location(r_reference,d,rprime,rprime$allowed_actions[length(rprime$allowed_actions)])
 		 action_indicator <-z_solution[variable_start_position:variable_end_position]
-             
+
 		 if( sum(action_indicator[c(2,5,7)])>rounding_threshold_H01){H01_reject <- 1}else{H01_reject <- 0}
 		 if( sum(action_indicator[c(3,6,7)])>rounding_threshold_H02){H02_reject <- 1}else{H02_reject <- 0}
 	    	 if( ((H01_reject && H02_reject) || sum(action_indicator[c(4,5,6,7)])>rounding_threshold_H0C)){H0C_reject <- 1}else{H0C_reject <- 0}
-					   
+
           	 col_value <- ifelse((!H01_reject) && (!H02_reject) && (!H0C_reject),1,
-		              ifelse((H01_reject) && (!H02_reject) && (!H0C_reject),2,  
+		              ifelse((H01_reject) && (!H02_reject) && (!H0C_reject),2,
             		      ifelse((!H01_reject) && (H02_reject) && (!H0C_reject),3,
-          		      ifelse((!H01_reject) && (!H02_reject) && (H0C_reject),4,  
+          		      ifelse((!H01_reject) && (!H02_reject) && (H0C_reject),4,
              		      ifelse((H01_reject) && (!H02_reject) && (H0C_reject),5,
-            		      ifelse((!H01_reject) && (H02_reject) && (H0C_reject),6,  
+            		      ifelse((!H01_reject) && (H02_reject) && (H0C_reject),6,
              		      ifelse((H01_reject) && (H02_reject) && (H0C_reject),7,8)))))))
-                 
+
                  z_rounded[variable_start_position:variable_end_position] <- rep(0,7)
                  z_rounded[variable_start_position+(col_value-1)] <- 1
-	         rect(max(rprime$lower_boundaries[1]-tau,-10),max(rprime$lower_boundaries[2]-tau,-10),min(rprime$upper_boundaries[1]+tau,10),min(rprime$upper_boundaries[2]+tau,10),col=col_value-1,border=NA) 
+	         rect(max(rprime$lower_boundaries[1]-tau,-10),max(rprime$lower_boundaries[2]-tau,-10),min(rprime$upper_boundaries[1]+tau,10),min(rprime$upper_boundaries[2]+tau,10),col=col_value-1,border=NA)
              }
         }
 }
 par(las=0)
-dev.off()	
+dev.off()
 
 save(z_rounded,file="z_rounded.rdata")
 
@@ -1061,7 +1061,7 @@ load("c.rdata")
 print("Objective function value")
 print(objective_function_vector %*% z_rounded)
 }
-					      
+
 # Clean up files used to specify LP
 system('rm A*.rdata')
 system('rm A*.mat')
