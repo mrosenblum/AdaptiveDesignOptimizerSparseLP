@@ -8,12 +8,13 @@ Authors@R:
            role = c("aut", "cre"),
            email = "mrosen@jhu.edu",
            comment = c(ORCID = "0000-0001-7411-4172"))
-Description: Adaptive Enrichment 2-Stage Designs Optimized with Linear Programming.
+Description: Adaptive Enrichment 2-Stage Designs Optimized with Sparse Linear Programming.
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
 Suggests: 
-    Rglpk
+    Rglpk,
+    gurobi
 Imports: 
     R.matlab,
     mvtnorm,
