@@ -30,7 +30,7 @@ if (c4<col[2]){
      A4 = rbind(A4,c(r4,col[2],0))
 }
 
-A4  = sparseMatrix(i=A4[,1],j=A4[,2],x=A4[,3])
+A4  = Matrix::sparseMatrix(i=A4[,1],j=A4[,2],x=A4[,3])
 
 tmp11 = read.table("number_equality_constraints_of_first_type.txt")
 a21   = tmp11$V1
@@ -79,7 +79,7 @@ model$sense <- c(rep('<',number_inequality_constraint),rep('=',number_equality_c
 model$lb    <- rep(0,tmp)
 model$ub    <- rep(1,tmp)
 
-result      <- gurobi(model)
+result      <- gurobi::gurobi(model)
 
 sln        = list()
 sln$z      = result$x
