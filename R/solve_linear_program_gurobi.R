@@ -9,7 +9,7 @@ for(i in 1:number_A1_files){
 
 tmp = load("A2.rdata")
 A2  = equality_constraints
-A2  = sparseMatrix(i=A2[,1],j=A2[,2],x=A2[,3])
+A2  = Matrix::sparseMatrix(i=A2[,1],j=A2[,2],x=A2[,3])
 
 tmp = load("A3.rdata")
 A3  = rbind(power_constraint_matrix_H01, power_constraint_matrix_H02,power_constraint_matrix_H0C)
@@ -48,7 +48,7 @@ if (c5<col[2]){
      A5 = rbind(A5,c(r5,col[2],0))
 }
 
-A5  = sparseMatrix(i=A5[,1],j=A5[,2],x=A5[,3])
+A5  = Matrix::sparseMatrix(i=A5[,1],j=A5[,2],x=A5[,3])
 
 tmpc = load("c.rdata")
 cc   = objective_function_vector
