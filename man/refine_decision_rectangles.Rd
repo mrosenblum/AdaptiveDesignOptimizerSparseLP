@@ -6,49 +6,23 @@
 Authors: Michael Rosenblum, Ethan Fang, Han Liu}
 \usage{
 refine_decision_rectangles(subpopulation.1.proportion = 0.5,
-  total.alpha = 0.05 - (1e-04),
-  data.generating.distributions = matrix(data = c(0, 0, 1, 1, 1, 1, 0,
-  sqrt(1/2) * (qnorm(0.95 + 1e-04) + qnorm(0.95))/5, 1, 1, 1, 1, sqrt(1/2)
-  * (qnorm(0.95 + 1e-04) + qnorm(0.95))/5, 0, 1, 1, 1, 1, sqrt(1/2) *
-  (qnorm(0.95 + 1e-04) + qnorm(0.95))/5, sqrt(1/2) * (qnorm(0.95 + 1e-04) +
-  qnorm(0.95))/5, 1, 1, 1, 1), nrow = 4, ncol = 6, byrow = TRUE, dimnames =
-  list(c(), c("Delta1", "Delta2", "Variance10", "Variance11", "Variance20",
-  "Variance21"))), stage.1.sample.sizes = c(50, 50),
+  stage.1.sample.sizes = c(50, 50),
   stage.2.sample.sizes.per.enrollment.choice = matrix(c(50, 50, 0, 0,
   150, 0, 0, 150), nrow = 4, ncol = 2, byrow = TRUE, dimnames = list(c(),
   c("Subpopulation1Stage2SampleSize", "Subpopulation2Stage2SampleSize"))),
-  objective.function.weights = 0.25 * c(1, 1, 1, 1),
-  power.constraints = matrix(c(0, 0, 0, 0, 0.82, 0, 0.82, 0, 0, 0, 0,
-  0.82), nrow = 4, ncol = 3, byrow = TRUE, dimnames = list(c(),
-  c("PowerH01", "PowerH02", "PowerH0C"))), type.of.LP.solver = "matlab",
-  discretization.parameter = c(1, 1, 10), number.cores = 30,
-  ncp.list = c(), list.of.rectangles.dec = c(), LP.iteration = 1,
-  round.each.decision.rectangle.to.integer = FALSE,
+  discretization.parameter = c(1, 1, 10), list.of.rectangles.dec = c(),
+  LP.iteration = 1, round.each.decision.rectangle.to.integer = FALSE,
   set.rectangles.with.identically.valued.neighbors.and.split.others = TRUE,
   sln)
 }
 \arguments{
 \item{subpopulation.1.proportion}{Proportion of overall population in subpopulation 1. Must be between 0 and 1.}
 
-\item{total.alpha}{Familywise Type I error rate (1-sided)}
-
-\item{data.generating.distributions}{Matrix encoding data generating distributions (defined in terms of treatment effect pairs and outcome variances) used to define power constraints and  objective function; each row defines the pair (Delta_1,Delta_2) of subpopulation 1 and 2 average treatment effects, followed by outcome variances for the four combinations of subpouplation (1 and 2) by study arm (0 and 1).}
-
 \item{stage.1.sample.sizes}{Vector with 2 entries representing stage 1 sample sizes for subpopulations 1 and 2, respectively}
 
 \item{stage.2.sample.sizes.per.enrollment.choice}{Matrix with number.choices.end.of.stage.1 rows and 2 columns, where the (i,j) entry represents the stage 2 sample size under enrollment choice i for subpopulation j.}
 
-\item{objective.function.weights}{Vector with length equal to number of rows of population.parameters, representing weights used to define the objective function}
-
-\item{power.constraints}{Matrix with same number of rows as population.parameters (each representing a data generating distribution) and three columns corresponding to the required power to reject (at least) H_01, H_02, H_0C, respectively.}
-
-\item{type.of.LP.solver}{"matlab", "cplex", "GLPK", or "Gurobi" The linear program solve that you want to use; assumes that you have installed this already and that path is set}
-
 \item{discretization.parameter}{vector with 3 elements representing initial discretization of decision region, rejection regions, and grid representing Type I error constraints}
-
-\item{number.cores}{the number of cores available for parallelization using the parallel R package}
-
-\item{ncp.list}{list of pairs of real numbers representing the non-centrality parameters to be used in the Type I error constraints; if list is empty, then default list is used.}
 
 \item{list.of.rectangles.dec}{list of rectangles representing decision region partition, encoded as a list with each element of the list having fields $lower_boundaries (pair of real numbers representing coordinates of lower left corner of rectangle), $upper_boundaries (pair of real numbers representing upper right corner of rectangle), $allowed_decisions (subset of stage.2.sample.sizes.per.enrollment.choice representing which decisions allowed if first stage z-statistics are in corresponding rectangle; default is entire list stage.2.sample.sizes.per.enrollment.choice), $preset_decision (indicator of whether the decision probabilities are hard-coded by the user; default is 0), $d_probs (empty unless $preset_decision==1, in which case it is a vector representing the probabilities of each decision); if list.or.rectangles.dec is empty, then a default partition is used based on discretization.parameter.}
 
@@ -66,8 +40,4 @@ refine_decision_rectangles(subpopulation.1.proportion = 0.5,
 \description{
 Adaptive Enrichment Design Optimization Using Sparse Linear Programming
 Authors: Michael Rosenblum, Ethan Fang, Han Liu
-}
-\examples{
-#For demonstration purposes, the examples below use a coarse discretization.
-optimize_design(discretization.parameter=c(3,3,1),number.cores=1)
 }

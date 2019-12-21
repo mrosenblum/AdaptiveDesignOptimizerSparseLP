@@ -2,16 +2,9 @@
 #' Authors: Michael Rosenblum, Ethan Fang, Han Liu
 #'
 #' @param subpopulation.1.proportion Proportion of overall population in subpopulation 1. Must be between 0 and 1.
-#' @param total.alpha Familywise Type I error rate (1-sided)
-#' @param data.generating.distributions Matrix encoding data generating distributions (defined in terms of treatment effect pairs and outcome variances) used to define power constraints and  objective function; each row defines the pair (Delta_1,Delta_2) of subpopulation 1 and 2 average treatment effects, followed by outcome variances for the four combinations of subpouplation (1 and 2) by study arm (0 and 1).
 #' @param stage.1.sample.sizes Vector with 2 entries representing stage 1 sample sizes for subpopulations 1 and 2, respectively
 #' @param stage.2.sample.sizes.per.enrollment.choice Matrix with number.choices.end.of.stage.1 rows and 2 columns, where the (i,j) entry represents the stage 2 sample size under enrollment choice i for subpopulation j.
-#' @param objective.function.weights Vector with length equal to number of rows of population.parameters, representing weights used to define the objective function
-#' @param power.constraints Matrix with same number of rows as population.parameters (each representing a data generating distribution) and three columns corresponding to the required power to reject (at least) H_01, H_02, H_0C, respectively.
-#' @param type.of.LP.solver "matlab", "cplex", "GLPK", or "Gurobi" The linear program solve that you want to use; assumes that you have installed this already and that path is set
 #' @param discretization.parameter vector with 3 elements representing initial discretization of decision region, rejection regions, and grid representing Type I error constraints
-#' @param number.cores the number of cores available for parallelization using the parallel R package
-#' @param ncp.list list of pairs of real numbers representing the non-centrality parameters to be used in the Type I error constraints; if list is empty, then default list is used.
 #' @param list.of.rectangles.dec list of rectangles representing decision region partition, encoded as a list with each element of the list having fields $lower_boundaries (pair of real numbers representing coordinates of lower left corner of rectangle), $upper_boundaries (pair of real numbers representing upper right corner of rectangle), $allowed_decisions (subset of stage.2.sample.sizes.per.enrollment.choice representing which decisions allowed if first stage z-statistics are in corresponding rectangle; default is entire list stage.2.sample.sizes.per.enrollment.choice), $preset_decision (indicator of whether the decision probabilities are hard-coded by the user; default is 0), $d_probs (empty unless $preset_decision==1, in which case it is a vector representing the probabilities of each decision); if list.or.rectangles.dec is empty, then a default partition is used based on discretization.parameter.
 #' @param LP.iteration positive integer used in file name to store output; can be used to avoid overwriting previous computations
 #' @param round.each.decision.rectangle.to.integer TRUE/FALSE indicator of whether decision probabilities encoded in list.of.rectangles.dec should be rounded to integer values
@@ -21,30 +14,14 @@
 #' @section Output
 #' The software computes and optimized design saved as "optimized_design.rdata" and the corresponding expected sample size is
 #' saved as "optimized_design_expected_sample_size.rdata".
-#' @examples
-#' #For demonstration purposes, the examples below use a coarse discretization.
-#' optimize_design(discretization.parameter=c(3,3,1),number.cores=1)
 #' @export
 refine_decision_rectangles <- function(subpopulation.1.proportion=0.5,
-		total.alpha=0.05-(1e-4),
-		data.generating.distributions=matrix(data=c(0,0,1,1,1,1,
-					       0,sqrt(1/2)*(qnorm(0.95+1e-4)+qnorm(0.95))/5,1,1,1,1,
-					       sqrt(1/2)*(qnorm(0.95+1e-4)+qnorm(0.95))/5,0,1,1,1,1,
-					       sqrt(1/2)*(qnorm(0.95+1e-4)+qnorm(0.95))/5,sqrt(1/2)*(qnorm(0.95+1e-4)+qnorm(0.95))/5,1,1,1,1),nrow=4,ncol=6,byrow=TRUE,dimnames=list(c(),c("Delta1","Delta2","Variance10","Variance11","Variance20","Variance21"))),
 		stage.1.sample.sizes=c(50,50),
 		stage.2.sample.sizes.per.enrollment.choice=matrix(c(50,50,
 								    0,0,
 								    150,0,
 		    					            0,150),nrow=4,ncol=2,byrow=TRUE,dimnames=list(c(),c("Subpopulation1Stage2SampleSize","Subpopulation2Stage2SampleSize"))),
-	  objective.function.weights=0.25*c(1,1,1,1),
-		power.constraints=matrix(c(0,0,0,
-					   0,0.82,0,
-					   0.82,0,0,
-					   0,0,0.82),nrow=4,ncol=3,byrow=TRUE,dimnames=list(c(),c("PowerH01","PowerH02","PowerH0C"))),
-	        type.of.LP.solver="matlab",
 		discretization.parameter=c(1,1,10),
-		number.cores=30,
-		ncp.list=c(),
 		list.of.rectangles.dec=c(),
 		LP.iteration=1,
 		round.each.decision.rectangle.to.integer=FALSE,
@@ -86,26 +63,6 @@ decisions <- (1:number_decisions)
 
 ## Set loss function to be sample size; can modify if desired--general format is matrix with number_decision rows and number_actions columns, and entry is loss function value at corresponding (decision,action pair). Can also generalize to make it depend on the ncp value as well but if so need to modify generalized_generate... objective function construction
 loss_function_value <- array(n_stage1_subpopulation1+n_stage1_subpopulation2+n_stage2_subpopulation1_decision+n_stage2_subpopulation2_decision,c(number_decisions,number_actions))
-
-# Convert data.generating.distributions to list of non-centrality parameter vectors
-prior_mean_support <- c()
-for(count in 1:dim(data.generating.distributions)[1]){
-  ncp <- c(data.generating.distributions[count,1]*sqrt(p1*sum(stage.1.sample.sizes)/(data.generating.distributions[count,3]+data.generating.distributions[count,4])),
-           data.generating.distributions[count,2]*sqrt(p2*sum(stage.1.sample.sizes)/(data.generating.distributions[count,5]+data.generating.distributions[count,6])))
-  names(ncp) <- c("NonCentralityParameter1","NonCentralityParameter2")
-  prior_mean_support <- c(prior_mean_support,list(ncp))
-}
-
-# Prior information used in constructing objective function
-prior_weights <- objective.function.weights
-prior_covariance_matrix <- diag(2)*0
-# List of non-centrality parameters to use for power constraints:
-# WARNING: If following line is modified, need to modify the line that follows it as well, and also the line:
-# switch(power_constraint_counter,power_constraint_vector_subpopulation1<-power_constraint_vector,power_constraint_vector_subpopulation2<-power_constraint_vector,power_constraint_vector_combined_population<-power_constraint_vector)
-# in the generalized_generate... file in order to modify the format of power constraint output
-power_constraint_list <- prior_mean_support
-## The type of power to put constraint on for each scenario in the power_constraint list:
-#power_constraint_null_hyp_contribution_list <- c(list(indicator_contribute_to_subpopulation1_power),list(indicator_contribute_to_subpopulation2_power),list(indicator_contribute_to_combined_population_power))
 
 # Decision Type: indicates one of 4 types of stage 2 enrollment choices:
 # 1: both subpopulations enrolled
@@ -154,34 +111,6 @@ for(d in decisions){
                       					    covariance_Z_1_Z_2,1,gamma2,
                      					    covariance_Z_1_Z_2*gamma2,gamma2,1),c(3,3))))
   }
-}
-
-mean_vector <- function(ncp,d){
-    if(d_type[d]==1){
-    return(c(
-       ncp[1]*sqrt(n_stage1_subpopulation1/(2*p1*sum(stage.1.sample.sizes))),ncp[2]*sqrt(n_stage1_subpopulation2/(2*p2*sum(stage.1.sample.sizes))),
-       ncp[1]*sqrt((n_stage1_subpopulation1+n_stage2_subpopulation1_decision[d])/(2*p1*sum(stage.1.sample.sizes))),ncp[2]*sqrt((n_stage1_subpopulation2+n_stage2_subpopulation2_decision[d])/(2*p2*sum(stage.1.sample.sizes)))))} else if(d_type[d]==2){
-    return(c(
-       ncp[1]*sqrt(n_stage1_subpopulation1/(2*p1*sum(stage.1.sample.sizes))),ncp[2]*sqrt(n_stage1_subpopulation2/(2*p1*sum(stage.1.sample.sizes)))))} else if(d_type[d]==3){
-    return(c(
-       ncp[1]*sqrt(n_stage1_subpopulation1/(2*p1*sum(stage.1.sample.sizes))),ncp[2]*sqrt(n_stage1_subpopulation2/(2*p2*sum(stage.1.sample.sizes))),
-       ncp[1]*sqrt((n_stage1_subpopulation1+n_stage2_subpopulation1_decision[d])/(2*p1*sum(stage.1.sample.sizes)))))} else if(d_type[d]==4){
-    return(c(
-       ncp[1]*sqrt(n_stage1_subpopulation1/(2*p1*sum(stage.1.sample.sizes))),ncp[2]*sqrt(n_stage1_subpopulation2/(2*p2*sum(stage.1.sample.sizes))),
-       ncp[2]*sqrt((n_stage1_subpopulation2+n_stage2_subpopulation2_decision[d])/(2*p2*sum(stage.1.sample.sizes)))))
-       }
-}
-
-# L <- function(ncp){return(
-#    -(as.numeric(ncp[1]>delta_1_min)*indicator_contribute_to_subpopulation1_power
-#    +as.numeric(ncp[2]>delta_2_min)*indicator_contribute_to_subpopulation2_power
-#    +as.numeric(rho1*ncp[1]+rho2*ncp[2]>rho1*delta_1_min+rho2*delta_2_min)*indicator_contribute_to_combined_population_power))}
-
-## Handles case of prior distribution used in objective function
-modified_joint_distribution <- function(prior_component_index,decision){
-	modified_mean_vector <- mean_vector(ncp=prior_mean_support[[prior_component_index]],d=decision)
-	modified_covariance_matrix <-  (array(c(mean_vector(ncp=c(1,0),d=decision),mean_vector(ncp=c(0,1),d=decision)),c(length(mean_vector(ncp=c(1,0),d=decision)),2))  %*% prior_covariance_matrix %*% t(array(c(mean_vector(ncp=c(1,0),d=decision),mean_vector(ncp=c(0,1),d=decision)),c(length(mean_vector(ncp=c(1,0),d=decision)),2)))) +  covariance_matrix[[decision]]
-	return(list(modified_mean_vector,modified_covariance_matrix))
 }
 
 number_reference_rectangles <- number_decisions
@@ -244,7 +173,6 @@ if(!is.null(list.of.rectangles.dec)){list.of.rectangles.dec <- list.of.rectangle
 	if(count_value <= length(list.of.rectangles.dec)){list.of.rectangles.dec[[counter_for_r]]$upper_neighbor <- count_value}
    }
    #save(list.of.rectangles.dec,file=paste("list.of.rectangles.dec",LP.iteration,".rdata",sep=""))
-   #save(ncp.list,file=paste("ncp.list",LP.iteration,".rdata",sep=""))
 }
 
 ## Set multiple testing procedure rectangle partition
