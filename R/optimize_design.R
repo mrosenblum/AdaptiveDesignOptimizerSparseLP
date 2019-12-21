@@ -16,7 +16,7 @@
 #' @param LP.iteration positive integer used in file name to store output; can be used to avoid overwriting previous computations
 #' @param prior.covariance.matrix 2x2 positive semidefinite matrix representing the covariance corresponding to each component of the mixture of multivariate normals prior distribution (used only in defining the objective function); the default is the matrix of all 0's, corresponding to the prior being a mixture of point masses
 #' @param round.each.multiple.testing.procedure.rectangle.to.integer TRUE/FALSE indicator of whether to round the multiple testing proce ure to integer values and save; only can be done if the procedure is passed a decision rule (encoded in list.of.rectangles.dec) that has all probabilities set as would typically be the case in the final refinement of the original problem
-#' @return 4 element list containing optimized designs from four classes (with increasing complexity):
+#' @return Nothing is returned; instead the optimized design is saved as "optimized_design<k>.rdata", where <k> is the user-defined iteration number (LP.iteration).
 #' @section Output
 #' The software computes an optimized design and saves it as "optimized_design<k>.rdata", where <k> is the user-defined iteration number (LP.iteration). E.g., if one sets LP.iteration=1, then the optimized design is saved as "optimized_design1.rdata". That file can be opened in R and contains the following 6 items:
 #' input.parameters (the inputs passed to the optimized_design function)
@@ -26,34 +26,40 @@
 #' ncp.list (the complete list of familywise Type I error constraints input to the linear program solver)
 #' sln (the solution to the linear program; sln$val is the expected sample size; sln$status, if either 1 or 5, indicates that a feasible solution was found and other wise the problem was infeasible or no solution was found; sln$z is the actual solution as a vector)
 #' @examples
-#' #For demonstration purposes, the examples below use a coarse discretization.
-#' optimize_design(discretization.parameter=c(3,3,1),number.cores=1)
+#' #For demonstration purposes, the example below uses a coarse discretization and a single processor.
+#' optimize_design(subpopulation.1.proportion=0.5,
+#' total.alpha=0.05-(1e-4),
+#' data.generating.distributions=matrix(data=c(0,0,1,1,1,1,
+#'                                            0,sqrt(1/2)*(qnorm(0.95+1e-4)+qnorm(0.95))/5,1,1,1,1,
+#'                                            sqrt(1/2)*(qnorm(0.95+1e-4)+qnorm(0.95))/5,0,1,1,1,1,
+#'                                            sqrt(1/2)*(qnorm(0.95+1e-4)+qnorm(0.95))/5,sqrt(1/2)*(qnorm(0.95+1e-4)+qnorm(0.95))/5,1,1,1,1),nrow=4,ncol=6,byrow=TRUE,dimnames=list(c(),c("Delta1","Delta2","Variance10","Variance11","Variance20","Variance21"))),
+#' stage.1.sample.sizes=c(50,50),
+#' stage.2.sample.sizes.per.enrollment.choice=matrix(c(50,50,
+#'                                                    0,0,
+#'                                                    150,0,
+#'                                                    0,150),nrow=4,ncol=2,byrow=TRUE,dimnames=list(c(),c("Subpopulation1Stage2SampleSize","Subpopulation2Stage2SampleSize"))),
+#' objective.function.weights=0.25*c(1,1,1,1),
+#' power.constraints=matrix(c(0,0,0,
+#'                           0,0.82,0,
+#'                           0.82,0,0,
+#'                           0,0,0.82),nrow=4,ncol=3,byrow=TRUE,dimnames=list(c(),c("PowerH01","PowerH02","PowerH0C"))),discretization.parameter=c(3,3,1),number.cores=1)
 #' @export
-optimize_design <- function(subpopulation.1.proportion=0.5,
-		total.alpha=0.05-(1e-4),
-		data.generating.distributions=matrix(data=c(0,0,1,1,1,1,
-					       0,sqrt(1/2)*(qnorm(0.95+1e-4)+qnorm(0.95))/5,1,1,1,1,
-					       sqrt(1/2)*(qnorm(0.95+1e-4)+qnorm(0.95))/5,0,1,1,1,1,
-					       sqrt(1/2)*(qnorm(0.95+1e-4)+qnorm(0.95))/5,sqrt(1/2)*(qnorm(0.95+1e-4)+qnorm(0.95))/5,1,1,1,1),nrow=4,ncol=6,byrow=TRUE,dimnames=list(c(),c("Delta1","Delta2","Variance10","Variance11","Variance20","Variance21"))),
-		stage.1.sample.sizes=c(50,50),
-		stage.2.sample.sizes.per.enrollment.choice=matrix(c(50,50,
-								    0,0,
-								    150,0,
-		    					            0,150),nrow=4,ncol=2,byrow=TRUE,dimnames=list(c(),c("Subpopulation1Stage2SampleSize","Subpopulation2Stage2SampleSize"))),
-	  objective.function.weights=0.25*c(1,1,1,1),
-		power.constraints=matrix(c(0,0,0,
-					   0,0.82,0,
-					   0.82,0,0,
-					   0,0,0.82),nrow=4,ncol=3,byrow=TRUE,dimnames=list(c(),c("PowerH01","PowerH02","PowerH0C"))),
-	  type.of.LP.solver="matlab",
-		discretization.parameter=c(1,1,10),
-		number.cores=30,
-		ncp.list=c(),
-		list.of.rectangles.dec=c(),
-		LP.iteration=1,
-		prior.covariance.matrix=diag(2)*0,
-		round.each.multiple.testing.procedure.rectangle.to.integer=FALSE
-		){
+optimize_design <- function(subpopulation.1.proportion,
+  total.alpha,
+  data.generating.distributions,
+  stage.1.sample.sizes,
+  stage.2.sample.sizes.per.enrollment.choice,
+  objective.function.weights,
+  power.constraints,
+  type.of.LP.solver="matlab",
+	discretization.parameter=c(1,1,10),
+	number.cores=30,
+	ncp.list=c(),
+	list.of.rectangles.dec=c(),
+	LP.iteration=1,
+	prior.covariance.matrix=diag(2)*0,
+	round.each.multiple.testing.procedure.rectangle.to.integer=FALSE){
+
 max_error_prob <- 0 # track approximation errors in problem construction; initialize to 0 here
 covariance_Z_1_Z_2 <-  0 # covariance_due_to overlap of subpopulations (generally we assume no overlap)
 p1 <- subpopulation.1.proportion;
