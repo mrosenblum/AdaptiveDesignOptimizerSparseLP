@@ -1002,8 +1002,8 @@ dev.off()
 
 z_rounded <- rep(0,length(z_solution))
 for(d_plot in decisions){
-  postscript(paste("rejection_regions.eps"),height=8,horizontal=FALSE,onefile=FALSE,width=8)
-  plot(0,type="n",xaxt="n",yaxt="n",xlim=c(-2.78,2.78),ylim=c(-2.78,2.78),main="Rejection Regions at End of Stage 2",xlab=expression(paste(Z[1])),ylab=expression(paste(Z[2])),cex.lab=2,
+  postscript(paste("rejection_regions",d_plot,".eps",sep=""),height=8,horizontal=FALSE,onefile=FALSE,width=8)
+  plot(0,type="n",xaxt="n",yaxt="n",xlim=c(-2.78,2.78),ylim=c(-2.78,2.78),main=paste("Rejection Regions at End of Stage 2 \n Under 1st Stage Decision ",d_plot,sep=""),xlab=expression(paste(Z[1])),ylab=expression(paste(Z[2])),cex.lab=2,
        cex.axis=2, cex.main=2, cex.sub=2)
   axis(1,at=seq(-3,3,by=1),labels=-3:3,cex.axis=2)
   axis(2,at=seq(-3,3,by=1),labels=-3:3,cex.axis=2)
