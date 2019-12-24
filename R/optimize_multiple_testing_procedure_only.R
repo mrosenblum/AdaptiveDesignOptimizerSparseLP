@@ -967,10 +967,9 @@ system('matlab -nojvm -r "siterprl()" > output_LP_solver')
 
 sln = R.matlab::readMat(paste("sln2M",LP.iteration,".mat",sep=""))
 save(sln,file=paste("sln2M",LP.iteration,".rdata",sep=""))
-ncp.active.FWER.constraints <- ncp.list[which(sln$dual[1:length(ncp.list)]>0.01)]
 input.parameters <- as.list(environment())
 print(paste("Adaptive Design Optimization Completed. Optimal design is stored in the file: optimized_design.rdata"))
-save(input.parameters,ncp.active.FWER.constraints,list.of.rectangles.dec,list.of.rectangles.mtp,ncp.list,sln,file=paste("optimized.design",LP.iteration,".rdata",sep=""))
+save(input.parameters,list.of.rectangles.dec,list.of.rectangles.mtp,ncp.list,sln,file=paste("optimized.design",LP.iteration,".rdata",sep=""))
 
 if(sln$status==1 || sln$status==5){
   print(paste("Feasible Solution was Found and Optimal Expected Sample Size is",sln$val))
@@ -1001,14 +1000,14 @@ postscript(paste("decision_rule.eps"),height=8,horizontal=FALSE,onefile=FALSE,wi
   legend("bottomleft",legend=decision_list,title = "Stage 2 sample size per subpop.",pch=c(15,15,15,15),col=decisions,cex=1,bg="white")
 dev.off()
 
-postscript(paste("rejection_regions.eps"),height=8,horizontal=FALSE,onefile=FALSE,width=8)
-plot(0,type="n",xaxt="n",yaxt="n",xlim=c(-2.78,2.78),ylim=c(-2.78,2.78),main="Rejection Regions at End of Stage 2",xlab=expression(paste(Z[1])),ylab=expression(paste(Z[2])),cex.lab=2,
- cex.axis=2, cex.main=2, cex.sub=2)
-axis(1,at=seq(-3,3,by=1),labels=-3:3,cex.axis=2)
-axis(2,at=seq(-3,3,by=1),labels=-3:3,cex.axis=2)
 z_rounded <- rep(0,length(z_solution))
 for(d_plot in decisions){
-	rounding_threshold_H01 <- rounding_threshold <- 0.9
+  postscript(paste("rejection_regions.eps"),height=8,horizontal=FALSE,onefile=FALSE,width=8)
+  plot(0,type="n",xaxt="n",yaxt="n",xlim=c(-2.78,2.78),ylim=c(-2.78,2.78),main="Rejection Regions at End of Stage 2",xlab=expression(paste(Z[1])),ylab=expression(paste(Z[2])),cex.lab=2,
+       cex.axis=2, cex.main=2, cex.sub=2)
+  axis(1,at=seq(-3,3,by=1),labels=-3:3,cex.axis=2)
+  axis(2,at=seq(-3,3,by=1),labels=-3:3,cex.axis=2)
+  rounding_threshold_H01 <- rounding_threshold <- 0.9
 	rounding_threshold_H02 <- rounding_threshold <- 0.9
 	rounding_threshold_H0C <- rounding_threshold <- 0.9
 	r_reference_index <- length(list.of.rectangles.dec) - number_reference_rectangles + d_plot
@@ -1037,9 +1036,9 @@ for(d_plot in decisions){
              }
 	}
 	legend("bottomleft",legend=c("none", "H01", "H02", "H0C", "H01 and H0C", "H02 and H0C", "all"),title = "Reject Null Hypotheses:",pch=c(15,15,15,15,15,15,15),col=actions-1,cex=1,bg="white")
+	dev.off()
 }
 par(las=0)
-dev.off()
 
 save(z_rounded,file="z_rounded.rdata")
 
@@ -1069,6 +1068,8 @@ print(objective_function_vector %*% z_rounded)
 }
 
 # Clean up files used to specify LP
+cleanup <- 0
+if(cleanup==1){
 system('rm A*.rdata')
 system('rm A*.mat')
 system('rm a*.mat')
@@ -1087,5 +1088,5 @@ system('rm number_equality_constraints_of_second_type.txt')
 system('rm number_A1_constraints.txt')
 system('rm number_A1_files.txt')
 system('rm power_constraints.rdata')
-system('rm max_error_prob*')
+system('rm max_error_prob*')}
 }
