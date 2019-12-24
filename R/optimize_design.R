@@ -1066,7 +1066,7 @@ load("A3.rdata")
 print("User defined power constraints (desired power); each row corresponds to a scenario and columns correspond to H01, H02, H0C desired power")
 print("power.constraints")
 print("Power achieved for each null hypothesis under each power constraint scenario (row)")
-print(cbind(power_constraint_matrix_H01 %*% z_rounded,power_constraint_matrix_H02 %*% z_rounded,power_constraint_matrix_H03 %*% z_rounded))
+print(cbind(power_constraint_matrix_H01 %*% z_rounded,power_constraint_matrix_H02 %*% z_rounded,power_constraint_matrix_H0C %*% z_rounded))
 
 load("c.rdata")
 print("Objective function value")

@@ -250,7 +250,7 @@ if(!is.null(list.of.rectangles.dec)){
 	r <- list.of.rectangles.dec[[counter_for_r]]
 	count_value <- 1
 	#while(count_value <= length(list.of.rectangles.dec) && (!(r$upper_boundaries[2]== list.of.rectangles.dec[[count_value]]$lower_boundaries[2] && r$lower_boundaries[1]== list.of.rectangles.dec[[count_value]]$lower_boundaries[1] && r$upper_boundaries[1]== list.of.rectangles.dec[[count_value]]$upper_boundaries[1]))){count_value <- count_value +1}
-	while(count_value <= length(list_of_rectangles_dec) && (!(abs(r$upper_boundaries[2] - list_of_rectangles_dec[[count_value]]$lower_boundaries[2])<10^(-10) && abs(r$lower_boundaries[1] - list_of_rectangles_dec[[count_value]]$lower_boundaries[1])<10^(-10) && abs(r$upper_boundaries[1] - list_of_rectangles_dec[[count_value]]$upper_boundaries[1])<10^(-10)))){count_value <- count_value +1}
+	while(count_value <= length(list.of.rectangles.dec) && (!(abs(r$upper_boundaries[2] - list.of.rectangles.dec[[count_value]]$lower_boundaries[2])<10^(-10) && abs(r$lower_boundaries[1] - list.of.rectangles.dec[[count_value]]$lower_boundaries[1])<10^(-10) && abs(r$upper_boundaries[1] - list.of.rectangles.dec[[count_value]]$upper_boundaries[1])<10^(-10)))){count_value <- count_value +1}
 	if(count_value <= length(list.of.rectangles.dec)){list.of.rectangles.dec[[counter_for_r]]$upper_neighbor <- count_value}
    }
    save(list.of.rectangles.dec,file=paste("list.of.rectangles.dec",LP.iteration,".rdata",sep=""))
@@ -282,7 +282,7 @@ for(rprime in list.of.rectangles.mtp1)
 {
 	count_value <- 1
 	#while(count_value <= length(list.of.rectangles.mtp1) && (!(rprime$upper_boundaries[1]== list.of.rectangles.mtp1[[count_value]]$lower_boundaries[1] && rprime$lower_boundaries[2]== list.of.rectangles.mtp1[[count_value]]$lower_boundaries[2] && rprime$upper_boundaries[2]== list.of.rectangles.mtp1[[count_value]]$upper_boundaries[2]))){count_value <- count_value +1}
-	while(count_value <= length(list_of_rectangles_mtp1) && (!(abs(rprime$upper_boundaries[1] - list_of_rectangles_mtp1[[count_value]]$lower_boundaries[1])<10^(-10) && abs(rprime$lower_boundaries[2] - list_of_rectangles_mtp1[[count_value]]$lower_boundaries[2])<10^(-10) && abs(rprime$upper_boundaries[2] - list_of_rectangles_mtp1[[count_value]]$upper_boundaries[2])<10^(-10)))){count_value <- count_value +1}
+	while(count_value <= length(list.of.rectangles.mtp1) && (!(abs(rprime$upper_boundaries[1] - list.of.rectangles.mtp1[[count_value]]$lower_boundaries[1])<10^(-10) && abs(rprime$lower_boundaries[2] - list.of.rectangles.mtp1[[count_value]]$lower_boundaries[2])<10^(-10) && abs(rprime$upper_boundaries[2] - list.of.rectangles.mtp1[[count_value]]$upper_boundaries[2])<10^(-10)))){count_value <- count_value +1}
 	if(count_value <= length(list.of.rectangles.mtp1)){list.of.rectangles.mtp1[[counter_for_rprime]]$right_neighbor <- count_value}
 	counter_for_rprime <- counter_for_rprime +1
 }
@@ -292,7 +292,7 @@ for(rprime in list.of.rectangles.mtp1)
 {
 	count_value <- 1
 	#while(count_value <= length(list.of.rectangles.mtp1) && (!(rprime$upper_boundaries[2]== list.of.rectangles.mtp1[[count_value]]$lower_boundaries[2] && rprime$lower_boundaries[1]== list.of.rectangles.mtp1[[count_value]]$lower_boundaries[1] && rprime$upper_boundaries[1]== list.of.rectangles.mtp1[[count_value]]$upper_boundaries[1]))){count_value <- count_value +1}
-	while(count_value <= length(list_of_rectangles_mtp1) && (!(abs(rprime$upper_boundaries[2] - list_of_rectangles_mtp1[[count_value]]$lower_boundaries[2])<10^(-10) && abs(rprime$lower_boundaries[1]- list_of_rectangles_mtp1[[count_value]]$lower_boundaries[1])<10^(-10) && abs(rprime$upper_boundaries[1] - list_of_rectangles_mtp1[[count_value]]$upper_boundaries[1])<10^(-10)))){count_value <- count_value +1}
+	while(count_value <= length(list.of.rectangles.mtp1) && (!(abs(rprime$upper_boundaries[2] - list.of.rectangles.mtp1[[count_value]]$lower_boundaries[2])<10^(-10) && abs(rprime$lower_boundaries[1]- list.of.rectangles.mtp1[[count_value]]$lower_boundaries[1])<10^(-10) && abs(rprime$upper_boundaries[1] - list.of.rectangles.mtp1[[count_value]]$upper_boundaries[1])<10^(-10)))){count_value <- count_value +1}
 	if(count_value <= length(list.of.rectangles.mtp1)){list.of.rectangles.mtp1[[counter_for_rprime]]$upper_neighbor <- count_value}
 	counter_for_rprime <- counter_for_rprime +1
 }
@@ -991,7 +991,7 @@ postscript(paste("decision_rule.eps"),height=8,horizontal=FALSE,onefile=FALSE,wi
   axis(1,at=seq(-3,3,by=1),labels=(-3:3),cex.axis=2)
   axis(2,at=seq(-3,3,by=1),labels=(-3:3),cex.axis=2)
   par(las=0)
-  for(r in list_of_rectangles_dec){
+  for(r in list.of.rectangles.dec){
     tau <- 0
     rect(max(r$lower_boundaries[1]-tau,-10),max(r$lower_boundaries[2]-tau,-10),min(r$upper_boundaries[1]+tau,10),min(r$upper_boundaries[2]+tau,10),col=r$allowed_decisions, border=NA)
     print(r$allowed_decisions)
@@ -1061,7 +1061,7 @@ load("A3.rdata")
 print("User defined power constraints (desired power); each row corresponds to a scenario and columns correspond to H01, H02, H0C desired power")
 print("power.constraints")
 print("Power achieved for each null hypothesis under each power constraint scenario (row)")
-print(cbind(power_constraint_matrix_H01 %*% z_rounded,power_constraint_matrix_H02 %*% z_rounded,power_constraint_matrix_H03 %*% z_rounded))
+print(cbind(power_constraint_matrix_H01 %*% z_rounded,power_constraint_matrix_H02 %*% z_rounded,power_constraint_matrix_H0C %*% z_rounded))
 
 load("c.rdata")
 print("Objective function value")
