@@ -8,7 +8,7 @@
 #' @param stage.2.sample.sizes.per.enrollment.choice Matrix with number.choices.end.of.stage.1 rows and 2 columns, where the (i,j) entry represents the stage 2 sample size under enrollment choice i for subpopulation j.
 #' @param objective.function.weights Vector with length equal to number of rows of population.parameters, representing weights used to define the objective function
 #' @param power.constraints Matrix with same number of rows as population.parameters (each representing a data generating distribution) and three columns corresponding to the required power to reject (at least) H_01, H_02, H_0C, respectively.
-#' @param type.of.LP.solver "matlab", "cplex", "GLPK", or "Gurobi" The linear program solve that you want to use; assumes that you have installed this already and that path is set
+#' @param type.of.LP.solver "matlab", "cplex", "GLPK", or "gurobi" The linear program solve that you want to use; assumes that you have installed this already and that path is set
 #' @param discretization.parameter vector with 3 elements representing initial discretization of decision region, rejection regions, and grid representing Type I error constraints
 #' @param number.cores the number of cores available for parallelization using the parallel R package
 #' @param ncp.list list of pairs of real numbers representing the non-centrality parameters to be used in the Type I error constraints; if list is empty, then default list is used.
@@ -971,7 +971,7 @@ input.parameters <- as.list(environment())
 print(paste("Adaptive Design Optimization Completed. Optimal design is stored in the file: optimized_design.rdata"))
 save(input.parameters,list.of.rectangles.dec,list.of.rectangles.mtp,ncp.list,sln,file=paste("optimized.design",LP.iteration,".rdata",sep=""))
 
-if(sln$status==1 || sln$status==5){
+if((type.of.LP.solver=="matlab" && sln$status==1 || sln$status==5 ) || (type.of.LP.solver=="gurobi" && sln$status == "OPTIMAL")){
   print(paste("Feasible Solution was Found and Optimal Expected Sample Size is",sln$val))
   print("Fraction of solution components with integral value solutions")
   print(sum(sln$z>1-1e-10 | sln$z<10e-10)/length(sln$z))
