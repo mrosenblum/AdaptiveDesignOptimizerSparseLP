@@ -357,6 +357,7 @@ print(number_equality_constraints_part2)
 write(number_equality_constraints_part2,f=paste("number_equality_constraints_of_second_type.txt"))
 write(length(ncp.list),f=paste("number_A1_constraints.txt"))
 write(ceiling(length(ncp.list)/constraints_per_A1_file),f=paste("number_A1_files.txt"))
+power.constraints.matrix <- power.constraints
 power.constraints <- as.vector(power.constraints)
 save(power.constraints,file="power_constraints.rdata")
 save(list.of.rectangles.mtp,file=paste("list.of.rectangles.mtp",LP.iteration,".rdata",sep=""))
@@ -1013,10 +1014,7 @@ load("../A3.rdata") # load power constraints
 z_rounded <- z_solution
 z_integral_components <- rep(0,length(z_solution))
 
-print(dim(power_constraint_matrix_H0C %*% z_integral_components))
-print(dim(power.constraints[,3]-power.constraint.tolerance))
-
-while(any(power_constraint_matrix_H0C %*% z_integral_components < power.constraints[,3]-power.constraint.tolerance))
+while(any(power_constraint_matrix_H0C %*% z_integral_components < power.constraints.matrix[,3]-power.constraint.tolerance))
 {
   #print(power_constraint_matrix_H0C[4,] %*% z_integral_components)
   for(d_plot in decisions){
