@@ -1013,7 +1013,8 @@ load("../A3.rdata") # load power constraints
 z_rounded <- z_solution
 z_integral_components <- rep(0,length(z_solution))
 
-any(power_constraint_matrix_H0C %*% z_integral_components < power.constraints[,3]-power.constraint.tolerance)
+print(dim(power_constraint_matrix_H0C %*% z_integral_components))
+print(dim(power.constraints[,3]-power.constraint.tolerance))
 
 while(any(power_constraint_matrix_H0C %*% z_integral_components < power.constraints[,3]-power.constraint.tolerance))
 {
