@@ -16,10 +16,20 @@
 #' @param LP.iteration positive integer used in file name to store output; can be used to avoid overwriting previous computations
 #' @param prior.covariance.matrix 2x2 positive semidefinite matrix representing the covariance corresponding to each component of the mixture of multivariate normals prior distribution (used only in defining the objective function); the default is the matrix of all 0's, corresponding to the prior being a mixture of point masses
 #' @param round.each.multiple.testing.procedure.rectangle.to.integer TRUE/FALSE indicator of whether to round the multiple testing proce ure to integer values and save; only can be done if the procedure is passed a decision rule (encoded in list.of.rectangles.dec) that has all probabilities set as would typically be the case in the final refinement of the original problem
-#' @return 4 element list containing optimized designs from four classes (with increasing complexity):
+#' @param plots.to.round.simply subset of plots (one per allowed enrollment decision) for which rounding is simply based on thresholding using rounding.threshold.H01, rounding.threshold.H02, rounding.threshold.H0C
+#' @param rounding.threshold.H01 threshold above which fractional solution corresponding to probability of rejecting H01 is rounded to 1
+#' @param rounding.threshold.H02 threshold above which fractional solution corresponding to probability of rejecting H02 is rounded to 1
+#' @param rounding.threshold.H0C threshold above which fractional solution corresponding to probability of rejecting H0C is rounded to 1
+#' @param power.constraint.tolerance amount by which power corresponding to rounded solution is allowed to be less than power.constraints; typically set to be small, e.g., 0.01
+#' @return Nothing is returned; instead the optimized design is saved as "optimized_design<k>.rdata", where <k> is the user-defined iteration number (LP.iteration).
 #' @section Output
-#' The software computes and optimized design saved as "optimized_design.rdata" and the corresponding expected sample size is
-#' saved as "optimized_design_expected_sample_size.rdata".
+#' The software computes an optimized design and saves it as "optimized_design<k>.rdata", where <k> is the user-defined iteration number (LP.iteration). E.g., if one sets LP.iteration=1, then the optimized design is saved as "optimized_design1.rdata". That file can be opened in R and contains the following 6 items:
+#' input.parameters (the inputs passed to the optimized_design function)
+#' list.of.rectangles.dec (the decision rectangle partition of R^2)
+#' list.of.rectangles.mtp (the multiple testing procedure partition of R^2)
+#' ncp.active.FWER.constraints (the active familywise Type I error constraints in the optimized design, obtained using the dual solution to the linear program)
+#' ncp.list (the complete list of familywise Type I error constraints input to the linear program solver)
+#' sln (the solution to the linear program; sln$val is the expected sample size; sln$status, if either 1 or 5, indicates that a feasible solution was found and other wise the problem was infeasible or no solution was found; sln$z is the actual solution as a vector)
 #' @examples
 #' #For demonstration purposes, the examples below use a coarse discretization.
 #' optimize_design(discretization.parameter=c(3,3,1),number.cores=1)
@@ -47,7 +57,12 @@ optimize_multiple_testing_procedure <- function(subpopulation.1.proportion=0.5,
 		list.of.rectangles.dec=c(),
 		LP.iteration=1,
 		prior.covariance.matrix=diag(2)*0,
-		round.each.multiple.testing.procedure.rectangle.to.integer=FALSE
+		round.each.multiple.testing.procedure.rectangle.to.integer=FALSE,
+		plots.to.round.simply = c(1,2),
+		rounding.threshold.H01 = 1-1e-10,
+		rounding.threshold.H02 = 1-1e-10,
+		rounding.threshold.H0C = 0.4,
+		power.constraint.tolerance = 0.01
 		){
 max_error_prob <- 0 # track approximation errors in problem construction; initialize to 0 here
 covariance_Z_1_Z_2 <-  0 # covariance_due_to overlap of subpopulations (generally we assume no overlap)
@@ -959,7 +974,7 @@ R.matlab::writeMat("cc.mat",cc = obj)
 # Solve linear program by call to cplex via matlab
 #
 
-system('matlab -nojvm -r "siterprl()" > output_LP_solver')
+system('matlab -nojvm -r "cplex_multiple_testing_procedure()" > output_LP_solver')
 
 #
 # Extract results from linear program solver and examine whether feasible solution was found
@@ -972,11 +987,9 @@ print(paste("Adaptive Design Optimization Completed. Optimal design is stored in
 save(input.parameters,list.of.rectangles.dec,list.of.rectangles.mtp,ncp.list,sln,file=paste("optimized.design",LP.iteration,".rdata",sep=""))
 
 if((type.of.LP.solver=="matlab" && sln$status==1 || sln$status==5 ) || (type.of.LP.solver=="gurobi" && sln$status == "OPTIMAL")){
-  print(paste("Feasible Solution was Found and Optimal Expected Sample Size is",sln$val))
+  print(paste("Feasible Solution was Found"))
   print("Fraction of solution components with integral value solutions")
   print(sum(sln$z>1-1e-10 | sln$z<10e-10)/length(sln$z))
-  print("Active Type I error constraints")
-  print(ncp.active.FWER.constraints)
 } else {print("Problem was Infeasible")}
 
 if(round.each.multiple.testing.procedure.rectangle.to.integer){## If Final iteration, round solution and save; only does this if decision rule was rounded and set to be deterministic
@@ -997,48 +1010,131 @@ postscript(paste("decision_rule.eps"),height=8,horizontal=FALSE,onefile=FALSE,wi
   }
   decision_list <- c()
   for(d in decisions){decision_list <- c(decision_list,list(as.vector(stage.2.sample.sizes.per.enrollment.choice[d,])))}
-  legend("bottomleft",legend=decision_list,title = "Stage 2 sample size per subpop.",pch=c(15,15,15,15),col=decisions,cex=1,bg="white")
+  legend("bottomleft",legend=decision_list,title = "Stage 2 sample size per subpop.",pch=rep(15,length(decision)),col=decisions,cex=1,bg="white")
 dev.off()
 
-z_rounded <- rep(0,length(z_solution))
+## Loop to create rounded version of multiple testing procedure
+load("../A3.rdata") # load power constraints
+z_rounded <- z_solution
+z_integral_components <- rep(0,length(z_solution))
+
+any(power_constraint_matrix_H0C %*% z_integral_components < power.constraints[,3]-power.constraint.tolerance)
+
+while(any(power_constraint_matrix_H0C %*% z_integral_components < power.constraints[,3]-power.constraint.tolerance))
+{
+  #print(power_constraint_matrix_H0C[4,] %*% z_integral_components)
+  for(d_plot in decisions){
+    r_reference_index <- length(list.of.rectangles.dec) - number_reference_rectangles + d_plot
+    r_reference <- list.of.rectangles.dec[[r_reference_index]]
+    for(d in r_reference$allowed_decisions){
+      for(rprime in list.of.rectangles.mtp[[d]]){
+        variable_start_position <- variable_location(r_reference,d,rprime,rprime$allowed_actions[1])
+        variable_end_position <- variable_location(r_reference,d,rprime,rprime$allowed_actions[length(rprime$allowed_actions)])
+        action_indicator <- z_rounded[variable_start_position:variable_end_position];
+        if(sum(action_indicator[c(2,5,7)])>rounding.threshold.H01){H01_reject <- 1}else{H01_reject <- 0}
+        if(sum(action_indicator[c(3,6,7)])>rounding.threshold.H02){H02_reject <- 1}else{H02_reject <- 0}
+        if(any(d_plot == plots.to.round.simply)){# Round using input thresholds, irrespective of neighbor rectangles
+          if((H01_reject && H02_reject) || sum(action_indicator[c(4,5,6,7)])>1-1e-10){H0C_reject <- 1}else{H0C_reject <- 0}
+          deterministic_action <- ifelse((!H01_reject) && (!H02_reject) && (!H0C_reject),1,
+                                         ifelse((H01_reject) && (!H02_reject) && (!H0C_reject),2,
+                                                ifelse((!H01_reject) && (H02_reject) && (!H0C_reject),3,
+                                                       ifelse((!H01_reject) && (!H02_reject) && (H0C_reject),4,
+                                                              ifelse((H01_reject) && (!H02_reject) && (H0C_reject),5,
+                                                                     ifelse((!H01_reject) && (H02_reject) && (H0C_reject),6,
+                                                                            ifelse((H01_reject) && (H02_reject) && (H0C_reject),7,8)))))));
+          z_integral_components[variable_start_position:variable_end_position] <- z_rounded[variable_start_position:variable_end_position] <- rep(0,variable_end_position-variable_start_position+1);
+          z_integral_components[variable_start_position+deterministic_action - 1] <- z_rounded[variable_start_position+deterministic_action - 1] <- 1;
+        } else{
+          if(sum(action_indicator>1-1e-10 | action_indicator<10e-10)==7){
+            deterministic_action <- which(action_indicator==max(action_indicator));
+            z_integral_components[variable_start_position:variable_end_position] <- z_rounded[variable_start_position:variable_end_position] <- rep(0,variable_end_position-variable_start_position+1);
+            z_integral_components[variable_start_position+deterministic_action - 1] <- z_rounded[variable_start_position+deterministic_action - 1] <- 1;} else{
+              # need to consider rounding for H0C
+              # If if fractional H0C component above threhold, and if upper neighbor and right neighbor reject H0C, then reject H0C
+              # Get upper neighbor (if any) and check if rejects H0C
+              if(!is.null(rprime$upper_neighbor)){
+                rprime_upper_neighbor <- list.of.rectangles.mtp[[d]][[rprime$upper_neighbor]]
+                upper_neighbor_start_position <- variable_location(r_reference,d,rprime_upper_neighbor,rprime_upper_neighbor$allowed_actions[1]);
+                upper_neighbor_end_position <- variable_location(r_reference,d,rprime_upper_neighbor,rprime_upper_neighbor$allowed_actions[length(rprime_upper_neighbor$allowed_actions)]);
+                upper_neighbor_action_indicator <- z_rounded[upper_neighbor_start_position:upper_neighbor_end_position];
+              }
+              # Get right neighbor (if any) and check if rejects H0C
+              if(!is.null(rprime$right_neighbor)){
+                rprime_right_neighbor <- list.of.rectangles.mtp[[d]][[rprime$right_neighbor]]
+                right_neighbor_start_position <- variable_location(r_reference,d,rprime_right_neighbor,rprime_right_neighbor$allowed_actions[1]);
+                right_neighbor_end_position <- variable_location(r_reference,d,rprime_right_neighbor,rprime_right_neighbor$allowed_actions[length(rprime_right_neighbor$allowed_actions)]);
+                right_neighbor_action_indicator <- z_rounded[right_neighbor_start_position:right_neighbor_end_position];
+              }
+
+              if((H01_reject && H02_reject) || sum(action_indicator[c(4,5,6,7)])>1-1e-10 || (sum(action_indicator[c(4,5,6,7)])>rounding.threshold.H0C && (is.null(rprime$upper_neighbor) || sum(upper_neighbor_action_indicator[c(4,5,6,7)])>1-1e-10) && (is.null(rprime$right_neighbor) || sum(right_neighbor_action_indicator[c(4,5,6,7)])>1-1e-10))){# round H0C to 1 and permanently fix rounding
+                H0C_reject <- 1
+                deterministic_action <- ifelse((!H01_reject) && (!H02_reject) && (!H0C_reject),1,
+                                               ifelse((H01_reject) && (!H02_reject) && (!H0C_reject),2,
+                                                      ifelse((!H01_reject) && (H02_reject) && (!H0C_reject),3,
+                                                             ifelse((!H01_reject) && (!H02_reject) && (H0C_reject),4,
+                                                                    ifelse((H01_reject) && (!H02_reject) && (H0C_reject),5,
+                                                                           ifelse((!H01_reject) && (H02_reject) && (H0C_reject),6,
+                                                                                  ifelse((H01_reject) && (H02_reject) && (H0C_reject),7,8)))))));
+                #print(d); print(rprime); if(!is.null(rprime$right_neighbor)){print(rprime$right_neighbor)};if(!is.null(rprime$upper_neighbor)){print(rprime$upper_neighbor)}; print(action_indicator);  print(deterministic_action);
+                z_integral_components[variable_start_position:variable_end_position] <- z_rounded[variable_start_position:variable_end_position] <- rep(0,variable_end_position-variable_start_position+1);
+                z_integral_components[variable_start_position+deterministic_action - 1] <- z_rounded[variable_start_position+deterministic_action - 1] <- 1;
+                #if(power_constraint_matrix_H0C[4,] %*% z_integral_components > 0.82){break;}
+                #print(power_constraint_matrix_H0C[4,] %*% z_integral_components)
+                #browser()
+              }
+            }
+        }}}}
+  #rounding.threshold.H0C <- 0.4
+}
+
 for(d_plot in decisions){
-  postscript(paste("rejection_regions",d_plot,".eps",sep=""),height=8,horizontal=FALSE,onefile=FALSE,width=8)
-  plot(0,type="n",xaxt="n",yaxt="n",xlim=c(-2.78,2.78),ylim=c(-2.78,2.78),main=paste("Rejection Regions at End of Stage 2 \n Under 1st Stage Decision ",d_plot,sep=""),xlab=expression(paste(Z[1])),ylab=expression(paste(Z[2])),cex.lab=2,
-       cex.axis=2, cex.main=2, cex.sub=2)
+  postscript(paste("rejection_regions_",d_plot,".eps",sep=""),height=8,horizontal=FALSE,onefile=FALSE,width=8)
+  par(mar=c(7.5,6.5,5.6,2.1))
+
+  main_label <- switch(d_plot,expression(paste(pi[1]^opt," = \"ALL\"")),expression(paste(pi[1]^opt," = \"STOP\"")),expression(paste(pi[1]^opt," = \"ONLY 1\"")),expression(paste(pi[1]^opt," = \"ONLY 2\"")))
+  plot(0,type="n",xaxt="n",yaxt="n",xlim=c(-2.78,2.78),ylim=c(-2.78,2.78),main=paste("Rejection Regions at End of Stage 2 \n Under 1st Stage Decision ",d_plot,sep=""),xlab=expression(paste(Z[1]^F)),ylab=expression(paste(Z[2]^F)),cex.lab=2, cex.axis=2, cex.main=2, cex.sub=2)
   axis(1,at=seq(-3,3,by=1),labels=-3:3,cex.axis=2)
   axis(2,at=seq(-3,3,by=1),labels=-3:3,cex.axis=2)
-  rounding_threshold_H01 <- rounding_threshold <- 0.9
-	rounding_threshold_H02 <- rounding_threshold <- 0.9
-	rounding_threshold_H0C <- rounding_threshold <- 0.9
-	r_reference_index <- length(list.of.rectangles.dec) - number_reference_rectangles + d_plot
-	r_reference <- list.of.rectangles.dec[[r_reference_index]]
-	for(d in r_reference$allowed_decisions){
-	      for(rprime in list.of.rectangles.mtp[[d]]){
-		 variable_start_position <- variable_location(r_reference,d,rprime,rprime$allowed_actions[1])
-		 variable_end_position <- variable_location(r_reference,d,rprime,rprime$allowed_actions[length(rprime$allowed_actions)])
-		 action_indicator <-z_solution[variable_start_position:variable_end_position]
 
-		 if( sum(action_indicator[c(2,5,7)])>rounding_threshold_H01){H01_reject <- 1}else{H01_reject <- 0}
-		 if( sum(action_indicator[c(3,6,7)])>rounding_threshold_H02){H02_reject <- 1}else{H02_reject <- 0}
-	    	 if( ((H01_reject && H02_reject) || sum(action_indicator[c(4,5,6,7)])>rounding_threshold_H0C)){H0C_reject <- 1}else{H0C_reject <- 0}
+  r_reference_index <- length(list.of.rectangles.dec) - number_reference_rectangles + d_plot
+  r_reference <- list.of.rectangles.dec[[r_reference_index]]
+  for(d in r_reference$allowed_decisions){
+    for(rprime in list.of.rectangles.mtp[[d]]){
+      variable_start_position <- variable_location(r_reference,d,rprime,rprime$allowed_actions[1])
+      variable_end_position <- variable_location(r_reference,d,rprime,rprime$allowed_actions[length(rprime$allowed_actions)])
+      action_indicator <-z_rounded[variable_start_position:variable_end_position]
 
-          	 col_value <- ifelse((!H01_reject) && (!H02_reject) && (!H0C_reject),1,
-		              ifelse((H01_reject) && (!H02_reject) && (!H0C_reject),2,
-            		      ifelse((!H01_reject) && (H02_reject) && (!H0C_reject),3,
-          		      ifelse((!H01_reject) && (!H02_reject) && (H0C_reject),4,
-             		      ifelse((H01_reject) && (!H02_reject) && (H0C_reject),5,
-            		      ifelse((!H01_reject) && (H02_reject) && (H0C_reject),6,
-             		      ifelse((H01_reject) && (H02_reject) && (H0C_reject),7,8)))))))
+      if(sum(action_indicator>1-1e-10 | action_indicator<10e-10)==7){
+        deterministic_action <- col_value <- which(action_indicator==max(action_indicator))} else{
+          if(sum(action_indicator[c(2,5,7)])>1-1e-10){H01_reject <- 1}else{H01_reject <- 0}
+          if(sum(action_indicator[c(3,6,7)])>1-1e-10){H02_reject <- 1}else{H02_reject <- 0}
+          if((H01_reject && H02_reject) || sum(action_indicator[c(4,5,6,7)])>1-1e-10){H0C_reject <- 1}else{H0C_reject <- 0};
+          #if(H0C_reject && !(sum(z_integral_components[variable_start_position+3,variable_start_position+6]>rounding.threshold.H0C))){browser()}
+          deterministic_action <- col_value <- ifelse((!H01_reject) && (!H02_reject) && (!H0C_reject),1,
+                                                      ifelse((H01_reject) && (!H02_reject) && (!H0C_reject),2,
+                                                             ifelse((!H01_reject) && (H02_reject) && (!H0C_reject),3,
+                                                                    ifelse((!H01_reject) && (!H02_reject) && (H0C_reject),4,
+                                                                           ifelse((H01_reject) && (!H02_reject) && (H0C_reject),5,
+                                                                                  ifelse((!H01_reject) && (H02_reject) && (H0C_reject),6,
+                                                                                         ifelse((H01_reject) && (H02_reject) && (H0C_reject),7,8)))))))
+        }
+      z_integral_components[variable_start_position:variable_end_position] <- z_rounded[variable_start_position:variable_end_position] <- rep(0,variable_end_position-variable_start_position+1);
+      z_integral_components[variable_start_position+deterministic_action - 1] <- z_rounded[variable_start_position+deterministic_action - 1] <- 1;
 
-                 z_rounded[variable_start_position:variable_end_position] <- rep(0,7)
-                 z_rounded[variable_start_position+(col_value-1)] <- 1
-	         rect(max(rprime$lower_boundaries[1]-tau,-10),max(rprime$lower_boundaries[2]-tau,-10),min(rprime$upper_boundaries[1]+tau,10),min(rprime$upper_boundaries[2]+tau,10),col=col_value-1,border=NA)
-             }
-	}
-	legend("bottomleft",legend=c("none", "H01", "H02", "H0C", "H01 and H0C", "H02 and H0C", "all"),title = "Reject Null Hypotheses:",pch=c(15,15,15,15,15,15,15),col=actions-1,cex=1,bg="white")
-	dev.off()
+      if(d_plot==3 && rprime$lower_boundaries[2]<1.25){
+        rect(max(rprime$lower_boundaries[1]-tau,-10),max(rprime$lower_boundaries[2]-tau,-10),min(rprime$upper_boundaries[1]+tau,10),min(rprime$upper_boundaries[2]+tau,10),col=col_value-1,border=NA)
+
+      } else if(d_plot==4 && rprime$lower_boundaries[1]<1.25){
+        rect(max(rprime$lower_boundaries[1]-tau,-10),max(rprime$lower_boundaries[2]-tau,-10),min(rprime$upper_boundaries[1]+tau,10),min(rprime$upper_boundaries[2]+tau,10),col=col_value-1,border=NA)
+      } else if(d_plot <3){
+        rect(max(rprime$lower_boundaries[1]-tau,-10),max(rprime$lower_boundaries[2]-tau,-10),min(rprime$upper_boundaries[1]+tau,10),min(rprime$upper_boundaries[2]+tau,10),col=col_value-1,border=NA)
+      }
+
+    }
+  }
+  legend("bottomleft",legend=c("none", "H01", "H02", "H0C", "H01 and H0C", "H02 and H0C", "all"),title = "Reject Null Hypotheses:",pch=c(15,15,15,15,15,15,15),col=actions-1,cex=1,bg="white")
+  dev.off()
 }
-par(las=0)
 
 save(z_rounded,file="z_rounded.rdata")
 

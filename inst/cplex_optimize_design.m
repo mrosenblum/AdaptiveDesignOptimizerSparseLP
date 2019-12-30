@@ -1,4 +1,4 @@
-function siterprl_power_objective_function()
+function cplex_optimize_design()
 
 addpath('/users/mrosen/Tools/ibm/ILOG/CPLEX_Studio128/cplex/matlab/x86-64_linux')
 load A11.mat
@@ -8,7 +8,7 @@ for i = 2:number_A1_files
     eval(['load A1',num2str(i),'.mat;']);
     A1 = [A1;tmp];
 
-    
+
 end
 
 load A2.mat
@@ -57,7 +57,7 @@ aa = [a1;-power];
 load a4status.mat
 
 if (a4status == 1)
-   
+
    load A4.mat
    A4  = sparse(A4(:,1),A4(:,2),A4(:,3));
    [~,col] = size(A2);
@@ -65,7 +65,7 @@ if (a4status == 1)
 
    if(tmp<col)
         A4(r4,col)=0;
-   end   
+   end
 
    AA  = [AA;A4]
    a4  = zeros(r4,1);
@@ -73,18 +73,18 @@ if (a4status == 1)
    aa  = [aa;a4];
 end
 
-cc = -(A3(3,:)+A3(6,:));
 
-%load cc.mat
+
+load cc.mat
 tmp     = length(cc);
 lb      = zeros(tmp,1);
 ub      = ones(tmp,1);
 
 
-options = cplexoptimset('lpmethod',0);
+options = cplexoptimset('lpmethod',4);
 
-%options.barrier.crossover = -1;
-%options.barrier.convergetol = 1e-10;
+options.barrier.crossover = -1;
+options.barrier.convergetol = 1e-10;
 
 %options = cplexoptimset('Algorithm','primal');
 
@@ -99,19 +99,17 @@ if (status==1)||(status==5)
     A5   = sparse(A5(:,1),A5(:,2),A5(:,3));
     [~,col] = size(A2);
     [r5,tmp] = size(A5);
-    
+
     if(tmp<col)
         A5(r5,col)=0;
     end
     aa       = [aa;zeros(r5,1)];
     AAn       = [AA;A5];
     [z,val,status,output,dual] = cplexlp(cc,AAn,aa,A2,a2,lb,ub,'options',options);
-    if(iteration<5)
     dual = [dual.ineqlin;dual.eqlin];
-    end
 
-    eval(['save sln2M83s_power_objective_function.mat',' output z val status dual'])
-    
+    eval(['save sln2M',num2str(iteration),'.mat',' output z val status dual'])
+
 end
 
 

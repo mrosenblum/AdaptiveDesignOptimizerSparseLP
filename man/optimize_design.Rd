@@ -29,7 +29,7 @@ optimize_design(subpopulation.1.proportion, total.alpha,
 
 \item{power.constraints}{Matrix with same number of rows as population.parameters (each representing a data generating distribution) and three columns corresponding to the required power to reject (at least) H_01, H_02, H_0C, respectively.}
 
-\item{type.of.LP.solver}{"matlab", "cplex", "GLPK", or "Gurobi" The linear program solve that you want to use; assumes that you have installed this already and that path is set}
+\item{type.of.LP.solver}{"matlab", "cplex", "GLPK", or "gurobi" The linear program solve that you want to use; assumes that you have installed this already and that path is set}
 
 \item{discretization.parameter}{vector with 3 elements representing initial discretization of decision region, rejection regions, and grid representing Type I error constraints}
 

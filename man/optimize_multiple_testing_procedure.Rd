@@ -24,7 +24,10 @@ optimize_multiple_testing_procedure(subpopulation.1.proportion = 0.5,
   discretization.parameter = c(1, 1, 10), number.cores = 30,
   ncp.list = c(), list.of.rectangles.dec = c(), LP.iteration = 1,
   prior.covariance.matrix = diag(2) * 0,
-  round.each.multiple.testing.procedure.rectangle.to.integer = FALSE)
+  round.each.multiple.testing.procedure.rectangle.to.integer = FALSE,
+  plots.to.round.simply = c(1, 2), rounding.threshold.H01 = 1 - 1e-10,
+  rounding.threshold.H02 = 1 - 1e-10, rounding.threshold.H0C = 0.4,
+  power.constraint.tolerance = 0.01)
 }
 \arguments{
 \item{subpopulation.1.proportion}{Proportion of overall population in subpopulation 1. Must be between 0 and 1.}
@@ -41,7 +44,7 @@ optimize_multiple_testing_procedure(subpopulation.1.proportion = 0.5,
 
 \item{power.constraints}{Matrix with same number of rows as population.parameters (each representing a data generating distribution) and three columns corresponding to the required power to reject (at least) H_01, H_02, H_0C, respectively.}
 
-\item{type.of.LP.solver}{"matlab", "cplex", "GLPK", or "Gurobi" The linear program solve that you want to use; assumes that you have installed this already and that path is set}
+\item{type.of.LP.solver}{"matlab", "cplex", "GLPK", or "gurobi" The linear program solve that you want to use; assumes that you have installed this already and that path is set}
 
 \item{discretization.parameter}{vector with 3 elements representing initial discretization of decision region, rejection regions, and grid representing Type I error constraints}
 
@@ -56,9 +59,19 @@ optimize_multiple_testing_procedure(subpopulation.1.proportion = 0.5,
 \item{prior.covariance.matrix}{2x2 positive semidefinite matrix representing the covariance corresponding to each component of the mixture of multivariate normals prior distribution (used only in defining the objective function); the default is the matrix of all 0's, corresponding to the prior being a mixture of point masses}
 
 \item{round.each.multiple.testing.procedure.rectangle.to.integer}{TRUE/FALSE indicator of whether to round the multiple testing proce ure to integer values and save; only can be done if the procedure is passed a decision rule (encoded in list.of.rectangles.dec) that has all probabilities set as would typically be the case in the final refinement of the original problem}
+
+\item{plots.to.round.simply}{subset of plots (one per allowed enrollment decision) for which rounding is simply based on thresholding using rounding.threshold.H01, rounding.threshold.H02, rounding.threshold.H0C}
+
+\item{rounding.threshold.H01}{threshold above which fractional solution corresponding to probability of rejecting H01 is rounded to 1}
+
+\item{rounding.threshold.H02}{threshold above which fractional solution corresponding to probability of rejecting H02 is rounded to 1}
+
+\item{rounding.threshold.H0C}{threshold above which fractional solution corresponding to probability of rejecting H0C is rounded to 1}
+
+\item{power.constraint.tolerance}{amount by which power corresponding to rounded solution is allowed to be less than power.constraints; typically set to be small, e.g., 0.01}
 }
 \value{
-4 element list containing optimized designs from four classes (with increasing complexity):
+Nothing is returned; instead the optimized design is saved as "optimized_design<k>.rdata", where <k> is the user-defined iteration number (LP.iteration).
 }
 \description{
 Adaptive Enrichment Design Optimization Using Sparse Linear Programming
