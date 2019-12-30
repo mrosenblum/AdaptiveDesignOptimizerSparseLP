@@ -1005,7 +1005,7 @@ postscript(paste("decision_rule.eps"),height=8,horizontal=FALSE,onefile=FALSE,wi
   }
   decision_list <- c()
   for(d in decisions){decision_list <- c(decision_list,list(as.vector(stage.2.sample.sizes.per.enrollment.choice[d,])))}
-  legend("bottomleft",legend=decision_list,title = "Stage 2 sample size per subpop.",pch=rep(15,length(decision)),col=decisions,cex=1,bg="white")
+  legend("bottomleft",legend=decision_list,title = "Stage 2 sample size per subpop.",pch=rep(15,length(decisions)),col=decisions,cex=1,bg="white")
 dev.off()
 
 ## Loop to create rounded version of multiple testing procedure
