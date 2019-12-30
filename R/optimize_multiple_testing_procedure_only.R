@@ -36,21 +36,12 @@
 #' @export
 optimize_multiple_testing_procedure <- function(subpopulation.1.proportion=0.5,
 		total.alpha=0.05-(1e-4),
-		data.generating.distributions=matrix(data=c(0,0,1,1,1,1,
-					       0,sqrt(1/2)*(qnorm(0.95+1e-4)+qnorm(0.95))/5,1,1,1,1,
-					       sqrt(1/2)*(qnorm(0.95+1e-4)+qnorm(0.95))/5,0,1,1,1,1,
-					       sqrt(1/2)*(qnorm(0.95+1e-4)+qnorm(0.95))/5,sqrt(1/2)*(qnorm(0.95+1e-4)+qnorm(0.95))/5,1,1,1,1),nrow=4,ncol=6,byrow=TRUE,dimnames=list(c(),c("Delta1","Delta2","Variance10","Variance11","Variance20","Variance21"))),
-		stage.1.sample.sizes=c(50,50),
-		stage.2.sample.sizes.per.enrollment.choice=matrix(c(50,50,
-								    0,0,
-								    150,0,
-		    					            0,150),nrow=4,ncol=2,byrow=TRUE,dimnames=list(c(),c("Subpopulation1Stage2SampleSize","Subpopulation2Stage2SampleSize"))),
-	  objective.function.weights=0.25*c(1,1,1,1),
-		power.constraints=matrix(c(0,0,0,
-					   0,0.82,0,
-					   0.82,0,0,
-					   0,0,0.82),nrow=4,ncol=3,byrow=TRUE,dimnames=list(c(),c("PowerH01","PowerH02","PowerH0C"))),
-	        type.of.LP.solver="matlab",
+		data.generating.distributions,
+		stage.1.sample.sizes,
+		stage.2.sample.sizes.per.enrollment.choice,
+	  objective.function.weights,
+		power.constraints,
+	  type.of.LP.solver="matlab",
 		discretization.parameter=c(1,1,10),
 		number.cores=30,
 		ncp.list=c(),
@@ -921,6 +912,8 @@ save(additional_inequality_constraints_part2,file=paste("Inequality_Constraints_
 number_jobs <- ceiling(length(ncp.list)/constraints_per_A1_file)+6
 parallel::mclapply(c((number_jobs-5):number_jobs,1:(number_jobs-6)),generate_LP,mc.cores=number.cores) # order of jobs puts computation of power constraints and objective function first since they take longer to compute
 
+if(type.of.LP.solver=="matlab"){
+
 # Convert linear program to matlab format
 
 R.matlab::writeMat("alphaValue.mat",alphaValue=total.alpha)
@@ -976,11 +969,12 @@ R.matlab::writeMat("cc.mat",cc = obj)
 
 system('matlab -nojvm -r "cplex_multiple_testing_procedure()" > output_LP_solver')
 
-#
 # Extract results from linear program solver and examine whether feasible solution was found
-#
-
 sln = R.matlab::readMat(paste("sln2M",LP.iteration,".mat",sep=""))
+
+} else if(type.of.LP.solver=="test_version"){
+  sln = R.matlab::readMat(paste("sln2M83s_power_objective_function.mat",sep=""))}else{print("Sorry, this function is only available for use with Matlab or CPLEX"); return(0);}
+
 save(sln,file=paste("sln2M",LP.iteration,".rdata",sep=""))
 input.parameters <- as.list(environment())
 print(paste("Adaptive Design Optimization Completed. Optimal design is stored in the file: optimized_design.rdata"))

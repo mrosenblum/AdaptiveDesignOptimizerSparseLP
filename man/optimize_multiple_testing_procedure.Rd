@@ -6,24 +6,12 @@
 Authors: Michael Rosenblum, Ethan Fang, Han Liu}
 \usage{
 optimize_multiple_testing_procedure(subpopulation.1.proportion = 0.5,
-  total.alpha = 0.05 - (1e-04),
-  data.generating.distributions = matrix(data = c(0, 0, 1, 1, 1, 1, 0,
-  sqrt(1/2) * (qnorm(0.95 + 1e-04) + qnorm(0.95))/5, 1, 1, 1, 1, sqrt(1/2)
-  * (qnorm(0.95 + 1e-04) + qnorm(0.95))/5, 0, 1, 1, 1, 1, sqrt(1/2) *
-  (qnorm(0.95 + 1e-04) + qnorm(0.95))/5, sqrt(1/2) * (qnorm(0.95 + 1e-04) +
-  qnorm(0.95))/5, 1, 1, 1, 1), nrow = 4, ncol = 6, byrow = TRUE, dimnames =
-  list(c(), c("Delta1", "Delta2", "Variance10", "Variance11", "Variance20",
-  "Variance21"))), stage.1.sample.sizes = c(50, 50),
-  stage.2.sample.sizes.per.enrollment.choice = matrix(c(50, 50, 0, 0,
-  150, 0, 0, 150), nrow = 4, ncol = 2, byrow = TRUE, dimnames = list(c(),
-  c("Subpopulation1Stage2SampleSize", "Subpopulation2Stage2SampleSize"))),
-  objective.function.weights = 0.25 * c(1, 1, 1, 1),
-  power.constraints = matrix(c(0, 0, 0, 0, 0.82, 0, 0.82, 0, 0, 0, 0,
-  0.82), nrow = 4, ncol = 3, byrow = TRUE, dimnames = list(c(),
-  c("PowerH01", "PowerH02", "PowerH0C"))), type.of.LP.solver = "matlab",
-  discretization.parameter = c(1, 1, 10), number.cores = 30,
-  ncp.list = c(), list.of.rectangles.dec = c(), LP.iteration = 1,
-  prior.covariance.matrix = diag(2) * 0,
+  total.alpha = 0.05 - (1e-04), data.generating.distributions,
+  stage.1.sample.sizes, stage.2.sample.sizes.per.enrollment.choice,
+  objective.function.weights, power.constraints,
+  type.of.LP.solver = "matlab", discretization.parameter = c(1, 1, 10),
+  number.cores = 30, ncp.list = c(), list.of.rectangles.dec = c(),
+  LP.iteration = 1, prior.covariance.matrix = diag(2) * 0,
   round.each.multiple.testing.procedure.rectangle.to.integer = FALSE,
   plots.to.round.simply = c(1, 2), rounding.threshold.H01 = 1 - 1e-10,
   rounding.threshold.H02 = 1 - 1e-10, rounding.threshold.H0C = 0.4,
