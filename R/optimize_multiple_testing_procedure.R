@@ -347,16 +347,16 @@ for(r in list.of.rectangles.dec){
     }
 }
 
-print("number of variables")
-print(number_of_variables)
-print("number of familywise Type I error constraints")
-print(length(ncp.list))
+#print("number of variables")
+#print(number_of_variables)
+#print("number of familywise Type I error constraints")
+#print(length(ncp.list))
 number_equality_constraints_part1 <- length(list.of.rectangles.dec)-number_preset_decision_rectangles
 write(number_equality_constraints_part1,f=paste("number_equality_constraints_of_first_type.txt"))
-print("number of equality constraints of first type")
-print(number_equality_constraints_part1)
-print("number of equality constraints of second type")
-print(number_equality_constraints_part2)
+#print("number of equality constraints of first type")
+#print(number_equality_constraints_part1)
+#print("number of equality constraints of second type")
+#print(number_equality_constraints_part2)
 write(number_equality_constraints_part2,f=paste("number_equality_constraints_of_second_type.txt"))
 write(length(ncp.list),f=paste("number_A1_constraints.txt"))
 write(ceiling(length(ncp.list)/constraints_per_A1_file),f=paste("number_A1_files.txt"))
@@ -371,8 +371,8 @@ save(list.of.rectangles.mtp,file=paste("list.of.rectangles.mtp",LP.iteration,".r
 
 generate_LP <- function(task_id,...){
     max_task_id_for_computing_FWER_constraints <- ceiling(length(ncp.list)/constraints_per_A1_file)
-    print("max_task_id_for_computing_FWER_constraints")
-    print(max_task_id_for_computing_FWER_constraints)
+    #print("max_task_id_for_computing_FWER_constraints")
+    #print(max_task_id_for_computing_FWER_constraints)
 
     if(task_id <= max_task_id_for_computing_FWER_constraints){
         ## Construct Familywise Type I error constraints
@@ -472,15 +472,15 @@ for(ncp in ncp.list[((task_id-1)*constraints_per_A1_file+1):min(length(ncp.list)
     }
 
     constraint_list <- rbind(constraint_list,rvec)
-    print(counter)
+    #print(counter)
                                         #	if(floor(counter/10) == counter/10) {print(paste(counter,"out of ",length(ncp.list),"familywise Type I error constraints generated"))}
                                         #print(sum(constraint_list[counter,]))
     counter <- counter + 1
 }
 
 # print estimated maximum error in computing bivariate normal probabilities using mvtnorm::pmvnorm:
-print("Max Error in Multivariate Normal Computation")
-print(max_error_prob); save(max_error_prob,file=paste("max_error_prob",task_id,".rdata",sep=""));
+#print("Max Error in Multivariate Normal Computation")
+#print(max_error_prob); save(max_error_prob,file=paste("max_error_prob",task_id,".rdata",sep=""));
 
 # record components of discretized linear program
 save(constraint_list,file=paste("A1",task_id,".rdata",sep=""))
@@ -587,8 +587,8 @@ for(ncp in prior_mean_support)
 if(length(objective_function_vector) !=number_of_variables){print("error in construction of constraints");write(2,file="error_flag")} else{save(objective_function_vector,file=paste("c.rdata"))}
 
 # print estimated maximum error in computing bivariate normal probabilities using mvtnorm::pmvnorm:
-print("Max Error in Multivariate Normal Computation")
-print(max_error_prob); save(max_error_prob,file=paste("max_error_prob",task_id,".rdata",sep=""));
+#print("Max Error in Multivariate Normal Computation")
+#print(max_error_prob); save(max_error_prob,file=paste("max_error_prob",task_id,".rdata",sep=""));
 
 
 } else if(task_id==max_task_id_for_computing_FWER_constraints+2){
@@ -777,8 +777,8 @@ for(ncp in power_constraint_list){
 save(power_constraint_matrix_H01,power_constraint_matrix_H02,power_constraint_matrix_H0C,file=paste("A3.rdata"))
 
 # print estimated maximum error in computing bivariate normal probabilities using mvtnorm::pmvnorm:
-print("Max Error in Multivariate Normal Computation")
-print(max_error_prob); save(max_error_prob,file=paste("max_error_prob",task_id,".rdata",sep=""));
+#print("Max Error in Multivariate Normal Computation")
+#print(max_error_prob); save(max_error_prob,file=paste("max_error_prob",task_id,".rdata",sep=""));
 
 } else if(task_id==max_task_id_for_computing_FWER_constraints+4){
 # Generate sparse inequality constraints (32) and (33) in Section 4.1 that restrict multiple testing procedure not depend on stage 1 statistics (given cumulative statistics Z^C and decision d)
