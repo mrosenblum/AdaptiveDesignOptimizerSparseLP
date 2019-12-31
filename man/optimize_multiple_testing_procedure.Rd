@@ -13,9 +13,9 @@ optimize_multiple_testing_procedure(subpopulation.1.proportion = 0.5,
   number.cores = 30, ncp.list = c(), list.of.rectangles.dec = c(),
   LP.iteration = 1, prior.covariance.matrix = diag(2) * 0,
   round.each.multiple.testing.procedure.rectangle.to.integer = FALSE,
-  plots.to.round.simply = c(1, 2), rounding.threshold.H01 = 1 - 1e-10,
-  rounding.threshold.H02 = 1 - 1e-10, rounding.threshold.H0C = 0.4,
-  power.constraint.tolerance = 0.01)
+  plots.to.round.simply = c(), rounding.threshold.H01 = 1 - 1e-10,
+  rounding.threshold.H02 = 1 - 1e-10, rounding.threshold.H0C = 1 -
+  1e-10, power.constraint.tolerance = 0, LP.solver.path)
 }
 \arguments{
 \item{subpopulation.1.proportion}{Proportion of overall population in subpopulation 1. Must be between 0 and 1.}
@@ -57,6 +57,8 @@ optimize_multiple_testing_procedure(subpopulation.1.proportion = 0.5,
 \item{rounding.threshold.H0C}{threshold above which fractional solution corresponding to probability of rejecting H0C is rounded to 1}
 
 \item{power.constraint.tolerance}{amount by which power corresponding to rounded solution is allowed to be less than power.constraints; typically set to be small, e.g., 0.01}
+
+\item{LP.solver.path}{path (i.e., directory) where LP.solver can be found; e.g., if type.of.LP.solver=="cplex" then LP.solver.path is directory where cplex is installed}
 }
 \value{
 Nothing is returned; instead the optimized design is saved as "optimized_design<k>.rdata", where <k> is the user-defined iteration number (LP.iteration).
