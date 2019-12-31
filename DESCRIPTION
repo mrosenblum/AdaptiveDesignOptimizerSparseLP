@@ -14,7 +14,8 @@ Encoding: UTF-8
 LazyData: true
 Suggests: 
     Rglpk,
-    gurobi
+    gurobi,
+    matlabr
 Imports: 
     R.matlab,
     mvtnorm,

@@ -32,7 +32,7 @@
 #' sln (the solution to the linear program; sln$val is the expected sample size; sln$status, if either 1 or 5, indicates that a feasible solution was found and other wise the problem was infeasible or no solution was found; sln$z is the actual solution as a vector)
 #' @examples
 #' #For demonstration purposes, the examples below use a coarse discretization.
-#' optimize_design(discretization.parameter=c(3,3,1),number.cores=1)
+#' optimize_multiple_testing_procedure(discretization.parameter=c(3,3,1),number.cores=1)
 #' @export
 optimize_multiple_testing_procedure <- function(subpopulation.1.proportion=0.5,
 		total.alpha=0.05-(1e-4),
@@ -974,7 +974,14 @@ system('matlab -nojvm -r "cplex_optimize_multiple_testing_procedure()" > output_
 sln = R.matlab::readMat(paste("sln2M",LP.iteration,".mat",sep=""))
 
 } else if(type.of.LP.solver=="test_version"){
-  system('matlab -nojvm -r "cplex_optimize_multiple_testing_procedure()" > output_LP_solver')
+  package_name = "AdaptiveDesignOptimizerSparseLP"
+  path_to_file = system.file("cplex", "cplex_optimize_multiple_testing_procedure.m", package = package_name)
+  matlab_add_path = dirname(path_to_file)
+  matlabcode = c(
+    paste0("addpath(genpath('", matlab_add_path, "'))"),
+    "cplex_optimize_multiple_testing_procedure()")
+  out = matlabr::run_matlab_code(matlabcode)
+  print(out)
   # Extract results from linear program solver and examine whether feasible solution was found
   sln = R.matlab::readMat(paste("sln2M",LP.iteration,".mat",sep=""))} else{print("Sorry, this function is only available for use with Matlab or CPLEX"); return(0);}
 
