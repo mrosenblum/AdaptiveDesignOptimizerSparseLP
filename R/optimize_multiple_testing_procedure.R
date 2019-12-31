@@ -1015,7 +1015,9 @@ if(((type.of.LP.solver=="matlab" || type.of.LP.solver=="cplex") && (sln$status==
   print(paste("Feasible Solution was Found"))
   print("Fraction of solution components with integral value solutions")
   print(sum(sln$z>1-1e-10 | sln$z<10e-10)/length(sln$z))
-} else {print("Problem was Infeasible"); stop();}
+} else {print("Problem was Infeasible"); print("Linear program exit status"); print(sln$status);
+  print("Please consider modifying the problem inputs, e.g., by relaxing the power constraints or by increasing the sample size, and submitting a new problem. Thank you for using this trial design optimizer.")
+  stop();}
 
 if(round.each.multiple.testing.procedure.rectangle.to.integer){## If Final iteration, round solution and save; only does this if decision rule was rounded and set to be deterministic
 
