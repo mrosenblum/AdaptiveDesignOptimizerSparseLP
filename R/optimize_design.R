@@ -995,8 +995,7 @@ if(!is.null(LP.solver.path)){
       matlabcode = c(
         paste0("addpath(genpath('", matlab_add_path, "'))"),
         function_to_call)}
-out = matlabr::run_matlab_code(matlabcode);
-print(out);
+  out = matlabr::run_matlab_code(matlabcode);
 # Extract results from linear program solver and examine whether feasible solution was found
 sln = R.matlab::readMat(paste("sln2M",LP.iteration,".mat",sep=""))}
 #system('matlab -nojvm -r "cplex_optimize_design()" > output_LP_solver')
@@ -1007,8 +1006,8 @@ else if(type.of.LP.solver=="gurobi") {
 save(sln,file=paste("sln2M",LP.iteration,".rdata",sep=""))
 ncp.active.FWER.constraints <- ncp.list[which(sln$dual[1:length(ncp.list)]>0.01)]
 input.parameters <- as.list(environment())
-print(paste("Adaptive Design Optimization Completed. Optimal design is stored in the file: optimized_design.rdata"))
 save(input.parameters,ncp.active.FWER.constraints,list.of.rectangles.dec,list.of.rectangles.mtp,ncp.list,sln,file=paste("optimized.design",LP.iteration,".rdata",sep=""))
+print(paste("Adaptive Design Optimization Completed. Optimal design is stored in the file: optimized_design",LP.iteration,".rdata",sep=""))
 
 if(((type.of.LP.solver=="matlab" || type.of.LP.solver=="cplex") && (sln$status==1 || sln$status==5 )) || (type.of.LP.solver=="gurobi" && sln$status == "OPTIMAL")){
   print(paste("Feasible Solution was Found and Optimal Expected Sample Size is",sln$val))
@@ -1016,7 +1015,7 @@ if(((type.of.LP.solver=="matlab" || type.of.LP.solver=="cplex") && (sln$status==
   print(sum(sln$z>1-1e-10 | sln$z<10e-10)/length(sln$z))
   print("Active Type I error constraints")
   print(ncp.active.FWER.constraints)
-} else {print("Problem was Infeasible")}
+} else {print("Problem was Infeasible"); stop();}
 
 if(round.each.multiple.testing.procedure.rectangle.to.integer){## If Final iteration, round solution and save; only does this if decision rule was rounded and set to be deterministic
 

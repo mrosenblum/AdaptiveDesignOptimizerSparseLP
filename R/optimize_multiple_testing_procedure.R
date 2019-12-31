@@ -986,9 +986,8 @@ if(!is.null(LP.solver.path)){
       matlabcode = c(
         paste0("addpath(genpath('", matlab_add_path, "'))"),
         function_to_call)}
-out = matlabr::run_matlab_code(matlabcode);
-print(out);
-# Extract results from linear program solver and examine whether feasible solution was found
+  out = matlabr::run_matlab_code(matlabcode);
+  # Extract results from linear program solver and examine whether feasible solution was found
 sln = R.matlab::readMat(paste("sln2M",LP.iteration,".mat",sep=""))}
 #system('matlab -nojvm -r "cplex_optimize_design()" > output_LP_solver')
 else if(type.of.LP.solver=="test_version"){
@@ -1004,20 +1003,19 @@ else if(type.of.LP.solver=="test_version"){
           paste0("addpath(genpath('", matlab_add_path, "'))"),
           function_to_call)}
   out = matlabr::run_matlab_code(matlabcode);
-  print(out);
   # Extract results from linear program solver and examine whether feasible solution was found
   sln = R.matlab::readMat(paste("sln2M",LP.iteration,".mat",sep=""))} else{print("Sorry, this function is only available for use with Matlab or CPLEX"); return(0);}
 
 save(sln,file=paste("sln2M",LP.iteration,".rdata",sep=""))
 input.parameters <- as.list(environment())
-print(paste("Adaptive Design Optimization Completed. Optimal design is stored in the file: optimized_design.rdata"))
 save(input.parameters,list.of.rectangles.dec,list.of.rectangles.mtp,ncp.list,sln,file=paste("optimized.design",LP.iteration,".rdata",sep=""))
+print(paste("Adaptive Design Optimization Completed. Optimal design is stored in the file: optimized_design",LP.iteration,".rdata",sep=""))
 
 if(((type.of.LP.solver=="matlab" || type.of.LP.solver=="cplex") && (sln$status==1 || sln$status==5 )) || (type.of.LP.solver=="gurobi" && sln$status == "OPTIMAL")){
   print(paste("Feasible Solution was Found"))
   print("Fraction of solution components with integral value solutions")
   print(sum(sln$z>1-1e-10 | sln$z<10e-10)/length(sln$z))
-} else {print("Problem was Infeasible")}
+} else {print("Problem was Infeasible"); stop();}
 
 if(round.each.multiple.testing.procedure.rectangle.to.integer){## If Final iteration, round solution and save; only does this if decision rule was rounded and set to be deterministic
 
