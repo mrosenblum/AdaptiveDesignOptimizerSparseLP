@@ -67,5 +67,5 @@ Authors: Michael Rosenblum, Ethan Fang, Han Liu
 }
 \examples{
 #For demonstration purposes, the examples below use a coarse discretization.
-optimize_design(discretization.parameter=c(3,3,1),number.cores=1)
+optimize_multiple_testing_procedure(discretization.parameter=c(3,3,1),number.cores=1)
 }

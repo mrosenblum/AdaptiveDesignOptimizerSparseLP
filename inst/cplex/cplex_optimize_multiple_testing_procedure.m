@@ -1,6 +1,6 @@
 function cplex_optimize_multiple_testing_procedure()
 
-addpath('/users/mrosen/Tools/ibm/ILOG/CPLEX_Studio128/cplex/matlab/x86-64_linux')
+%addpath('/users/mrosen/Tools/ibm/ILOG/CPLEX_Studio128/cplex/matlab/x86-64_linux')
 load A11.mat
 A1   = tmp;
 number_A1_files = importdata('number_A1_files.txt');

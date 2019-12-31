@@ -21,6 +21,7 @@
 #' @param rounding.threshold.H02 threshold above which fractional solution corresponding to probability of rejecting H02 is rounded to 1
 #' @param rounding.threshold.H0C threshold above which fractional solution corresponding to probability of rejecting H0C is rounded to 1
 #' @param power.constraint.tolerance amount by which power corresponding to rounded solution is allowed to be less than power.constraints; typically set to be small, e.g., 0.01
+#' @param LP.solver.path path (i.e., directory) where LP.solver can be found; e.g., if type.of.LP.solver=="cplex" then LP.solver.path is directory where cplex is installed
 #' @return Nothing is returned; instead the optimized design is saved as "optimized_design<k>.rdata", where <k> is the user-defined iteration number (LP.iteration).
 #' @section Output
 #' The software computes an optimized design and saves it as "optimized_design<k>.rdata", where <k> is the user-defined iteration number (LP.iteration). E.g., if one sets LP.iteration=1, then the optimized design is saved as "optimized_design1.rdata". That file can be opened in R and contains the following 6 items:
@@ -49,11 +50,12 @@ optimize_multiple_testing_procedure <- function(subpopulation.1.proportion=0.5,
 		LP.iteration=1,
 		prior.covariance.matrix=diag(2)*0,
 		round.each.multiple.testing.procedure.rectangle.to.integer=FALSE,
-		plots.to.round.simply = c(1,2),
+		plots.to.round.simply = c(),
 		rounding.threshold.H01 = 1-1e-10,
 		rounding.threshold.H02 = 1-1e-10,
-		rounding.threshold.H0C = 0.4,
-		power.constraint.tolerance = 0.01
+		rounding.threshold.H0C = 1-1e-10,
+		power.constraint.tolerance=0,
+		LP.solver.path
 		){
 max_error_prob <- 0 # track approximation errors in problem construction; initialize to 0 here
 covariance_Z_1_Z_2 <-  0 # covariance_due_to overlap of subpopulations (generally we assume no overlap)
@@ -977,11 +979,16 @@ sln = R.matlab::readMat(paste("sln2M",LP.iteration,".mat",sep=""))
   package_name = "AdaptiveDesignOptimizerSparseLP"
   path_to_file = system.file("cplex", "cplex_optimize_multiple_testing_procedure.m", package = package_name)
   matlab_add_path = dirname(path_to_file)
-  matlabcode = c(
-    paste0("addpath(genpath('", matlab_add_path, "'))"),
-    "cplex_optimize_multiple_testing_procedure()")
-  out = matlabr::run_matlab_code(matlabcode)
-  print(out)
+  if(!is.null(LP.solver.path)){
+    matlabcode = c(
+      paste0("addpath(genpath('", LP.solver.path, "'))"),
+      paste0("addpath(genpath('", matlab_add_path, "'))"),
+      "cplex_optimize_multiple_testing_procedure()")} else {
+    matlabcode = c(
+      paste0("addpath(genpath('", matlab_add_path, "'))"),
+      "cplex_optimize_multiple_testing_procedure()")}
+    out = matlabr::run_matlab_code(matlabcode)
+    print(out)
   # Extract results from linear program solver and examine whether feasible solution was found
   sln = R.matlab::readMat(paste("sln2M",LP.iteration,".mat",sep=""))} else{print("Sorry, this function is only available for use with Matlab or CPLEX"); return(0);}
 
