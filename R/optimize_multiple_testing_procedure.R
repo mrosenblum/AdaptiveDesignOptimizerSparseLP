@@ -1115,7 +1115,7 @@ for(d_plot in decisions){
   par(mar=c(7.5,6.5,5.6,2.1))
 
   main_label <- switch(d_plot,expression(paste(pi[1]^opt," = \"ALL\"")),expression(paste(pi[1]^opt," = \"STOP\"")),expression(paste(pi[1]^opt," = \"ONLY 1\"")),expression(paste(pi[1]^opt," = \"ONLY 2\"")))
-  plot(0,type="n",xaxt="n",yaxt="n",xlim=c(-2.78,2.78),ylim=c(-2.78,2.78),main=paste("Rejection Regions at End of Stage 2 \n Under 1st Stage Decision ",d_plot,sep=""),xlab=expression(paste(Z[1]^F)),ylab=expression(paste(Z[2]^F)),cex.lab=2, cex.axis=2, cex.main=2, cex.sub=2)
+  plot(0,type="n",xaxt="n",yaxt="n",xlim=c(-3,3),ylim=c(-3,3),main=paste("Rejection Regions at End of Stage 2 \n Under 1st Stage Decision ",d_plot,sep=""),xlab=expression(paste(Z[1]^F)),ylab=expression(paste(Z[2]^F)),cex.lab=2, cex.axis=2, cex.main=2, cex.sub=2)
   axis(1,at=seq(-3,3,by=1),labels=-3:3,cex.axis=2)
   axis(2,at=seq(-3,3,by=1),labels=-3:3,cex.axis=2)
 
