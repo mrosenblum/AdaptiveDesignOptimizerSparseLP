@@ -969,7 +969,7 @@ R.matlab::writeMat("cc.mat",cc = obj)
 # Solve linear program by call to cplex via matlab
 #
 
-system('matlab -nojvm -r "cplex_multiple_testing_procedure()" > output_LP_solver')
+system('matlab -nojvm -r "cplex_optimize_multiple_testing_procedure()" > output_LP_solver')
 
 # Extract results from linear program solver and examine whether feasible solution was found
 sln = R.matlab::readMat(paste("sln2M",LP.iteration,".mat",sep=""))
