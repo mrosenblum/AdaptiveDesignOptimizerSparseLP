@@ -21,7 +21,7 @@
 #' @param rounding.threshold.H02 threshold above which fractional solution corresponding to probability of rejecting H02 is rounded to 1
 #' @param rounding.threshold.H0C threshold above which fractional solution corresponding to probability of rejecting H0C is rounded to 1
 #' @param power.constraint.tolerance amount by which power corresponding to rounded solution is allowed to be less than power.constraints; typically set to be small, e.g., 0.01
-#' @param LP.solver.path path (i.e., directory) where LP.solver can be found; e.g., if type.of.LP.solver=="cplex" then LP.solver.path is directory where cplex is installed
+#' @param LP.solver.path path (i.e., directory) where LP.solver is installed; e.g., if type.of.LP.solver=="cplex" then LP.solver.path is directory where cplex is installed
 #' @return Nothing is returned; instead the optimized design is saved as "optimized_design<k>.rdata", where <k> is the user-defined iteration number (LP.iteration).
 #' @section Output
 #' The software computes an optimized design and saves it as "optimized_design<k>.rdata", where <k> is the user-defined iteration number (LP.iteration). E.g., if one sets LP.iteration=1, then the optimized design is saved as "optimized_design1.rdata". That file can be opened in R and contains the following 6 items:
@@ -55,7 +55,7 @@ optimize_multiple_testing_procedure <- function(subpopulation.1.proportion=0.5,
 		rounding.threshold.H02 = 1-1e-10,
 		rounding.threshold.H0C = 1-1e-10,
 		power.constraint.tolerance=0,
-		LP.solver.path
+		LP.solver.path=c()
 		){
 max_error_prob <- 0 # track approximation errors in problem construction; initialize to 0 here
 covariance_Z_1_Z_2 <-  0 # covariance_due_to overlap of subpopulations (generally we assume no overlap)

@@ -16,6 +16,7 @@
 #' @param LP.iteration positive integer used in file name to store output; can be used to avoid overwriting previous computations
 #' @param prior.covariance.matrix 2x2 positive semidefinite matrix representing the covariance corresponding to each component of the mixture of multivariate normals prior distribution (used only in defining the objective function); the default is the matrix of all 0's, corresponding to the prior being a mixture of point masses
 #' @param round.each.multiple.testing.procedure.rectangle.to.integer TRUE/FALSE indicator of whether to round the multiple testing proce ure to integer values and save; only can be done if the procedure is passed a decision rule (encoded in list.of.rectangles.dec) that has all probabilities set as would typically be the case in the final refinement of the original problem
+#' @param LP.solver.path path (i.e., directory) where LP.solver is installed; e.g., if type.of.LP.solver=="cplex" then LP.solver.path is directory where cplex is installed
 #' @return Nothing is returned; instead the optimized design is saved as "optimized_design<k>.rdata", where <k> is the user-defined iteration number (LP.iteration).
 #' @section Output
 #' The software computes an optimized design and saves it as "optimized_design<k>.rdata", where <k> is the user-defined iteration number (LP.iteration). E.g., if one sets LP.iteration=1, then the optimized design is saved as "optimized_design1.rdata". That file can be opened in R and contains the following 6 items:
@@ -58,7 +59,8 @@ optimize_design <- function(subpopulation.1.proportion,
 	list.of.rectangles.dec=c(),
 	LP.iteration=1,
 	prior.covariance.matrix=diag(2)*0,
-	round.each.multiple.testing.procedure.rectangle.to.integer=FALSE){
+	round.each.multiple.testing.procedure.rectangle.to.integer=FALSE,
+  LP.solver.path=c()){
 
 max_error_prob <- 0 # track approximation errors in problem construction; initialize to 0 here
 covariance_Z_1_Z_2 <-  0 # covariance_due_to overlap of subpopulations (generally we assume no overlap)
@@ -981,11 +983,23 @@ obj = objective_function_vector
 R.matlab::writeMat("cc.mat",cc = obj)
 
 # Solve linear program by call to cplex via matlab
-system('matlab -nojvm -r "cplex_optimize_design()" > output_LP_solver')
-
+package_name = "AdaptiveDesignOptimizerSparseLP";
+path_to_file = system.file("cplex", "cplex_optimize_design.m", package = package_name);
+matlab_add_path = dirname(path_to_file);
+if(!is.null(LP.solver.path)){
+  matlabcode = c(
+    paste0("addpath(genpath('", LP.solver.path, "'))"),
+    paste0("addpath(genpath('", matlab_add_path, "'))"),
+    "cplex_optimize_design()")} else {
+      matlabcode = c(
+        paste0("addpath(genpath('", matlab_add_path, "'))"),
+        "cplex_optimize_design()")}
+out = matlabr::run_matlab_code(matlabcode);
+print(out);
 # Extract results from linear program solver and examine whether feasible solution was found
-sln = R.matlab::readMat(paste("sln2M",LP.iteration,".mat",sep=""))
-} else if(type.of.LP.solver=="gurobi") {
+sln = R.matlab::readMat(paste("sln2M",LP.iteration,".mat",sep=""))}
+#system('matlab -nojvm -r "cplex_optimize_design()" > output_LP_solver')
+else if(type.of.LP.solver=="gurobi") {
   sln = solve_linear_program_gurobi(total.alpha)
 }
 
