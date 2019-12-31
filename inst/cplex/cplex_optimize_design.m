@@ -108,7 +108,7 @@ if (status==1)||(status==5)
     [z,val,status,output,dual] = cplexlp(cc,AAn,aa,A2,a2,lb,ub,'options',options);
     dual = [dual.ineqlin;dual.eqlin];
 
-    eval(['save sln2M',num2str(iteration),'.mat',' output z val status dual'])
+    eval(['save sln2M',num2str(iteration),'.mat',' output z val status dual']);
 
 end
 

@@ -110,7 +110,7 @@ if (status==1)||(status==5)
     dual = [dual.ineqlin;dual.eqlin];
     end
 
-    eval(['save sln2M',num2str(iteration),'.mat',' output z val status dual'])
+    eval(['save sln2M',num2str(iteration),'.mat',' output z val status dual']);
 
 end
 
