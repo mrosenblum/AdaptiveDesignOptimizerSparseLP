@@ -212,9 +212,9 @@ constraints_per_A1_file <- 1 # Set number of familywise Type I error constraints
 if(is.null(ncp.list)){
   # list of pairs of non-centrality parameters in G_{tau,w}
   ncp.list <- list()
-  for(z in seq(-9,9,length=18*discretization.parameter[3])) {ncp.list <- c(ncp.list,list(c(0,z)))}
-  for(z in seq(-9,9,length=18*discretization.parameter[3])) {ncp.list <- c(ncp.list,list(c(z,0)))}
-  for(z in seq(-9,9,length=18*discretization.parameter[3])) {ncp.list <- c(ncp.list,list(c(z,-(rho1/rho2)*z)))}
+  for(z in seq(-9,9,length=max(1,floor(18*discretization.parameter[3])))) {ncp.list <- c(ncp.list,list(c(0,z)))}
+  for(z in seq(-9,9,length=max(1,floor(18*discretization.parameter[3])))) {ncp.list <- c(ncp.list,list(c(z,0)))}
+  for(z in seq(-9,9,length=max(1,floor(18*discretization.parameter[3])))) {ncp.list <- c(ncp.list,list(c(z,-(rho1/rho2)*z)))}
   ncp.list <- c(ncp.list,list(c(0,0)))
   ncp.list <- unique(ncp.list)
 }
