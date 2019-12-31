@@ -929,7 +929,6 @@ save(additional_inequality_constraints_part2,file=paste("Inequality_Constraints_
 number_jobs <- ceiling(length(ncp.list)/constraints_per_A1_file)+6
 parallel::mclapply(c((number_jobs-5):number_jobs,1:(number_jobs-6)),generate_LP,mc.cores=number.cores) # order of jobs puts computation of power constraints and objective function first since they take longer to compute
 
-browser()
 # Convert linear program to matlab format
 if(type.of.LP.solver=="matlab" || type.of.LP.solver=="cplex"){
 
