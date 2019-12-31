@@ -1013,7 +1013,9 @@ if(((type.of.LP.solver=="matlab" || type.of.LP.solver=="cplex") && (sln$status==
   print(sum(sln$z>1-1e-10 | sln$z<10e-10)/length(sln$z))
   print("Active Type I error constraints")
   print(ncp.active.FWER.constraints)
-} else {print("Problem was Infeasible"); stop();}
+} else {print("Problem was Infeasible"); print("Linear program exit status"); print(sln$status);
+  print("Please consider modifying the problem inputs, e.g., by relaxing the power constraints or by increasing the sample size, and submitting a new problem. Thank you for using this trial design optimizer.")
+  stop();}
 
 # Clean up files used to specify LP
 system('rm A*.rdata')
