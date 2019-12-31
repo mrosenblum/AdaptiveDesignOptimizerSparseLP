@@ -42,7 +42,7 @@ optimize_multiple_testing_procedure <- function(subpopulation.1.proportion=0.5,
 		stage.2.sample.sizes.per.enrollment.choice,
 	  objective.function.weights,
 		power.constraints,
-	  type.of.LP.solver="matlab",
+	  type.of.LP.solver="cplex",
 		discretization.parameter=c(1,1,10),
 		number.cores=30,
 		ncp.list=c(),
@@ -916,7 +916,7 @@ number_jobs <- ceiling(length(ncp.list)/constraints_per_A1_file)+6
 if(type.of.LP.solver != "test_version"){
   parallel::mclapply(c((number_jobs-5):number_jobs,1:(number_jobs-6)),generate_LP,mc.cores=number.cores)} # order of jobs puts computation of power constraints and objective function first since they take longer to compute
 
-if(type.of.LP.solver=="matlab"){
+if(type.of.LP.solver=="matlab" || type.of.LP.solver=="cplex"){
 
 # Convert linear program to matlab format
 
@@ -967,28 +967,43 @@ tmp = load("c.rdata")
 obj = objective_function_vector
 R.matlab::writeMat("cc.mat",cc = obj)
 
-#
-# Solve linear program by call to cplex via matlab
-#
+# Solve linear program
+# Previously used call: system('matlab -nojvm -r "cplex_optimize_multiple_testing_procedure()" > output_LP_solver')
 
-system('matlab -nojvm -r "cplex_optimize_multiple_testing_procedure()" > output_LP_solver')
+package_name = "AdaptiveDesignOptimizerSparseLP";
+if(type.of.LP.solver=="cplex"){# Solve linear program by call to cplex via matlab
+  path_to_file = system.file("cplex", "cplex_optimize_multiple_testing_procedure.m", package = package_name);
+  function_to_call = "cplex_optimize_multiple_testing_procedure()";} else if(type.of.LP.solver=="matlab"){# Solve linear program by call to matlab
+    path_to_file = system.file("matlab", "matlab_optimize_multiple_testing_procedure.m", package = package_name);
+    function_to_call = "matlab_optimize_multiple_testing_procedure()";}
+matlab_add_path = dirname(path_to_file);
+if(!is.null(LP.solver.path)){
+  matlabcode = c(
+    paste0("addpath(genpath('", LP.solver.path, "'))"),
+    paste0("addpath(genpath('", matlab_add_path, "'))"),
+    function_to_call)} else {
+      matlabcode = c(
+        paste0("addpath(genpath('", matlab_add_path, "'))"),
+        function_to_call)}
+out = matlabr::run_matlab_code(matlabcode);
+print(out);
 # Extract results from linear program solver and examine whether feasible solution was found
-sln = R.matlab::readMat(paste("sln2M",LP.iteration,".mat",sep=""))
-
-} else if(type.of.LP.solver=="test_version"){
-  package_name = "AdaptiveDesignOptimizerSparseLP"
-  path_to_file = system.file("cplex", "cplex_optimize_multiple_testing_procedure.m", package = package_name)
-  matlab_add_path = dirname(path_to_file)
+sln = R.matlab::readMat(paste("sln2M",LP.iteration,".mat",sep=""))}
+#system('matlab -nojvm -r "cplex_optimize_design()" > output_LP_solver')
+else if(type.of.LP.solver=="test_version"){
+  package_name = "AdaptiveDesignOptimizerSparseLP";
+  path_to_file = system.file("cplex", "cplex_optimize_multiple_testing_procedure.m", package = package_name);  matlab_add_path = dirname(path_to_file);
+  function_to_call = "cplex_optimize_multiple_testing_procedure()";
   if(!is.null(LP.solver.path)){
     matlabcode = c(
       paste0("addpath(genpath('", LP.solver.path, "'))"),
       paste0("addpath(genpath('", matlab_add_path, "'))"),
-      "cplex_optimize_multiple_testing_procedure()")} else {
-    matlabcode = c(
-      paste0("addpath(genpath('", matlab_add_path, "'))"),
-      "cplex_optimize_multiple_testing_procedure()")}
-    out = matlabr::run_matlab_code(matlabcode)
-    print(out)
+      function_to_call)} else {
+        matlabcode = c(
+          paste0("addpath(genpath('", matlab_add_path, "'))"),
+          function_to_call)}
+  out = matlabr::run_matlab_code(matlabcode);
+  print(out);
   # Extract results from linear program solver and examine whether feasible solution was found
   sln = R.matlab::readMat(paste("sln2M",LP.iteration,".mat",sep=""))} else{print("Sorry, this function is only available for use with Matlab or CPLEX"); return(0);}
 
@@ -997,7 +1012,7 @@ input.parameters <- as.list(environment())
 print(paste("Adaptive Design Optimization Completed. Optimal design is stored in the file: optimized_design.rdata"))
 save(input.parameters,list.of.rectangles.dec,list.of.rectangles.mtp,ncp.list,sln,file=paste("optimized.design",LP.iteration,".rdata",sep=""))
 
-if((type.of.LP.solver=="matlab" && sln$status==1 || sln$status==5 ) || (type.of.LP.solver=="gurobi" && sln$status == "OPTIMAL")){
+if(((type.of.LP.solver=="matlab" || type.of.LP.solver=="cplex") && (sln$status==1 || sln$status==5 )) || (type.of.LP.solver=="gurobi" && sln$status == "OPTIMAL")){
   print(paste("Feasible Solution was Found"))
   print("Fraction of solution components with integral value solutions")
   print(sum(sln$z>1-1e-10 | sln$z<10e-10)/length(sln$z))

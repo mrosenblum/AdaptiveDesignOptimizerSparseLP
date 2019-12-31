@@ -8,7 +8,7 @@ Authors: Michael Rosenblum, Ethan Fang, Han Liu}
 optimize_design(subpopulation.1.proportion, total.alpha,
   data.generating.distributions, stage.1.sample.sizes,
   stage.2.sample.sizes.per.enrollment.choice, objective.function.weights,
-  power.constraints, type.of.LP.solver = "matlab",
+  power.constraints, type.of.LP.solver = "cplex",
   discretization.parameter = c(1, 1, 10), number.cores = 30,
   ncp.list = c(), list.of.rectangles.dec = c(), LP.iteration = 1,
   prior.covariance.matrix = diag(2) * 0,
