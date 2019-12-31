@@ -1031,7 +1031,7 @@ postscript(paste("decision_rule.eps"),height=8,horizontal=FALSE,onefile=FALSE,wi
   for(r in list.of.rectangles.dec){
     tau <- 0
     rect(max(r$lower_boundaries[1]-tau,-10),max(r$lower_boundaries[2]-tau,-10),min(r$upper_boundaries[1]+tau,10),min(r$upper_boundaries[2]+tau,10),col=r$allowed_decisions, border=NA)
-    print(r$allowed_decisions)
+    #print(r$allowed_decisions)
   }
   decision_list <- c()
   for(d in decisions){decision_list <- c(decision_list,list(as.vector(stage.2.sample.sizes.per.enrollment.choice[d,])))}
@@ -1168,7 +1168,7 @@ for(task_id in 1:length(ncp.list)){
    fwer_candidates <- constraint_list %*% z_rounded
    if(max(fwer_candidates)>max_FWER){
 	max_FWER <- max(max_FWER,max(constraint_list %*% z_rounded))
-	print(constraint_list %*% z_rounded)
+	#print(constraint_list %*% z_rounded)
 	#print(ncp.list[(1+(counter-1)*6):(counter*6)])
    }
 }
@@ -1180,15 +1180,9 @@ print("User defined power constraints (desired power); each row corresponds to a
 print("power.constraints")
 print("Power achieved for each null hypothesis under each power constraint scenario (row)")
 print(cbind(power_constraint_matrix_H01 %*% z_rounded,power_constraint_matrix_H02 %*% z_rounded,power_constraint_matrix_H0C %*% z_rounded))
-
-load("c.rdata")
-print("Objective function value")
-print(objective_function_vector %*% z_rounded)
 }
 
 # Clean up files used to specify LP
-cleanup <- 0
-if(cleanup==1){
 system('rm A*.rdata')
 system('rm A*.mat')
 system('rm a*.mat')
@@ -1207,5 +1201,5 @@ system('rm number_equality_constraints_of_second_type.txt')
 system('rm number_A1_constraints.txt')
 system('rm number_A1_files.txt')
 system('rm power_constraints.rdata')
-system('rm max_error_prob*')}
+system('rm max_error_prob*')
 }

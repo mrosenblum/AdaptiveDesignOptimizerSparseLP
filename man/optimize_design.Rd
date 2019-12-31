@@ -11,9 +11,7 @@ optimize_design(subpopulation.1.proportion, total.alpha,
   power.constraints, type.of.LP.solver = "cplex",
   discretization.parameter = c(1, 1, 10), number.cores = 30,
   ncp.list = c(), list.of.rectangles.dec = c(), LP.iteration = 1,
-  prior.covariance.matrix = diag(2) * 0,
-  round.each.multiple.testing.procedure.rectangle.to.integer = FALSE,
-  LP.solver.path = c())
+  prior.covariance.matrix = diag(2) * 0, LP.solver.path = c())
 }
 \arguments{
 \item{subpopulation.1.proportion}{Proportion of overall population in subpopulation 1. Must be between 0 and 1.}
@@ -43,8 +41,6 @@ optimize_design(subpopulation.1.proportion, total.alpha,
 \item{LP.iteration}{positive integer used in file name to store output; can be used to avoid overwriting previous computations}
 
 \item{prior.covariance.matrix}{2x2 positive semidefinite matrix representing the covariance corresponding to each component of the mixture of multivariate normals prior distribution (used only in defining the objective function); the default is the matrix of all 0's, corresponding to the prior being a mixture of point masses}
-
-\item{round.each.multiple.testing.procedure.rectangle.to.integer}{TRUE/FALSE indicator of whether to round the multiple testing proce ure to integer values and save; only can be done if the procedure is passed a decision rule (encoded in list.of.rectangles.dec) that has all probabilities set as would typically be the case in the final refinement of the original problem}
 
 \item{LP.solver.path}{path (i.e., directory) where LP.solver is installed; e.g., if type.of.LP.solver=="cplex" then LP.solver.path is directory where cplex is installed}
 }

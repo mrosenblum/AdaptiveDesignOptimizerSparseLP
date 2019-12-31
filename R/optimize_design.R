@@ -15,7 +15,6 @@
 #' @param list.of.rectangles.dec list of rectangles representing decision region partition, encoded as a list with each element of the list having fields $lower_boundaries (pair of real numbers representing coordinates of lower left corner of rectangle), $upper_boundaries (pair of real numbers representing upper right corner of rectangle), $allowed_decisions (subset of stage.2.sample.sizes.per.enrollment.choice representing which decisions allowed if first stage z-statistics are in corresponding rectangle; default is entire list stage.2.sample.sizes.per.enrollment.choice), $preset_decision (indicator of whether the decision probabilities are hard-coded by the user; default is 0), $d_probs (empty unless $preset_decision==1, in which case it is a vector representing the probabilities of each decision); if list.or.rectangles.dec is empty, then a default partition is used based on discretization.parameter.
 #' @param LP.iteration positive integer used in file name to store output; can be used to avoid overwriting previous computations
 #' @param prior.covariance.matrix 2x2 positive semidefinite matrix representing the covariance corresponding to each component of the mixture of multivariate normals prior distribution (used only in defining the objective function); the default is the matrix of all 0's, corresponding to the prior being a mixture of point masses
-#' @param round.each.multiple.testing.procedure.rectangle.to.integer TRUE/FALSE indicator of whether to round the multiple testing proce ure to integer values and save; only can be done if the procedure is passed a decision rule (encoded in list.of.rectangles.dec) that has all probabilities set as would typically be the case in the final refinement of the original problem
 #' @param LP.solver.path path (i.e., directory) where LP.solver is installed; e.g., if type.of.LP.solver=="cplex" then LP.solver.path is directory where cplex is installed
 #' @return Nothing is returned; instead the optimized design is saved as "optimized_design<k>.rdata", where <k> is the user-defined iteration number (LP.iteration).
 #' @section Output
@@ -59,7 +58,6 @@ optimize_design <- function(subpopulation.1.proportion,
 	list.of.rectangles.dec=c(),
 	LP.iteration=1,
 	prior.covariance.matrix=diag(2)*0,
-	round.each.multiple.testing.procedure.rectangle.to.integer=FALSE,
   LP.solver.path=c()){
 
 max_error_prob <- 0 # track approximation errors in problem construction; initialize to 0 here
@@ -1016,76 +1014,6 @@ if(((type.of.LP.solver=="matlab" || type.of.LP.solver=="cplex") && (sln$status==
   print("Active Type I error constraints")
   print(ncp.active.FWER.constraints)
 } else {print("Problem was Infeasible"); stop();}
-
-if(round.each.multiple.testing.procedure.rectangle.to.integer){## If Final iteration, round solution and save; only does this if decision rule was rounded and set to be deterministic
-
-postscript(paste("rejection_regions.eps"),height=8,horizontal=FALSE,onefile=FALSE,width=8)
-plot(0,type="n",xaxt="n",yaxt="n",xlim=c(-2.78,2.78),ylim=c(-2.78,2.78),main="Rejection Regions",xlab=expression(paste(Z[1])),ylab=expression(paste(Z[2])),cex.lab=2,
- cex.axis=2, cex.main=2, cex.sub=2)
-
-z_solution <- sln$z
-axis(1,at=seq(-3,3,by=1),labels=-3:3,cex.axis=2)
-axis(2,at=seq(-3,3,by=1),labels=-3:3,cex.axis=2)
-z_rounded <- rep(0,length(z_solution))
-for(d_plot in decisions){
-	rounding_threshold_H01 <- rounding_threshold <- 0.9
-	rounding_threshold_H02 <- rounding_threshold <- 0.9
-	rounding_threshold_H0C <- rounding_threshold <- 0.9
-	r_reference_index <- length(list.of.rectangles.dec) - number_reference_rectangles + d_plot
-	r_reference <- list.of.rectangles.dec[[r_reference_index]]
-	for(d in r_reference$allowed_decisions){
-	      for(rprime in list.of.rectangles.mtp[[d]]){
-		 variable_start_position <- variable_location(r_reference,d,rprime,rprime$allowed_actions[1])
-		 variable_end_position <- variable_location(r_reference,d,rprime,rprime$allowed_actions[length(rprime$allowed_actions)])
-		 action_indicator <-z_solution[variable_start_position:variable_end_position]
-
-		 if( sum(action_indicator[c(2,5,7)])>rounding_threshold_H01){H01_reject <- 1}else{H01_reject <- 0}
-		 if( sum(action_indicator[c(3,6,7)])>rounding_threshold_H02){H02_reject <- 1}else{H02_reject <- 0}
-	    	 if( ((H01_reject && H02_reject) || sum(action_indicator[c(4,5,6,7)])>rounding_threshold_H0C)){H0C_reject <- 1}else{H0C_reject <- 0}
-
-          	 col_value <- ifelse((!H01_reject) && (!H02_reject) && (!H0C_reject),1,
-		              ifelse((H01_reject) && (!H02_reject) && (!H0C_reject),2,
-            		      ifelse((!H01_reject) && (H02_reject) && (!H0C_reject),3,
-          		      ifelse((!H01_reject) && (!H02_reject) && (H0C_reject),4,
-             		      ifelse((H01_reject) && (!H02_reject) && (H0C_reject),5,
-            		      ifelse((!H01_reject) && (H02_reject) && (H0C_reject),6,
-             		      ifelse((H01_reject) && (H02_reject) && (H0C_reject),7,8)))))))
-
-                 z_rounded[variable_start_position:variable_end_position] <- rep(0,7)
-                 z_rounded[variable_start_position+(col_value-1)] <- 1
-	         rect(max(rprime$lower_boundaries[1]-tau,-10),max(rprime$lower_boundaries[2]-tau,-10),min(rprime$upper_boundaries[1]+tau,10),min(rprime$upper_boundaries[2]+tau,10),col=col_value-1,border=NA)
-             }
-        }
-}
-par(las=0)
-dev.off()
-
-save(z_rounded,file="z_rounded.rdata")
-
-max_FWER <- 0
-for(task_id in 1:length(ncp.list)){
-   load(file=paste("A1",task_id,".rdata",sep=""))
-   #print(ncp.list[[which((constraint_list %*% sln$z) ==max(constraint_list %*% sln$z))]])
-   fwer_candidates <- constraint_list %*% z_rounded
-   if(max(fwer_candidates)>max_FWER){
-	max_FWER <- max(max_FWER,max(constraint_list %*% z_rounded))
-	print(constraint_list %*% z_rounded)
-	#print(ncp.list[(1+(counter-1)*6):(counter*6)])
-   }
-}
-print("Maximum familywise Type I error rate among Type I error constraints")
-print(max_FWER)
-
-load("A3.rdata")
-print("User defined power constraints (desired power); each row corresponds to a scenario and columns correspond to H01, H02, H0C desired power")
-print("power.constraints")
-print("Power achieved for each null hypothesis under each power constraint scenario (row)")
-print(cbind(power_constraint_matrix_H01 %*% z_rounded,power_constraint_matrix_H02 %*% z_rounded,power_constraint_matrix_H0C %*% z_rounded))
-
-load("c.rdata")
-print("Objective function value")
-print(objective_function_vector %*% z_rounded)
-}
 
 # Clean up files used to specify LP
 system('rm A*.rdata')
