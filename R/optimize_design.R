@@ -993,7 +993,7 @@ if(!is.null(LP.solver.path)){
       matlabcode = c(
         paste0("addpath(genpath('", matlab_add_path, "'))"),
         function_to_call)}
-  out = matlabr::run_matlab_code(matlabcode);
+  output_matlab = capture.output(matlabr::run_matlab_code(matlabcode));
 # Extract results from linear program solver and examine whether feasible solution was found
 sln = R.matlab::readMat(paste("sln2M",LP.iteration,".mat",sep=""))}
 #system('matlab -nojvm -r "cplex_optimize_design()" > output_LP_solver')
