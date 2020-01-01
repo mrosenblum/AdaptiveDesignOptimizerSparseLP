@@ -376,7 +376,7 @@ write(length(ncp.list),f=paste("number_A1_constraints.txt"))
 write(ceiling(length(ncp.list)/constraints_per_A1_file),f=paste("number_A1_files.txt"))
 power.constraints <- as.vector(power.constraints)
 save(power.constraints,file="power_constraints.rdata")
-save(list.of.rectangles.mtp,file=paste("list.of.rectangles.mtp",LP.iteration,".rdata",sep=""))
+#save(list.of.rectangles.mtp,file=paste("list.of.rectangles.mtp",LP.iteration,".rdata",sep=""))
 
 ## Includes constraints the restrict multiple testing procedure not depend on stage 1 statistics (given cumulative statistics Z^C and decision d)
 ## Implements unequal rectangle sizes, with setting of rectangles to specific values

@@ -12,8 +12,7 @@
 #' @param sln solution to linear program computed previously
 #' @return 4 element list containing optimized designs from four classes (with increasing complexity):
 #' @section Output
-#' The software computes and optimized design saved as "optimized_design.rdata" and the corresponding expected sample size is
-#' saved as "optimized_design_expected_sample_size.rdata".
+#' A refined partition of the decision rectangles is constructed and returned.
 #' @export
 refine_decision_rectangles <- function(subpopulation.1.proportion=0.5,
 		stage.1.sample.sizes=c(50,50),
@@ -269,12 +268,12 @@ for(r in list.of.rectangles.dec){
     }
 }
 
-print("number of variables")
-print(number_of_variables)
-print("number of familywise Type I error constraints")
+#print("number of variables")
+#print(number_of_variables)
+#print("number of familywise Type I error constraints")
 
-if(sln$status==(-9)){return("Linear Program was Infeasible; Please Try Again e.g., With Greater Sample Sizes")} else if(sln$status==1 || sln$status==5){
-print(paste("Linear Program at Iteration ",LP.iteration," Solved. Now Evaluating New Linear Program with Finer Discretization of Decision Regions"))} else{return(paste("Error in linear program; see solver output: see sln2M",LP.iteration,".rdata"))}
+if(sln$status==(-9)){return("Linear program solution that was input is infeasible. Please Try Solving the problem again e.g., With Greater Sample Sizes."); stop();} else if(sln$status==1 || sln$status==5){
+print(paste("Linear program solution that was input is feasible. Now refining decision rectangle partition based on this solution."))} else{return("Error in linear program solution that was input; cannot proceed. Please Try Solving the problem again e.g., With Greater Sample Sizes."); stop();}
 print("Fraction of solution components with integral value solutions")
 print(sum(sln$z>1-1e-10 | sln$z<10e-10)/length(sln$z))
 
