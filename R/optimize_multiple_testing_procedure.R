@@ -1007,7 +1007,8 @@ else if(type.of.LP.solver=="test_version"){
   sln = R.matlab::readMat(paste("sln2M",LP.iteration,".mat",sep=""))} else{print("Sorry, this function is only available for use with Matlab or CPLEX"); return(0);}
 
 save(sln,file=paste("sln2M",LP.iteration,".rdata",sep=""))
-input.parameters <- as.list(environment())
+input.parameters <- list(subpopulation.1.proportion,total.alpha,data.generating.distributions,stage.1.sample.sizes,stage.2.sample.sizes.per.enrollment.choice,objective.function.weights,power.constraints,type.of.LP.solver,discretization.parameter,number.cores,ncp.list,list.of.rectangles.dec,LP.iteration,prior.covariance.matrix,round.each.multiple.testing.procedure.rectangle.to.integer,plots.to.round.simply,rounding.threshold.H01,rounding.threshold.H02,rounding.threshold.H0C,power.constraint.tolerance,LP.solver.path);
+names(input.parameters) <- list("subpopulation.1.proportion","total.alpha","data.generating.distributions","stage.1.sample.sizes","stage.2.sample.sizes.per.enrollment.choice","objective.function.weights","power.constraints","type.of.LP.solver","discretization.parameter","number.cores","ncp.list","list.of.rectangles.dec","LP.iteration","prior.covariance.matrix","round.each.multiple.testing.procedure.rectangle.to.integer","plots.to.round.simply","rounding.threshold.H01","rounding.threshold.H02","rounding.threshold.H0C","power.constraint.tolerance","LP.solver.path");
 save(input.parameters,list.of.rectangles.dec,list.of.rectangles.mtp,ncp.list,sln,file=paste("optimized.design",LP.iteration,".rdata",sep=""))
 print(paste("Adaptive Design Optimization Completed. Optimal design is stored in the file: optimized_design",LP.iteration,".rdata",sep=""))
 
