@@ -1001,24 +1001,8 @@ else if(type.of.LP.solver=="gurobi") {
   sln = solve_linear_program_gurobi(total.alpha)
 }
 
-function(subpopulation.1.proportion,
-         total.alpha,
-         data.generating.distributions,
-         stage.1.sample.sizes,
-         stage.2.sample.sizes.per.enrollment.choice,
-         objective.function.weights,
-         power.constraints,
-         type.of.LP.solver="cplex",
-         discretization.parameter=c(1,1,10),
-         number.cores=30,
-         ncp.list=c(),
-         list.of.rectangles.dec=c(),
-         LP.iteration=1,
-         prior.covariance.matrix=diag(2)*0,
-         LP.solver.path=c()){
-
-save(sln,file=paste("sln2M",LP.iteration,".rdata",sep=""))
-ncp.active.FWER.constraints <- ncp.list[which(sln$dual[1:length(ncp.list)]>0.01)]
+save(sln,file=paste("sln2M",LP.iteration,".rdata",sep=""));
+ncp.active.FWER.constraints <- ncp.list[which(sln$dual[1:length(ncp.list)]>0.01)];
 input.parameters <- list(subpopulation.1.proportion,total.alpha,data.generating.distributions,stage.1.sample.sizes,stage.2.sample.sizes.per.enrollment.choice,objective.function.weights,power.constraints,type.of.LP.solver,discretization.parameter,number.cores,ncp.list,list.of.rectangles.dec,LP.iteration,prior.covariance.matrix,LP.solver.path);
 names(input.parameters) <- list("subpopulation.1.proportion","total.alpha","data.generating.distributions","stage.1.sample.sizes","stage.2.sample.sizes.per.enrollment.choice","objective.function.weights","power.constraints","type.of.LP.solver","discretization.parameter","number.cores","ncp.list","list.of.rectangles.dec","LP.iteration","prior.covariance.matrix","LP.solver.path");
 save(input.parameters,ncp.active.FWER.constraints,list.of.rectangles.dec,list.of.rectangles.mtp,ncp.list,sln,file=paste("optimized.design",LP.iteration,".rdata",sep=""))
