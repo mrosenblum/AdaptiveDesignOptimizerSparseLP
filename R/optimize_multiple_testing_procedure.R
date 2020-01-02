@@ -1036,7 +1036,7 @@ names(input.parameters) <- list("subpopulation.1.proportion","total.alpha","data
 save(input.parameters,list.of.rectangles.dec,list.of.rectangles.mtp,ncp.list,sln,file=paste("optimized.design",LP.iteration,".rdata",sep=""))
 print(paste("Adaptive Design Optimization Completed. Optimal design is stored in the file: optimized_design",LP.iteration,".rdata",sep=""))
 
-if(((type.of.LP.solver=="matlab" || type.of.LP.solver=="cplex") && (sln$status==1 || sln$status==5 )) || (type.of.LP.solver=="gurobi" && sln$status == "OPTIMAL")){
+if(((type.of.LP.solver=="matlab" || type.of.LP.solver=="cplex" || type.of.LP.solver=="test_version") && (sln$status==1 || sln$status==5 )) || (type.of.LP.solver=="gurobi" && sln$status == "OPTIMAL")){
   print(paste("Feasible Solution was Found"))
   print("Fraction of solution components with integral value solutions")
   print(sum(sln$z>1-1e-10 | sln$z<10e-10)/length(sln$z))
