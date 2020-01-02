@@ -33,7 +33,7 @@
 #' sln (the solution to the linear program; sln$val is the expected sample size; sln$status, if either 1 or 5, indicates that a feasible solution was found and other wise the problem was infeasible or no solution was found; sln$z is the actual solution as a vector)
 #' @examples
 #' #For demonstration purposes, the code below implements the final iteration, as described in Section 5.2 of the paper, for Example 3.2 of the paper.
-#' #First set all problem parameters based on Example 3.2, and using explicit choices of sample sizes (where n=200)
+#' #First set all problem parameters based on Example 3.2, and using explicit choices of sample sizes (where n=200, sigma=1, Delta^min=sqrt(1/2)*(qnorm(0.95+1e-4)+qnorm(0.95))/5=0.465), as follows:
 #' subpopulation.1.proportion=0.5;
 #' total.alpha=0.05-(1e-4);
 #' data.generating.distributions=matrix(data=c(0,0,1,1,1,1,
