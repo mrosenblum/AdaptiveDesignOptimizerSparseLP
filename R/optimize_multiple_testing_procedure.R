@@ -32,7 +32,7 @@
 #' ncp.list (the complete list of familywise Type I error constraints input to the linear program solver)
 #' sln (the solution to the linear program; sln$val is the expected sample size; sln$status, if either 1 or 5, indicates that a feasible solution was found and other wise the problem was infeasible or no solution was found; sln$z is the actual solution as a vector)
 #' @examples
-#' #For demonstration purposes, the code below implements the final iteration, as described in Section 5.2 of the paper, for Example 3.2 of the paper.  
+#' #For demonstration purposes, the code below implements the final iteration, as described in Section 5.2 of the paper, for Example 3.2 of the paper.
 #' #First set all problem parameters based on Example 3.2, and using explicit choices of sample sizes (where n=200)
 #' subpopulation.1.proportion=0.5;
 #' total.alpha=0.05-(1e-4);
@@ -55,7 +55,7 @@
 #' discretization.parameter=c(1,1,10);
 #' number.cores=30;
 #' # Load list of Type I Error Constraints (encoded as ncp.list in our software and denoted as G in the paper) and the partition of decision rectangles (encoded as list.of.rectangles.dec in our software and denoted as A_1 in the paper).
-#' load(system.file("examples", "example_3.2._final_iteration", package = "AdaptiveDesignOptimizerSparseLP"));
+#' load(system.file("examples", "example3.2final.iteration.inputs.rdata", package = "AdaptiveDesignOptimizerSparseLP"));
 #' # Run final iteration solving sparse linear program with above inputs
 #' optimize_multiple_testing_procedure(subpopulation.1.proportion,total.alpha=0.049,data.generating.distributions,stage.1.sample.sizes,stage.2.sample.sizes.per.enrollment.choice,objective.function.weights,power.constraints,type.of.LP.solver="cplex",discretization.parameter=c(1,0.25,10),number.cores,ncp.list,list.of.rectangles.dec,LP.iteration=5,prior.covariance.matrix,round.each.multiple.testing.procedure.rectangle.to.integer=TRUE,plots.to.round.simply = c(1,2),rounding.threshold.H01 = 1-1e-10,rounding.threshold.H02 = 1-1e-10,rounding.threshold.H0C = 0.4,power.constraint.tolerance = 0.01,LP.solver.path=LP.solver.path)
 #' @export
