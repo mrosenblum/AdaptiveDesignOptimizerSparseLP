@@ -205,7 +205,6 @@ tau_mtp <- discretization.parameter[2]
 max_eval_iters <- 100000
 w1_unconst <- 5
 w2_unconst <- 5
-constraints_per_A1_file <- 1 # Set number of familywise Type I error constraints to encode per file written
 
 if(is.null(ncp.list)){
   # list of pairs of non-centrality parameters in G_{tau,w}
@@ -216,6 +215,8 @@ if(is.null(ncp.list)){
   ncp.list <- c(ncp.list,list(c(0,0)))
   ncp.list <- unique(ncp.list)
 }
+
+constraints_per_A1_file <- ceiling(length(ncp.list)/200) # Set number of familywise Type I error constraints to encode per file written
 
   # construct list of rectangles in set R
   ## List of rectangles defining decision boundaries

@@ -69,7 +69,7 @@ Authors: Michael Rosenblum, Ethan Fang, Han Liu
 }
 \examples{
 #For demonstration purposes, the code below implements the final iteration, as described in Section 5.2 of the paper, for Example 3.2 of the paper.
-#First set all problem parameters based on Example 3.2, and using explicit choices of sample sizes (where n=200)
+#First set all problem parameters based on Example 3.2, and using explicit choices of sample sizes (where n=200, sigma=1, Delta^min=sqrt(1/2)*(qnorm(0.95+1e-4)+qnorm(0.95))/5=0.465), as follows:
 subpopulation.1.proportion=0.5;
 total.alpha=0.05-(1e-4);
 data.generating.distributions=matrix(data=c(0,0,1,1,1,1,
@@ -88,10 +88,10 @@ power.constraints=matrix(c(0,0,0,
 			   0.83,0,0,
 			   0,0,0.83),nrow=4,ncol=3,byrow=TRUE,dimnames=list(c(),c("PowerH01","PowerH02","PowerH0C")));
 type.of.LP.solver="matlab";
-discretization.parameter=c(1,1,10);
+discretization.parameter=c(1,0.25,10);
 number.cores=30;
 # Load list of Type I Error Constraints (encoded as ncp.list in our software and denoted as G in the paper) and the partition of decision rectangles (encoded as list.of.rectangles.dec in our software and denoted as A_1 in the paper).
 load(system.file("examples", "example3.2final.iteration.inputs.rdata", package = "AdaptiveDesignOptimizerSparseLP"));
 # Run final iteration solving sparse linear program with above inputs
-optimize_multiple_testing_procedure(subpopulation.1.proportion,total.alpha=0.049,data.generating.distributions,stage.1.sample.sizes,stage.2.sample.sizes.per.enrollment.choice,objective.function.weights,power.constraints,type.of.LP.solver="cplex",discretization.parameter=c(1,0.25,10),number.cores,ncp.list,list.of.rectangles.dec,LP.iteration=5,prior.covariance.matrix,round.each.multiple.testing.procedure.rectangle.to.integer=TRUE,plots.to.round.simply = c(1,2),rounding.threshold.H01 = 1-1e-10,rounding.threshold.H02 = 1-1e-10,rounding.threshold.H0C = 0.4,power.constraint.tolerance = 0.01,LP.solver.path=LP.solver.path)
+optimize_multiple_testing_procedure(subpopulation.1.proportion,total.alpha=0.049,data.generating.distributions,stage.1.sample.sizes,stage.2.sample.sizes.per.enrollment.choice,objective.function.weights,power.constraints,type.of.LP.solver,discretization.parameter,number.cores,ncp.list,list.of.rectangles.dec,LP.iteration=5,prior.covariance.matrix,round.each.multiple.testing.procedure.rectangle.to.integer=TRUE,plots.to.round.simply = c(1,2),rounding.threshold.H0C = 0.4,power.constraint.tolerance = 0.01,LP.solver.path=c())
 }
