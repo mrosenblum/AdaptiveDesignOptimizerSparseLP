@@ -1,4 +1,4 @@
-# Object returned
+#' This function takes the output of the linear program solver and constructs the corresponding policy.
 extract_solution <- function(list.of.rectangles.dec,decisions,list.of.rectangles.mtp,actions){
 S1 <- list.of.rectangles.dec
 A1 <- decisions
@@ -15,13 +15,11 @@ pi_1 <- function(s1){# Returns vector of probabilities representing the policy p
   print(paste("Probabilities of enrollment decisions 1 through ",length(decisions), " respectively:"))
   return(probability_vector)
 }
-
 pi_2 <- function(s1,a1,s2){# Returns vector of probabilities representing the policy pi^*_2 applied after state s1, action a1, and state s2; the vector represents the probability that each possible subset of null hypotheses is rejected at the end of the trial
   variable_start_position <- variable_location(s1,a1,s2,1);
   variable_end_position <- variable_location(s1,a1,s2,length(actions));
   print(paste("Probabilities of rejecting each of the following subsets of null hypotheses: none, H01, H02, H0C, H01 and H0C, H02 and H0C, all"))
   return(sln$z[variable_start_position:variable_end_position])
 }
-
 return(policy = list(S1,A1,S2,A2,pi_1,pi_2));
 }
