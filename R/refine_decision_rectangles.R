@@ -636,7 +636,11 @@ for(d in decisions){list.of.rectangles.dec <- c(list.of.rectangles.dec,list(list
     #save(list.of.rectangles.dec,file=paste("list.of.rectangles.dec",LP.iteration,".rdata",sep="")) # modified list of rectangles constructed
 
 	set_counter <- 0
-	for(r1_counter in 1:(length(list.of.rectangles.dec))){if(list.of.rectangles.dec[[r1_counter]]$preset_decision>0){set_counter<-set_counter+1}}
+	for(r1_counter in 1:(length(list.of.rectangles.dec))){if(list.of.rectangles.dec[[r1_counter]]$preset_decision>0){
+	  list.of.rectangles.dec[[r1_counter]]$preset_decision <- 1;
+	  list.of.rectangles.dec[[r1_counter]]$d_probs <- NULL;
+	  set_counter<-set_counter+1} else {list.of.rectangles.dec[[r1_counter]]$preset_decision_value_preliminary <- NULL; list.of.rectangles.dec[[r1_counter]]$d_probs <- NULL;}
+	}
 	number_preset_decision_rectangles <- set_counter
 	print(number_preset_decision_rectangles)
 
