@@ -31,10 +31,12 @@ pi_2 <- function(s1_index,a1_index,s2_index){# Returns vector of probabilities r
     print(paste("s1 is rectangle defined as the Cartesian product [",s1$lower_boundaries[1],",",s1$upper_boundaries[1],"] x [",s1$lower_boundaries[2],",",s1$upper_boundaries[2],"]"));
     print(paste("a1 is enrollment decision ",a1))
     print(paste("s2 is rectangle defined as the Cartesian product [",s2$lower_boundaries[1],",",s2$upper_boundaries[1],"] x [",s2$lower_boundaries[2],",",s2$upper_boundaries[2],"]"));
+    probability_of_a1_given_s1 <- pi_1(s1_index)[a1];
+    if(probability_of_a1_given_s1<=0){print("That sequence of states and actions is not possible under this policy since a1 has probability 0 given s1.");return(NULL)}
     if(s1$preset_decision==0){
       variable_start_position <- variable_location(s1,a1,s2,1);
       variable_end_position <- variable_location(s1,a1,s2,length(actions));
-      probability_vector <- sln$z[variable_start_position:variable_end_position];
+      probability_vector <- sln$z[variable_start_position:variable_end_position]/probability_of_a1_given_s1;
       names(probability_vector) <- c("Reject none","Reject H01","Reject H02","Reject H0C","Reject H01 and H0C","Reject H02 and H0C","Reject all");
       return(probability_vector);} else if(s1$preset_decision_value[a1]==1){
     #Deterministic decision to take action a1 if first stage statistics are in s1
@@ -42,7 +44,7 @@ pi_2 <- function(s1_index,a1_index,s2_index){# Returns vector of probabilities r
     variable_start_position <- variable_location(reference_rectangle_s1,a1,s2,1);
     variable_end_position <- variable_location(reference_rectangle_s1,a1,s2,length(actions));
     print(paste("Probabilities of rejecting each of the following subsets of null hypotheses, respectively:"))
-    probability_vector <- sln$z[variable_start_position:variable_end_position];
+    probability_vector <- sln$z[variable_start_position:variable_end_position]/probability_of_a1_given_s1;
     names(probability_vector) <- c("Reject none","Reject H01","Reject H02","Reject H0C","Reject H01 and H0C","Reject H02 and H0C","Reject all");
     return(probability_vector);} else {print(paste("That sequence of states and actions is not possible under this policy, since after state s1 the enrollment decision ",which(s1$preset_decision_value==1)," is always selected."));return(NULL)}
 }
