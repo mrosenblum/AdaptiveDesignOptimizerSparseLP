@@ -32,8 +32,8 @@
 #' ncp.list (the complete list of familywise Type I error constraints input to the linear program solver)
 #' sln (the solution to the linear program; sln$val is the expected sample size; sln$status, if either 1 or 5, indicates that a feasible solution was found and other wise the problem was infeasible or no solution was found; sln$z is the actual solution as a vector)
 #' @examples
-#' #For demonstration purposes, the code below implements the final iteration, as described in Section 5.2 of the paper, for Example 3.2 of the paper.  
-#' #First set all problem parameters based on Example 3.2, and using explicit choices of sample sizes (where n=200)
+#' #For demonstration purposes, the code below implements the final iteration, as described in Section 5.2 of the paper, for Example 3.2 of the paper.
+#' #First set all problem parameters based on Example 3.2, and using explicit choices of sample sizes (where n=200, sigma=1, Delta^min=sqrt(1/2)*(qnorm(0.95+1e-4)+qnorm(0.95))/5=0.465), as follows:
 #' subpopulation.1.proportion=0.5;
 #' total.alpha=0.05-(1e-4);
 #' data.generating.distributions=matrix(data=c(0,0,1,1,1,1,
@@ -52,12 +52,12 @@
 #' 			   0.83,0,0,
 #' 			   0,0,0.83),nrow=4,ncol=3,byrow=TRUE,dimnames=list(c(),c("PowerH01","PowerH02","PowerH0C")));
 #' type.of.LP.solver="matlab";
-#' discretization.parameter=c(1,1,10);
+#' discretization.parameter=c(1,0.25,10);
 #' number.cores=30;
 #' # Load list of Type I Error Constraints (encoded as ncp.list in our software and denoted as G in the paper) and the partition of decision rectangles (encoded as list.of.rectangles.dec in our software and denoted as A_1 in the paper).
-#' load(system.file("examples", "example_3.2._final_iteration", package = "AdaptiveDesignOptimizerSparseLP"));
+#' load(system.file("examples", "example3.2final.iteration.inputs.rdata", package = "AdaptiveDesignOptimizerSparseLP"));
 #' # Run final iteration solving sparse linear program with above inputs
-#' optimize_multiple_testing_procedure(subpopulation.1.proportion,total.alpha=0.049,data.generating.distributions,stage.1.sample.sizes,stage.2.sample.sizes.per.enrollment.choice,objective.function.weights,power.constraints,type.of.LP.solver="cplex",discretization.parameter=c(1,0.25,10),number.cores,ncp.list,list.of.rectangles.dec,LP.iteration=5,prior.covariance.matrix,round.each.multiple.testing.procedure.rectangle.to.integer=TRUE,plots.to.round.simply = c(1,2),rounding.threshold.H01 = 1-1e-10,rounding.threshold.H02 = 1-1e-10,rounding.threshold.H0C = 0.4,power.constraint.tolerance = 0.01,LP.solver.path=LP.solver.path)
+#' optimize_multiple_testing_procedure(subpopulation.1.proportion,total.alpha=0.049,data.generating.distributions,stage.1.sample.sizes,stage.2.sample.sizes.per.enrollment.choice,objective.function.weights,power.constraints,type.of.LP.solver,discretization.parameter,number.cores,ncp.list,list.of.rectangles.dec,LP.iteration=5,prior.covariance.matrix,round.each.multiple.testing.procedure.rectangle.to.integer=TRUE,plots.to.round.simply = c(1,2),rounding.threshold.H0C = 0.4,power.constraint.tolerance = 0.01,LP.solver.path=c())
 #' @export
 optimize_multiple_testing_procedure <- function(subpopulation.1.proportion=0.5,
 		total.alpha=0.05-(1e-4),
@@ -226,7 +226,6 @@ tau_mtp <- discretization.parameter[2]
 max_eval_iters <- 100000
 w1_unconst <- 5
 w2_unconst <- 5
-constraints_per_A1_file <- 1 # Set number of familywise Type I error constraints to encode per file written
 
 if(is.null(ncp.list)){
   # list of pairs of non-centrality parameters in G_{tau,w}
@@ -238,6 +237,7 @@ if(is.null(ncp.list)){
   ncp.list <- unique(ncp.list)
 }
 
+constraints_per_A1_file <- ceiling(length(ncp.list)/200) # Set number of familywise Type I error constraints to encode per file written
 
   # construct list of rectangles in set R
   ## List of rectangles defining decision boundaries
@@ -1033,10 +1033,11 @@ else if(type.of.LP.solver=="test_version"){
 save(sln,file=paste("sln2M",LP.iteration,".rdata",sep=""))
 input.parameters <- list(subpopulation.1.proportion,total.alpha,data.generating.distributions,stage.1.sample.sizes,stage.2.sample.sizes.per.enrollment.choice,objective.function.weights,power.constraints,type.of.LP.solver,discretization.parameter,number.cores,ncp.list,list.of.rectangles.dec,LP.iteration,prior.covariance.matrix,round.each.multiple.testing.procedure.rectangle.to.integer,plots.to.round.simply,rounding.threshold.H01,rounding.threshold.H02,rounding.threshold.H0C,power.constraint.tolerance,LP.solver.path);
 names(input.parameters) <- list("subpopulation.1.proportion","total.alpha","data.generating.distributions","stage.1.sample.sizes","stage.2.sample.sizes.per.enrollment.choice","objective.function.weights","power.constraints","type.of.LP.solver","discretization.parameter","number.cores","ncp.list","list.of.rectangles.dec","LP.iteration","prior.covariance.matrix","round.each.multiple.testing.procedure.rectangle.to.integer","plots.to.round.simply","rounding.threshold.H01","rounding.threshold.H02","rounding.threshold.H0C","power.constraint.tolerance","LP.solver.path");
-save(input.parameters,list.of.rectangles.dec,list.of.rectangles.mtp,ncp.list,sln,file=paste("optimized.design",LP.iteration,".rdata",sep=""))
+optimized.policy <- extract_solution(list.of.rectangles.dec,decisions,list.of.rectangles.mtp,actions);
+save(optimized.policy,input.parameters,list.of.rectangles.dec,list.of.rectangles.mtp,ncp.list,sln,file=paste("optimized.design",LP.iteration,".rdata",sep=""))
 print(paste("Adaptive Design Optimization Completed. Optimal design is stored in the file: optimized_design",LP.iteration,".rdata",sep=""))
 
-if(((type.of.LP.solver=="matlab" || type.of.LP.solver=="cplex") && (sln$status==1 || sln$status==5 )) || (type.of.LP.solver=="gurobi" && sln$status == "OPTIMAL")){
+if(((type.of.LP.solver=="matlab" || type.of.LP.solver=="cplex" || type.of.LP.solver=="test_version") && (sln$status==1 || sln$status==5 )) || (type.of.LP.solver=="gurobi" && sln$status == "OPTIMAL")){
   print(paste("Feasible Solution was Found"))
   print("Fraction of solution components with integral value solutions")
   print(sum(sln$z>1-1e-10 | sln$z<10e-10)/length(sln$z))
@@ -1066,7 +1067,7 @@ postscript(paste("decision_rule.eps"),height=8,horizontal=FALSE,onefile=FALSE,wi
 dev.off()
 
 ## Loop to create rounded version of multiple testing procedure
-load("../A3.rdata") # load power constraints
+load("A3.rdata") # load power constraints
 z_rounded <- z_solution
 z_integral_components <- rep(0,length(z_solution))
 

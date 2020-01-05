@@ -16,7 +16,7 @@
 #' @param LP.iteration positive integer used in file name to store output; can be used to avoid overwriting previous computations
 #' @param prior.covariance.matrix 2x2 positive semidefinite matrix representing the covariance corresponding to each component of the mixture of multivariate normals prior distribution (used only in defining the objective function); the default is the matrix of all 0's, corresponding to the prior being a mixture of point masses
 #' @param LP.solver.path path (i.e., directory) where LP.solver is installed; e.g., if type.of.LP.solver=="cplex" then LP.solver.path is directory where cplex is installed
-#' @return Nothing is returned; instead the optimized design is saved as "optimized_design<k>.rdata", where <k> is the user-defined iteration number (LP.iteration).
+#' @return An optimized policy is returned, consisting of the following elements (defined in the paper): S1, A1, S2, A2 (sets of states and actions) and the optimized policy (pi_1, pi_2). Also, additional information related to the optimized design is saved as "optimized_design<k>.rdata", where <k> is the user-defined iteration number (LP.iteration).
 #' @section Output
 #' The software computes an optimized design and saves it as "optimized_design<k>.rdata", where <k> is the user-defined iteration number (LP.iteration). E.g., if one sets LP.iteration=1, then the optimized design is saved as "optimized_design1.rdata". That file can be opened in R and contains the following 6 items:
 #' input.parameters (the inputs passed to the optimized_design function)
@@ -205,7 +205,6 @@ tau_mtp <- discretization.parameter[2]
 max_eval_iters <- 100000
 w1_unconst <- 5
 w2_unconst <- 5
-constraints_per_A1_file <- 1 # Set number of familywise Type I error constraints to encode per file written
 
 if(is.null(ncp.list)){
   # list of pairs of non-centrality parameters in G_{tau,w}
@@ -216,6 +215,8 @@ if(is.null(ncp.list)){
   ncp.list <- c(ncp.list,list(c(0,0)))
   ncp.list <- unique(ncp.list)
 }
+
+constraints_per_A1_file <- ceiling(length(ncp.list)/200) # Set number of familywise Type I error constraints to encode per file written
 
   # construct list of rectangles in set R
   ## List of rectangles defining decision boundaries
@@ -1005,7 +1006,8 @@ save(sln,file=paste("sln2M",LP.iteration,".rdata",sep=""));
 ncp.active.FWER.constraints <- ncp.list[which(sln$dual[1:length(ncp.list)]>0.01)];
 input.parameters <- list(subpopulation.1.proportion,total.alpha,data.generating.distributions,stage.1.sample.sizes,stage.2.sample.sizes.per.enrollment.choice,objective.function.weights,power.constraints,type.of.LP.solver,discretization.parameter,number.cores,ncp.list,list.of.rectangles.dec,LP.iteration,prior.covariance.matrix,LP.solver.path);
 names(input.parameters) <- list("subpopulation.1.proportion","total.alpha","data.generating.distributions","stage.1.sample.sizes","stage.2.sample.sizes.per.enrollment.choice","objective.function.weights","power.constraints","type.of.LP.solver","discretization.parameter","number.cores","ncp.list","list.of.rectangles.dec","LP.iteration","prior.covariance.matrix","LP.solver.path");
-save(input.parameters,ncp.active.FWER.constraints,list.of.rectangles.dec,list.of.rectangles.mtp,ncp.list,sln,file=paste("optimized.design",LP.iteration,".rdata",sep=""))
+optimized.policy <- extract_solution(list.of.rectangles.dec,decisions,list.of.rectangles.mtp,actions);
+save(input.parameters,ncp.active.FWER.constraints,list.of.rectangles.dec,list.of.rectangles.mtp,ncp.list,sln,optimized.policy,file=paste("optimized.design",LP.iteration,".rdata",sep=""))
 print(paste("Adaptive Design Optimization Completed. Optimal design is stored in the file: optimized_design",LP.iteration,".rdata",sep=""))
 
 if(((type.of.LP.solver=="matlab" || type.of.LP.solver=="cplex") && (sln$status==1 || sln$status==5 )) || (type.of.LP.solver=="gurobi" && sln$status == "OPTIMAL")){
@@ -1038,4 +1040,5 @@ system('rm number_A1_constraints.txt')
 system('rm number_A1_files.txt')
 system('rm power_constraints.rdata')
 system('rm max_error_prob*')
+return(optimized.policy);
 }

@@ -67,7 +67,7 @@ if (a4status == 1)
         A4(r4,col)=0;
    end
 
-   AA  = [AA;A4]
+   AA  = [AA;A4];
    a4  = zeros(r4,1);
 
    aa  = [aa;a4];

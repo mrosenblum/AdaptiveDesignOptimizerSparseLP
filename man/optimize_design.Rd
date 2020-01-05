@@ -45,7 +45,7 @@ optimize_design(subpopulation.1.proportion, total.alpha,
 \item{LP.solver.path}{path (i.e., directory) where LP.solver is installed; e.g., if type.of.LP.solver=="cplex" then LP.solver.path is directory where cplex is installed}
 }
 \value{
-Nothing is returned; instead the optimized design is saved as "optimized_design<k>.rdata", where <k> is the user-defined iteration number (LP.iteration).
+An optimized policy is returned, consisting of the following elements (defined in the paper): S1, A1, S2, A2 (sets of states and actions) and the optimized policy (pi_1, pi_2). Also, additional information related to the optimized design is saved as "optimized_design<k>.rdata", where <k> is the user-defined iteration number (LP.iteration).
 }
 \description{
 Adaptive Enrichment Design Optimization Using Sparse Linear Programming
