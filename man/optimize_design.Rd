@@ -11,7 +11,8 @@ optimize_design(subpopulation.1.proportion, total.alpha,
   power.constraints, type.of.LP.solver = "cplex",
   discretization.parameter = c(1, 1, 10), number.cores = 30,
   ncp.list = c(), list.of.rectangles.dec = c(), LP.iteration = 1,
-  prior.covariance.matrix = diag(2) * 0, LP.solver.path = c())
+  prior.covariance.matrix = diag(2) * 0, LP.solver.path = c(),
+  cleanup.temporary.files = TRUE)
 }
 \arguments{
 \item{subpopulation.1.proportion}{Proportion of overall population in subpopulation 1. Must be between 0 and 1.}
@@ -43,6 +44,8 @@ optimize_design(subpopulation.1.proportion, total.alpha,
 \item{prior.covariance.matrix}{2x2 positive semidefinite matrix representing the covariance corresponding to each component of the mixture of multivariate normals prior distribution (used only in defining the objective function); the default is the matrix of all 0's, corresponding to the prior being a mixture of point masses}
 
 \item{LP.solver.path}{path (i.e., directory) where LP.solver is installed; e.g., if type.of.LP.solver=="cplex" then LP.solver.path is directory where cplex is installed}
+
+\item{cleanup.temporary.files}{TRUE/FALSE indicates whether temporary files generated during problem solving process should be deleted or not after termination; set to FALSE for debugging purposes only.}
 }
 \value{
 An optimized policy is returned, consisting of the following elements (defined in the paper): S1, A1, S2, A2 (sets of states and actions) and the optimized policy (pi_1, pi_2). Also, additional information related to the optimized design is saved as "optimized_design<k>.rdata", where <k> is the user-defined iteration number (LP.iteration).
@@ -54,7 +57,7 @@ Authors: Michael Rosenblum, Ethan Fang, Han Liu
 \examples{
 #For demonstration purposes, the example below uses a coarse discretization and a single processor.
 optimize_design(subpopulation.1.proportion=0.5,
-total.alpha=0.05-(1e-4),
+total.alpha=0.05,
 data.generating.distributions=matrix(data=c(0,0,1,1,1,1,
                                            0,sqrt(1/2)*(qnorm(0.95+1e-4)+qnorm(0.95))/5,1,1,1,1,
                                            sqrt(1/2)*(qnorm(0.95+1e-4)+qnorm(0.95))/5,0,1,1,1,1,
@@ -66,7 +69,7 @@ stage.2.sample.sizes.per.enrollment.choice=matrix(c(50,50,
                                                    0,150),nrow=4,ncol=2,byrow=TRUE,dimnames=list(c(),c("Subpopulation1Stage2SampleSize","Subpopulation2Stage2SampleSize"))),
 objective.function.weights=0.25*c(1,1,1,1),
 power.constraints=matrix(c(0,0,0,
-                          0,0.82,0,
-                          0.82,0,0,
-                          0,0,0.82),nrow=4,ncol=3,byrow=TRUE,dimnames=list(c(),c("PowerH01","PowerH02","PowerH0C"))),discretization.parameter=c(3,3,1),number.cores=1)
+                          0,0.83,0,
+                          0.83,0,0,
+                          0,0,0.83),nrow=4,ncol=3,byrow=TRUE,dimnames=list(c(),c("PowerH01","PowerH02","PowerH0C"))),discretization.parameter=c(3,3,1),number.cores=1)
 }

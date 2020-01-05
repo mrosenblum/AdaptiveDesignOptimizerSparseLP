@@ -16,6 +16,7 @@
 #' @param LP.iteration positive integer used in file name to store output; can be used to avoid overwriting previous computations
 #' @param prior.covariance.matrix 2x2 positive semidefinite matrix representing the covariance corresponding to each component of the mixture of multivariate normals prior distribution (used only in defining the objective function); the default is the matrix of all 0's, corresponding to the prior being a mixture of point masses
 #' @param LP.solver.path path (i.e., directory) where LP.solver is installed; e.g., if type.of.LP.solver=="cplex" then LP.solver.path is directory where cplex is installed
+#' @param cleanup.temporary.files TRUE/FALSE indicates whether temporary files generated during problem solving process should be deleted or not after termination; set to FALSE for debugging purposes only.
 #' @return An optimized policy is returned, consisting of the following elements (defined in the paper): S1, A1, S2, A2 (sets of states and actions) and the optimized policy (pi_1, pi_2). Also, additional information related to the optimized design is saved as "optimized_design<k>.rdata", where <k> is the user-defined iteration number (LP.iteration).
 #' @section Output
 #' The software computes an optimized design and saves it as "optimized_design<k>.rdata", where <k> is the user-defined iteration number (LP.iteration). E.g., if one sets LP.iteration=1, then the optimized design is saved as "optimized_design1.rdata". That file can be opened in R and contains the following 6 items:
@@ -28,7 +29,7 @@
 #' @examples
 #' #For demonstration purposes, the example below uses a coarse discretization and a single processor.
 #' optimize_design(subpopulation.1.proportion=0.5,
-#' total.alpha=0.05-(1e-4),
+#' total.alpha=0.05,
 #' data.generating.distributions=matrix(data=c(0,0,1,1,1,1,
 #'                                            0,sqrt(1/2)*(qnorm(0.95+1e-4)+qnorm(0.95))/5,1,1,1,1,
 #'                                            sqrt(1/2)*(qnorm(0.95+1e-4)+qnorm(0.95))/5,0,1,1,1,1,
@@ -40,9 +41,9 @@
 #'                                                    0,150),nrow=4,ncol=2,byrow=TRUE,dimnames=list(c(),c("Subpopulation1Stage2SampleSize","Subpopulation2Stage2SampleSize"))),
 #' objective.function.weights=0.25*c(1,1,1,1),
 #' power.constraints=matrix(c(0,0,0,
-#'                           0,0.82,0,
-#'                           0.82,0,0,
-#'                           0,0,0.82),nrow=4,ncol=3,byrow=TRUE,dimnames=list(c(),c("PowerH01","PowerH02","PowerH0C"))),discretization.parameter=c(3,3,1),number.cores=1)
+#'                           0,0.83,0,
+#'                           0.83,0,0,
+#'                           0,0,0.83),nrow=4,ncol=3,byrow=TRUE,dimnames=list(c(),c("PowerH01","PowerH02","PowerH0C"))),discretization.parameter=c(3,3,1),number.cores=1)
 #' @export
 optimize_design <- function(subpopulation.1.proportion,
   total.alpha,
@@ -58,7 +59,8 @@ optimize_design <- function(subpopulation.1.proportion,
 	list.of.rectangles.dec=c(),
 	LP.iteration=1,
 	prior.covariance.matrix=diag(2)*0,
-  LP.solver.path=c()){
+  LP.solver.path=c(),
+  cleanup.temporary.files=TRUE){
 
 max_error_prob <- 0 # track approximation errors in problem construction; initialize to 0 here
 covariance_Z_1_Z_2 <-  0 # covariance_due_to overlap of subpopulations (generally we assume no overlap)
@@ -1021,6 +1023,7 @@ if(((type.of.LP.solver=="matlab" || type.of.LP.solver=="cplex") && (sln$status==
   stop();}
 
 # Clean up files used to specify LP
+if(cleanup.temporary.files){
 system('rm A*.rdata')
 system('rm A*.mat')
 system('rm a*.mat')
@@ -1040,5 +1043,6 @@ system('rm number_A1_constraints.txt')
 system('rm number_A1_files.txt')
 system('rm power_constraints.rdata')
 system('rm max_error_prob*')
+  }
 return(optimized.policy);
 }
