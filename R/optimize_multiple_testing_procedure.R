@@ -22,6 +22,7 @@
 #' @param rounding.threshold.H0C threshold above which fractional solution corresponding to probability of rejecting H0C is rounded to 1
 #' @param power.constraint.tolerance amount by which power corresponding to rounded solution is allowed to be less than power.constraints; typically set to be small, e.g., 0.01
 #' @param LP.solver.path path (i.e., directory) where LP.solver is installed; e.g., if type.of.LP.solver=="cplex" then LP.solver.path is directory where cplex is installed
+#' @param cleanup.temporary.files TRUE/FALSE indicates whether temporary files generated during problem solving process should be deleted or not after termination; set to FALSE for debugging purposes only.
 #' @return Nothing is returned; instead the optimized design is saved as "optimized_design<k>.rdata", where <k> is the user-defined iteration number (LP.iteration).
 #' @section Output
 #' The software computes an optimized design and saves it as "optimized_design<k>.rdata", where <k> is the user-defined iteration number (LP.iteration). E.g., if one sets LP.iteration=1, then the optimized design is saved as "optimized_design1.rdata". That file can be opened in R and contains the following 6 items:
@@ -79,7 +80,8 @@ optimize_multiple_testing_procedure <- function(subpopulation.1.proportion=0.5,
 		rounding.threshold.H02 = 1-1e-10,
 		rounding.threshold.H0C = 1-1e-10,
 		power.constraint.tolerance=0,
-		LP.solver.path=c()
+		LP.solver.path=c(),
+		cleanup.temporary.files=TRUE
 		){
 max_error_prob <- 0 # track approximation errors in problem construction; initialize to 0 here
 covariance_Z_1_Z_2 <-  0 # covariance_due_to overlap of subpopulations (generally we assume no overlap)
@@ -1211,6 +1213,7 @@ print(cbind(power_constraint_matrix_H01 %*% z_rounded,power_constraint_matrix_H0
 }
 
 # Clean up files used to specify LP
+if(cleanup.temporary.files){
 system('rm A*.rdata')
 system('rm A*.mat')
 system('rm a*.mat')
@@ -1229,5 +1232,5 @@ system('rm number_equality_constraints_of_second_type.txt')
 system('rm number_A1_constraints.txt')
 system('rm number_A1_files.txt')
 system('rm power_constraints.rdata')
-system('rm max_error_prob*')
+system('rm max_error_prob*')}
 }
