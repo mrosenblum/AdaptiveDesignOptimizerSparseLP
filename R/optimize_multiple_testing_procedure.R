@@ -1140,11 +1140,28 @@ while(any(power_constraint_matrix_H0C %*% z_integral_components < power.constrai
   #rounding.threshold.H0C <- 0.4
 }
 
+max_d_type_4_x_value <- max_d_type_3_y_value <- (-Inf);
+
+for(r in list.of.rectangles.dec[1:(length(list.of.rectangles.dec)-number_reference_rectangles)]){    if(r$preset_decision>0){
+    probability_vector <- r$preset_decision_value;
+  } else {
+    for(d in decisions){
+      rprime <- list.of.rectangles.mtp[[d]][[1]]
+      variable_start_position <- variable_location(r,d,rprime,1);
+      variable_end_position <- variable_location(r,d,rprime,length(actions));
+      probability_vector[d] <- sum(z_rounded[variable_start_position:variable_end_position]);
+    }
+    if(d_type(d)==3 && probability_vector[d]>1e-10){
+        max_d_type_3_y_value <- max(max_d_type_3_y_value,r$upper_boundaries[2])} else
+    if(d_type(d)==4 && probability_vector[d]>1e-10){
+        max_d_type_4_x_value <- max(max_d_type_4_x_value,r$upper_boundaries[1])}
+  }
+}
+print(c(max_d_type_3_y_value,max_d_type_4_x_value))
+
 for(d_plot in decisions){
   postscript(paste("rejection_regions_",d_plot,".eps",sep=""),height=8,horizontal=FALSE,onefile=FALSE,width=8)
   par(mar=c(7.5,6.5,5.6,2.1))
-
-  main_label <- switch(d_plot,expression(paste(pi[1]^opt," = \"ALL\"")),expression(paste(pi[1]^opt," = \"STOP\"")),expression(paste(pi[1]^opt," = \"ONLY 1\"")),expression(paste(pi[1]^opt," = \"ONLY 2\"")))
   plot(0,type="n",xaxt="n",yaxt="n",xlim=c(-3,3),ylim=c(-3,3),main=paste("Rejection Regions at End of Stage 2 \n Under 1st Stage Decision ",d_plot,sep=""),xlab=expression(paste(Z[1]^F)),ylab=expression(paste(Z[2]^F)),cex.lab=2, cex.axis=2, cex.main=2, cex.sub=2)
   axis(1,at=seq(-3,3,by=1),labels=-3:3,cex.axis=2)
   axis(2,at=seq(-3,3,by=1),labels=-3:3,cex.axis=2)
@@ -1174,12 +1191,26 @@ for(d_plot in decisions){
       z_integral_components[variable_start_position:variable_end_position] <- z_rounded[variable_start_position:variable_end_position] <- rep(0,variable_end_position-variable_start_position+1);
       z_integral_components[variable_start_position+deterministic_action - 1] <- z_rounded[variable_start_position+deterministic_action - 1] <- 1;
 
-      if(d_plot==3 && rprime$lower_boundaries[2]<1.25){
+      if(d_type(d_plot)==2){ #if decision is to stop after stage 1
+        for(r in list.of.rectangles.dec[1:(length(list.of.rectangles.dec)-number_reference_rectangles)]){      ## compute overlap in rectangles between r and rprime:
+            intersection_rectangle_lower_boundaries <- pmax(r$lower_boundaries,rprime$lower_boundaries)
+            intersection_rectangle_upper_boundaries <- pmin(r$upper_boundaries,rprime$upper_boundaries)
+            if(sum(intersection_rectangle_lower_boundaries < intersection_rectangle_upper_boundaries)==2){ #if they intersect, check for positive probability of d=d_plot at r:
+        if(r$preset_decision>0){
+          probability_of_d_plot <- r$preset_decision_value[d_plot];
+        } else {
+            variable_start_position <- variable_location(r,d_plot,rprime,1);
+            variable_end_position <- variable_location(r,d_plot,rprime,length(actions));
+            probability_of_d_plot <- sum(sln$z[variable_start_position:variable_end_position]);
+        }
+      if(probability_of_d_plot > 1e-10){ # if positive probability, then plot rectangle
+          rect(max(rprime$lower_boundaries[1]-tau,-10),max(rprime$lower_boundaries[2]-tau,-10),min(rprime$upper_boundaries[1]+tau,10),min(rprime$upper_boundaries[2]+tau,10),col=col_value-1,border=NA)}
+      }}} else if(d_type(d_plot)==3 && rprime$lower_boundaries[2]< max_d_type_3_y_value){
         rect(max(rprime$lower_boundaries[1]-tau,-10),max(rprime$lower_boundaries[2]-tau,-10),min(rprime$upper_boundaries[1]+tau,10),min(rprime$upper_boundaries[2]+tau,10),col=col_value-1,border=NA)
 
-      } else if(d_plot==4 && rprime$lower_boundaries[1]<1.25){
+      } else if(d_type(d_plot)==4 && rprime$lower_boundaries[1]<max_d_type_4_x_value){
         rect(max(rprime$lower_boundaries[1]-tau,-10),max(rprime$lower_boundaries[2]-tau,-10),min(rprime$upper_boundaries[1]+tau,10),min(rprime$upper_boundaries[2]+tau,10),col=col_value-1,border=NA)
-      } else if(d_plot <3){
+      } else if(d_type(d_plot)==1){
         rect(max(rprime$lower_boundaries[1]-tau,-10),max(rprime$lower_boundaries[2]-tau,-10),min(rprime$upper_boundaries[1]+tau,10),min(rprime$upper_boundaries[2]+tau,10),col=col_value-1,border=NA)
       }
 
