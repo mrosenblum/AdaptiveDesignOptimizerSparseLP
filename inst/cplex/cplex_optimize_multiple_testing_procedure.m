@@ -73,7 +73,7 @@ if (a4status == 1)
    aa  = [aa;a4];
 end
 
-cc = -(A3(3,:)+A3(6,:));
+cc = -(A3(3,:)+A3(6,:)+A3(12,:));
 
 %load cc.mat
 tmp     = length(cc);
