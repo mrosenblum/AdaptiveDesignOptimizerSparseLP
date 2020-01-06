@@ -15,7 +15,8 @@ optimize_multiple_testing_procedure(subpopulation.1.proportion = 0.5,
   round.each.multiple.testing.procedure.rectangle.to.integer = FALSE,
   plots.to.round.simply = c(), rounding.threshold.H01 = 1 - 1e-10,
   rounding.threshold.H02 = 1 - 1e-10, rounding.threshold.H0C = 1 -
-  1e-10, power.constraint.tolerance = 0, LP.solver.path = c())
+  1e-10, power.constraint.tolerance = 0, LP.solver.path = c(),
+  cleanup.temporary.files = TRUE)
 }
 \arguments{
 \item{subpopulation.1.proportion}{Proportion of overall population in subpopulation 1. Must be between 0 and 1.}
@@ -59,6 +60,8 @@ optimize_multiple_testing_procedure(subpopulation.1.proportion = 0.5,
 \item{power.constraint.tolerance}{amount by which power corresponding to rounded solution is allowed to be less than power.constraints; typically set to be small, e.g., 0.01}
 
 \item{LP.solver.path}{path (i.e., directory) where LP.solver is installed; e.g., if type.of.LP.solver=="cplex" then LP.solver.path is directory where cplex is installed}
+
+\item{cleanup.temporary.files}{TRUE/FALSE indicates whether temporary files generated during problem solving process should be deleted or not after termination; set to FALSE for debugging purposes only.}
 }
 \value{
 Nothing is returned; instead the optimized design is saved as "optimized_design<k>.rdata", where <k> is the user-defined iteration number (LP.iteration).

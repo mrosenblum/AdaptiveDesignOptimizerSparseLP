@@ -1192,7 +1192,7 @@ for(d_plot in decisions){
 save(z_rounded,file="z_rounded.rdata")
 
 max_FWER <- 0
-for(task_id in 1:length(ncp.list)){
+for(task_id in 1:(ceiling(length(ncp.list)/constraints_per_A1_file))){
    load(file=paste("A1",task_id,".rdata",sep=""))
    #print(ncp.list[[which((constraint_list %*% sln$z) ==max(constraint_list %*% sln$z))]])
    fwer_candidates <- constraint_list %*% z_rounded
