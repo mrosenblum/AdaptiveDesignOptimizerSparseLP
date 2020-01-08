@@ -1073,6 +1073,8 @@ load("A3.rdata") # load power constraints
 z_rounded <- z_solution
 z_integral_components <- rep(0,length(z_solution))
 
+round_up_fractional_H0C_extra_step <- FALSE
+if(round_up_fractional_H0C_extra_step){
 while(any(power_constraint_matrix_H0C %*% z_integral_components < power.constraints.matrix[,3]-power.constraint.tolerance))
 {
   #print(power_constraint_matrix_H0C[4,] %*% z_integral_components)
@@ -1131,7 +1133,7 @@ while(any(power_constraint_matrix_H0C %*% z_integral_components < power.constrai
                 #print(d); print(rprime); if(!is.null(rprime$right_neighbor)){print(rprime$right_neighbor)};if(!is.null(rprime$upper_neighbor)){print(rprime$upper_neighbor)}; print(action_indicator);  print(deterministic_action);
                 z_integral_components[variable_start_position:variable_end_position] <- z_rounded[variable_start_position:variable_end_position] <- rep(0,variable_end_position-variable_start_position+1);
                 z_integral_components[variable_start_position+deterministic_action - 1] <- z_rounded[variable_start_position+deterministic_action - 1] <- 1;
-                #if(power_constraint_matrix_H0C[4,] %*% z_integral_components > 0.82){break;}
+                if(!any(power_constraint_matrix_H0C %*% z_integral_components < power.constraints.matrix[,3]-power.constraint.tolerance)){break;}
                 #print(power_constraint_matrix_H0C[4,] %*% z_integral_components)
                 #browser()
               }
@@ -1139,7 +1141,7 @@ while(any(power_constraint_matrix_H0C %*% z_integral_components < power.constrai
         }}}}
   #rounding.threshold.H0C <- 0.4
 }
-
+}
 # Only used for decisions d of d_type[d]==3 or ==4, and encodes maximum possible z_statistic value in x-coordinate for d_type[d]==3 and in y-coordinate for d_type[d]==4. (This can be computed for the case where the decision regions are set in advance, since d_type[d]==3 involves no update to x-coordinate z-statistic, and analogously for y-coordinate under d_type[d]==4.)
 max_d_type_value <- rep(-Inf,length(decisions))
 
@@ -1179,9 +1181,9 @@ for(d_plot in decisions){
 
       if(sum(action_indicator>1-1e-10 | action_indicator<10e-10)==7){
         deterministic_action <- col_value <- which(action_indicator==max(action_indicator))} else{
-          if(sum(action_indicator[c(2,5,7)])>1-1e-10){H01_reject <- 1}else{H01_reject <- 0}
-          if(sum(action_indicator[c(3,6,7)])>1-1e-10){H02_reject <- 1}else{H02_reject <- 0}
-          if((H01_reject && H02_reject) || sum(action_indicator[c(4,5,6,7)])>1-1e-10){H0C_reject <- 1}else{H0C_reject <- 0};
+          if(sum(action_indicator[c(2,5,7)])>rounding.threshold.H01){H01_reject <- 1}else{H01_reject <- 0}
+          if(sum(action_indicator[c(3,6,7)])>rounding.threshold.H02){H02_reject <- 1}else{H02_reject <- 0}
+          if((H01_reject && H02_reject) || sum(action_indicator[c(4,5,6,7)])>rounding.threshold.H0C){H0C_reject <- 1}else{H0C_reject <- 0};
           #if(H0C_reject && !(sum(z_integral_components[variable_start_position+3,variable_start_position+6]>rounding.threshold.H0C))){browser()}
           deterministic_action <- col_value <- ifelse((!H01_reject) && (!H02_reject) && (!H0C_reject),1,
                                                       ifelse((H01_reject) && (!H02_reject) && (!H0C_reject),2,
