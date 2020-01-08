@@ -1015,16 +1015,6 @@ optimized.policy <- extract_solution(list.of.rectangles.dec,decisions,list.of.re
 save(input.parameters,ncp.active.FWER.constraints,list.of.rectangles.dec,list.of.rectangles.mtp,ncp.list,sln,optimized.policy,file=paste("optimized.design",LP.iteration,".rdata",sep=""))
 print(paste("Adaptive Design Optimization Completed. Optimal design is stored in the file: optimized_design",LP.iteration,".rdata",sep=""))
 
-if(((type.of.LP.solver=="matlab" || type.of.LP.solver=="cplex") && (sln$status==1 || sln$status==5 )) || (type.of.LP.solver=="gurobi" && sln$status == "OPTIMAL")){
-  print(paste("Feasible Solution was Found and Optimal Expected Sample Size is",sln$val))
-  print("Fraction of solution components with integral value solutions")
-  print(sum(sln$z>1-1e-10 | sln$z<10e-10)/length(sln$z))
-  print("Active Type I error constraints")
-  print(ncp.active.FWER.constraints)
-} else {print("Problem was Infeasible"); print("Linear program exit status"); print(sln$status);
-  print("Please consider modifying the problem inputs, e.g., by relaxing the power constraints or by increasing the sample size, and submitting a new problem. Thank you for using this trial design optimizer.")
-  stop();}
-
 # Clean up files used to specify LP
 if(cleanup.temporary.files){
 system('rm A*.rdata')
@@ -1046,6 +1036,15 @@ system('rm number_A1_constraints.txt')
 system('rm number_A1_files.txt')
 system('rm power_constraints.rdata')
 system('rm max_error_prob*')
-  }
-return(optimized.policy);
+}
+
+if(((type.of.LP.solver=="matlab" || type.of.LP.solver=="cplex") && (sln$status==1 || sln$status==5 )) || (type.of.LP.solver=="gurobi" && sln$status == "OPTIMAL") || (type.of.LP.solver=="glpk" && sln$status == 0)){
+  print(paste("Feasible Solution was Found and Optimal Expected Sample Size is",sln$val))
+  print("Fraction of solution components with integral value solutions")
+  print(sum(sln$z>1-1e-10 | sln$z<10e-10)/length(sln$z))
+  print("Active Type I error constraints")
+  print(ncp.active.FWER.constraints)
+  return(optimized.policy)
+} else {print("Problem was Infeasible"); print(paste("Linear program exit status from solver",type.of.LP.solver,"is")); print(sln$status);
+  print("Please consider modifying the problem inputs, e.g., by relaxing the power constraints or by increasing the sample size, and submitting a new problem. Thank you for using this trial design optimizer."); return(NULL)}
 }
