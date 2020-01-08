@@ -1140,24 +1140,27 @@ while(any(power_constraint_matrix_H0C %*% z_integral_components < power.constrai
   #rounding.threshold.H0C <- 0.4
 }
 
-max_d_type_4_x_value <- max_d_type_3_y_value <- (-Inf);
+# Only used for decisions d of d_type[d]==3 or ==4, and encodes maximum possible z_statistic value in x-coordinate for d_type[d]==3 and in y-coordinate for d_type[d]==4. (This can be computed for the case where the decision regions are set in advance, since d_type[d]==3 involves no update to x-coordinate z-statistic, and analogously for y-coordinate under d_type[d]==4.)
+max_d_type_value <- rep(-Inf,length(decisions))
 
-for(r in list.of.rectangles.dec[1:(length(list.of.rectangles.dec)-number_reference_rectangles)]){    if(r$preset_decision>0){
+for(r in list.of.rectangles.dec[1:(length(list.of.rectangles.dec)-number_reference_rectangles)]){   if(r$preset_decision>0){
     probability_vector <- r$preset_decision_value;
   } else {
     for(d in decisions){
-      rprime <- list.of.rectangles.mtp[[d]][[1]]
-      variable_start_position <- variable_location(r,d,rprime,1);
-      variable_end_position <- variable_location(r,d,rprime,length(actions));
-      probability_vector[d] <- sum(z_rounded[variable_start_position:variable_end_position]);
+       rprime <- list.of.rectangles.mtp[[d]][[1]]
+       variable_start_position <- variable_location(r,d,rprime,1);
+       variable_end_position <- variable_location(r,d,rprime,length(actions));
+       probability_vector[d] <- sum(z_rounded[variable_start_position:variable_end_position]);
     }
+  }
+  for(d in decisions){
     if(d_type[d]==3 && probability_vector[d]>1e-10){
-        max_d_type_3_y_value <- max(max_d_type_3_y_value,r$upper_boundaries[2])} else
+        max_d_type_value[d] <- max(max_d_type_value[d],r$upper_boundaries[2])} else
     if(d_type[d]==4 && probability_vector[d]>1e-10){
-        max_d_type_4_x_value <- max(max_d_type_4_x_value,r$upper_boundaries[1])}
+        max_d_type_value[d] <- max(max_d_type_value[d],r$upper_boundaries[1])}
   }
 }
-print(c(max_d_type_3_y_value,max_d_type_4_x_value))
+print(max_d_type_value);
 
 for(d_plot in decisions){
   postscript(paste("rejection_regions_",d_plot,".eps",sep=""),height=8,horizontal=FALSE,onefile=FALSE,width=8)
@@ -1205,15 +1208,14 @@ for(d_plot in decisions){
         }
       if(probability_of_d_plot > 1e-10){ # if positive probability, then plot rectangle
           rect(max(rprime$lower_boundaries[1]-tau,-10),max(rprime$lower_boundaries[2]-tau,-10),min(rprime$upper_boundaries[1]+tau,10),min(rprime$upper_boundaries[2]+tau,10),col=col_value-1,border=NA)}
-      }}} else if(d_type[d_plot]==3 && rprime$lower_boundaries[2]< max_d_type_3_y_value){
+      }}} else if(d_type[d_plot]==3 && rprime$lower_boundaries[2]< max_d_type_value[d_plot]){
         rect(max(rprime$lower_boundaries[1]-tau,-10),max(rprime$lower_boundaries[2]-tau,-10),min(rprime$upper_boundaries[1]+tau,10),min(rprime$upper_boundaries[2]+tau,10),col=col_value-1,border=NA)
 
-      } else if(d_type[d_plot]==4 && rprime$lower_boundaries[1]<max_d_type_4_x_value){
+      } else if(d_type[d_plot]==4 && rprime$lower_boundaries[1]<max_d_type_value[d_plot]){
         rect(max(rprime$lower_boundaries[1]-tau,-10),max(rprime$lower_boundaries[2]-tau,-10),min(rprime$upper_boundaries[1]+tau,10),min(rprime$upper_boundaries[2]+tau,10),col=col_value-1,border=NA)
       } else if(d_type[d_plot]==1){
         rect(max(rprime$lower_boundaries[1]-tau,-10),max(rprime$lower_boundaries[2]-tau,-10),min(rprime$upper_boundaries[1]+tau,10),min(rprime$upper_boundaries[2]+tau,10),col=col_value-1,border=NA)
       }
-
     }
   }
   legend("bottomleft",legend=c("none", "H01", "H02", "H0C", "H01 and H0C", "H02 and H0C", "all"),title = "Reject Null Hypotheses:",pch=c(15,15,15,15,15,15,15),col=actions-1,cex=1,bg="white")
