@@ -1001,8 +1001,11 @@ if(!is.null(LP.solver.path)){
 sln = R.matlab::readMat(paste("sln2M",LP.iteration,".mat",sep=""))}
 #system('matlab -nojvm -r "cplex_optimize_design()" > output_LP_solver')
 else if(type.of.LP.solver=="gurobi") {
-  sln = solve_linear_program_gurobi(total.alpha)
+  sln = solve_linear_program_gurobi(total.alpha);
+} else if(type.of.LP.solver=="glpk") {
+  sln = solve_linear_program_glpk(total.alpha);
 }
+
 
 save(sln,file=paste("sln2M",LP.iteration,".rdata",sep=""));
 ncp.active.FWER.constraints <- ncp.list[which(sln$dual[1:length(ncp.list)]>0.01)];
