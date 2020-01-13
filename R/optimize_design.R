@@ -960,10 +960,11 @@ if(any(ls()=="additional_inequality_constraints_part1")){
 tmp = additional_inequality_constraints_part1
 col = read.table("number_variables.txt")
 col = col$V1
-R.matlab::writeMat("A4.mat",A4=tmp)
+try_to_write_A4.mat <- tryCatch((R.matlab::writeMat("A4.mat",A4=tmp)),error=function(cond){return("A4toolarge")})
+if(try_to_write_A4.mat != "A4toolarge"){
 rm(additional_inequality_constraints_part1)
 R.matlab::writeMat("a4status.mat",a4status=1)
-} else {R.matlab::writeMat("a4status.mat",a4status=0)}
+} else {R.matlab::writeMat("a4status.mat",a4status=0)}} else {R.matlab::writeMat("a4status.mat",a4status=0)}
 
 tmp11 = read.table("number_equality_constraints_of_first_type.txt")
 tmp11 = tmp11$V1
