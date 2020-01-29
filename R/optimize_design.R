@@ -14,7 +14,7 @@
 #' @param ncp.list list of pairs of real numbers representing the non-centrality parameters to be used in the Type I error constraints; if list is empty, then default list is used.
 #' @param list.of.rectangles.dec list of rectangles representing decision region partition, encoded as a list with each element of the list having fields $lower_boundaries (pair of real numbers representing coordinates of lower left corner of rectangle), $upper_boundaries (pair of real numbers representing upper right corner of rectangle), $allowed_decisions (subset of stage.2.sample.sizes.per.enrollment.choice representing which decisions allowed if first stage z-statistics are in corresponding rectangle; default is entire list stage.2.sample.sizes.per.enrollment.choice), $preset_decision (indicator of whether the decision probabilities are hard-coded by the user; default is 0), $d_probs (empty unless $preset_decision==1, in which case it is a vector representing the probabilities of each decision); if list.or.rectangles.dec is empty, then a default partition is used based on discretization.parameter.
 #' @param LP.iteration positive integer used in file name to store output; can be used to avoid overwriting previous computations
-#' @param prior.covariance.matrix 2x2 positive semidefinite matrix representing the covariance corresponding to each component of the mixture of multivariate normals prior distribution (used only in defining the objective function); the default is the matrix of all 0's, corresponding to the prior being a mixture of point masses
+#' @param prior.covariance.matrix 2x2 positive semidefinite matrix representing the covariance corresponding to each component of the mixture of multivariate normals prior distribution (used only in defining the objective function); the default is the matrix of all 0's, corresponding to the prior being a mixture of point masses. If separate covariance matrices are desired for each component of the mixture prior distribution, a list of  such 2x2 matrices of same length as the number of rows in data.generating.distributions can be provided instead of a single matrix; this option allows the user to specify anyfinite mixture of point masses (by setting the corresponding covariance matrices to have all 0's) and bivariate normal distributions.
 #' @param LP.solver.path path (i.e., directory) where LP.solver is installed; e.g., if type.of.LP.solver=="cplex" then LP.solver.path is directory where cplex is installed
 #' @param cleanup.temporary.files TRUE/FALSE indicates whether temporary files generated during problem solving process should be deleted or not after termination; set to FALSE for debugging purposes only.
 #' @return An optimized policy is returned, consisting of the following elements (defined in the paper): S1, A1, S2, A2 (sets of states and actions) and the optimized policy (pi_1, pi_2). Also, additional information related to the optimized design is saved as "optimized_design<k>.rdata", where <k> is the user-defined iteration number (LP.iteration).
@@ -186,10 +186,22 @@ mean_vector <- function(ncp,d){
 #    +as.numeric(ncp[2]>delta_2_min)*indicator_contribute_to_subpopulation2_power
 #    +as.numeric(rho1*ncp[1]+rho2*ncp[2]>rho1*delta_1_min+rho2*delta_2_min)*indicator_contribute_to_combined_population_power))}
 
+## If prior.covariance.matrix is a single 2x2 matrix, replicate it for each row of data.generating.distributions;
+if((!is.null(dim(prior.covariance.matrix))) && (sum(dim(prior.covariance.matrix)==c(2,2))==2)){
+  prior.covariance.matrix.list <- list()
+  for(row.number.counter in 1:(dim(data.generating.distributions)[1])){
+    prior.covariance.matrix.list <- c(prior.covariance.matrix.list,list(prior.covariance.matrix))
+  }
+} else if(length(prior.covariance.matrix)!=dim(data.generating.distributions)[1]) {
+  #; else, if prior.covariance.matrix is already a list, make sure that it has the same number of rows as data.generating.distributions
+   print("Error in problem inputs: prior.covariance.matrix needs to be either a 2 by 2 matrix or a list of such matrices of same length as the number of rows in data.generating.distributions."); return(NULL);
+} else {prior.covariance.matrix.list <- prior.covariance.matrix}
+
+browser();
 ## Handles case of prior distribution used in objective function
 modified_joint_distribution <- function(prior_component_index,decision){
 	modified_mean_vector <- mean_vector(ncp=prior_mean_support[[prior_component_index]],d=decision)
-	modified_covariance_matrix <-  (array(c(mean_vector(ncp=c(1,0),d=decision),mean_vector(ncp=c(0,1),d=decision)),c(length(mean_vector(ncp=c(1,0),d=decision)),2))  %*% prior.covariance.matrix %*% t(array(c(mean_vector(ncp=c(1,0),d=decision),mean_vector(ncp=c(0,1),d=decision)),c(length(mean_vector(ncp=c(1,0),d=decision)),2)))) +  covariance_matrix[[decision]]
+	modified_covariance_matrix <-  (array(c(mean_vector(ncp=c(1,0),d=decision),mean_vector(ncp=c(0,1),d=decision)),c(length(mean_vector(ncp=c(1,0),d=decision)),2))  %*% prior.covariance.matrix.list[[prior_component_index]] %*% t(array(c(mean_vector(ncp=c(1,0),d=decision),mean_vector(ncp=c(0,1),d=decision)),c(length(mean_vector(ncp=c(1,0),d=decision)),2)))) +  covariance_matrix[[decision]]
 	return(list(modified_mean_vector,modified_covariance_matrix))
 }
 
