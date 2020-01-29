@@ -395,6 +395,7 @@ write(number_equality_constraints_part1,f=paste("number_equality_constraints_of_
 write(number_equality_constraints_part2,f=paste("number_equality_constraints_of_second_type.txt"))
 write(length(ncp.list),f=paste("number_A1_constraints.txt"))
 write(ceiling(length(ncp.list)/constraints_per_A1_file),f=paste("number_A1_files.txt"))
+power.constraints.matrix <- power.constraints
 power.constraints <- as.vector(power.constraints)
 save(power.constraints,file="power_constraints.rdata")
 #save(list.of.rectangles.mtp,file=paste("list.of.rectangles.mtp",LP.iteration,".rdata",sep=""))
@@ -1034,36 +1035,48 @@ optimized.policy <- extract_solution(list.of.rectangles.dec,decisions,list.of.re
 save(input.parameters,ncp.active.FWER.constraints,list.of.rectangles.dec,list.of.rectangles.mtp,ncp.list,sln,optimized.policy,file=paste("optimized.design",LP.iteration,".rdata",sep=""))
 print(paste("Adaptive Design Optimization Completed. Optimal design is stored in the file: optimized_design",LP.iteration,".rdata",sep=""))
 
-# Clean up files used to specify LP
-if(cleanup.temporary.files){
-system('rm A*.rdata')
-system('rm A*.mat')
-system('rm a*.mat')
-system('rm cc.mat')
-system('rm c.rdata')
-system('rm number_variables.txt')
-system('rm ncp.list*.rdata')
-system('rm list.of.rectangles.mtp*.rdata')
-system('rm iteration.mat')
-system('rm output_LP_solver')
-system('rm sln2M*.mat')
-system('rm Inequality_Constraints_to_Restrict_MTP_to_Sufficient_Statistics.rdata')
-system('rm Inequality_Constraints_to_set_monotonicity_in_hypotheses_rejected.rdata')
-system('rm number_equality_constraints_of_first_type.txt')
-system('rm number_equality_constraints_of_second_type.txt')
-system('rm number_A1_constraints.txt')
-system('rm number_A1_files.txt')
-system('rm power_constraints.rdata')
-system('rm max_error_prob*')
-}
-
 if(((type.of.LP.solver=="matlab" || type.of.LP.solver=="cplex") && (sln$status==1 || sln$status==5 )) || (type.of.LP.solver=="gurobi" && sln$status == "OPTIMAL") || (type.of.LP.solver=="glpk" && sln$status == 0)){
   print(paste("Feasible Solution was Found and Optimal Expected Sample Size is",sln$val))
   print("Fraction of solution components with integral value solutions")
   print(sum(sln$z>1-1e-10 | sln$z<10e-10)/length(sln$z))
   print("Active Type I error constraints")
   print(ncp.active.FWER.constraints)
+  print("User defined power constraints (desired power); each row corresponds to a data generating distribution; each column corresponds to H01, H02, H0C desired power, respectively.")
+  load("A3.rdata")
+  power.requirement.matrix <- cbind(data.generating.distributions,power.constraints.matrix)
+  rownames(power.requirement.matrix) <- paste("Scenario",1:dim(data.generating.distributions)[1])
+  print(power.requirement.matrix)
+  print("Probability of rejecting each null hypothesis (last 3 columns) under each data generating distribution (row)")
+  rejection.probabilities <- cbind(power_constraint_matrix_H01 %*% sln$z,power_constraint_matrix_H02 %*% sln$z,power_constraint_matrix_H0C %*% sln$z)
+  colnames(rejection.probabilities) <- c("H01","H02","H0C")
+  rejection_probability_matrix <- cbind(data.generating.distributions,rejection.probabilities);
+  rownames(rejection_probability_matrix) <- paste("Scenario",1:dim(data.generating.distributions)[1])
+  print(rejection_probability_matrix)
   return(optimized.policy)
 } else {print("Problem was Infeasible"); print(paste("Linear program exit status from solver",type.of.LP.solver,"is")); print(sln$status);
   print("Please consider modifying the problem inputs, e.g., by relaxing the power constraints or by increasing the sample size, and submitting a new problem. Thank you for using this trial design optimizer."); return(NULL)}
+
+# Clean up files used to specify LP
+if(cleanup.temporary.files){
+  system('rm A*.rdata')
+  system('rm A*.mat')
+  system('rm a*.mat')
+  system('rm cc.mat')
+  system('rm c.rdata')
+  system('rm number_variables.txt')
+  system('rm ncp.list*.rdata')
+  system('rm list.of.rectangles.mtp*.rdata')
+  system('rm iteration.mat')
+  system('rm output_LP_solver')
+  system('rm sln2M*.mat')
+  system('rm Inequality_Constraints_to_Restrict_MTP_to_Sufficient_Statistics.rdata')
+  system('rm Inequality_Constraints_to_set_monotonicity_in_hypotheses_rejected.rdata')
+  system('rm number_equality_constraints_of_first_type.txt')
+  system('rm number_equality_constraints_of_second_type.txt')
+  system('rm number_A1_constraints.txt')
+  system('rm number_A1_files.txt')
+  system('rm power_constraints.rdata')
+  system('rm max_error_prob*')
+}
+
 }
