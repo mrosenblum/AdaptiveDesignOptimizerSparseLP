@@ -1,0 +1,44 @@
+#Install R package if not already done so:
+#remotes::install_github("mrosenblum/AdaptiveDesignOptimizerSparseLP")
+
+# Load R package
+library(AdaptiveDesignOptimizerSparseLP)
+set.seed(32515);
+# Set all problem parameters based on Example 3.2, and using explicit choices of the following input parameters:
+# The proportion of the population in subpopulation 1:
+subpopulation.1.proportion=0.5;
+# Sample size in stage 1 for each subpopulation: 50; when both subpopulations enrolled in stage 2, then 50 new participants are enrolled from each subpopulation; when only 1 subpopulation is enrolled in stage 2 then 150 new participants are enrolled from that subpopulation. This is equivalent to setting n=200 in our adaptive design template n^(1b) from Section 3.2 of the paper. These sample sizes are encoded below:
+stage.1.sample.sizes=c(50,50);
+stage.2.sample.sizes.per.enrollment.choice=matrix(c(50,50,
+                                                   0,0,
+                                                   150,0,
+                                                   0,150),nrow=4,ncol=2,byrow=TRUE,dimnames=list(c(),c("Subpopulation1Stage2SampleSize","Subpopulation2Stage2SampleSize")));
+# Minimum, clinically meaningful treatment effect size: Delta^min=sqrt(1/2)*(qnorm(0.95+1e-4)+qnorm(0.95))/5=0.465.
+Delta_min = sqrt(1/2)*(qnorm(0.95+1e-4)+qnorm(0.95))/5; 
+# The corresponding data generating distributions are encoded as follows (where we set the outcome variance to 1 for each subpopulation bby study arm combination):
+data.generating.distributions=matrix(data=c(0,0,1,1,1,1,
+                                           0,Delta_min,1,1,1,1,
+                                           Delta_min,0,1,1,1,1,
+                                           Delta_min,Delta_min,1,1,1,1),nrow=4,ncol=6,byrow=TRUE,dimnames=list(c(),c("Delta1","Delta2","Variance10","Variance11","Variance20","Variance21")));
+# The resulting non-centrality parameter (see Section 5.1 of the paper) matches that used in the paper computations.
+# Required Familywise Type I error:
+total.alpha=0.05;
+# We set the desired power for each of the power constraint to be 0.83 in the first four iterations of our algorithm, rather than the intended final output of 0.82, since we anticipate rounding in the final iteration that leads to a slight decrease in power. 
+desired.power=0.83;
+power.constraints=matrix(c(0,0,0,
+			   0,desired.power,0,
+			   desired.power,0,0,
+			   0,0,desired.power),nrow=4,ncol=3,byrow=TRUE,dimnames=list(c(),c("PowerH01","PowerH02","PowerH0C")));
+objective.function.weights=0.25*c(1,1,1,1);
+prior.covariance.matrix=diag(2);
+type.of.LP.solver="cplex";
+discretization.parameter=c(1,1,10);
+number.cores=30;
+LP.solver.path='/users/mrosen/Tools/ibm/ILOG/CPLEX_Studio128/cplex/matlab/x86-64_linux'
+ncp.list <- list(c(0,0),c(0,1.960894),c(1.960894,0))
+
+# Run first iteration solving sparse linear program
+optimal_policy1 <- optimize_design(subpopulation.1.proportion,total.alpha,data.generating.distributions,stage.1.sample.sizes,stage.2.sample.sizes.per.enrollment.choice,objective.function.weights,power.constraints,type.of.LP.solver,discretization.parameter,number.cores,ncp.list,list.of.rectangles.dec=c(),LP.iteration=1,prior.covariance.matrix,LP.solver.path=LP.solver.path)
+# Construct new list of familywise Type I error constraints focusing on neighborhoods of active constraints from previous iteration 
+# The Active Type I error constraints are contained in the output file optimized.design1.rdata and stored in the variable ncp.active.FWER.constraints, and in this case are the following 3 pairs: 0 0; 0.000000 1.960894; 1.960894 0.000000
+# We construct a list of new Type I error constraints in neighborhoods around these active constraints, for use in the next iteration (below)
