@@ -16,6 +16,7 @@
 #' @param LP.iteration positive integer used in file name to store output; can be used to avoid overwriting previous computations
 #' @param prior.covariance.matrix 2x2 positive semidefinite matrix representing the covariance corresponding to each component of the mixture of multivariate normals prior distribution (used only in defining the objective function); the default is the matrix of all 0's, corresponding to the prior being a mixture of point masses. If separate covariance matrices are desired for each component of the mixture prior distribution, a list of  such 2x2 matrices of same length as the number of rows in data.generating.distributions can be provided instead of a single matrix; this option allows the user to specify anyfinite mixture of point masses (by setting the corresponding covariance matrices to have all 0's) and bivariate normal distributions.
 #' @param LP.solver.path path (i.e., directory) where LP.solver is installed; e.g., if type.of.LP.solver=="cplex" then LP.solver.path is directory where cplex is installed
+#' @param loss.function a matrix of same length as the number of enrollment choices for stage 2, i.e., same length as the number of rows in stage.2.sample.sizes.per.enrollment.choice. Each component d of this vector represents the loss corresponding to enrollment choice d; if nothing is specified, the default is to use the total sample size under each enrollment choice, so that the objective function represents expected sample size. An alternative choice would be, for example, the trial duration under each enrollment choice, or some combination of sample size and trial duration.
 #' @param cleanup.temporary.files TRUE/FALSE indicates whether temporary files generated during problem solving process should be deleted or not after termination; set to FALSE for debugging purposes only.
 #' @return An optimized policy is returned, consisting of the following elements (defined in the paper): S1, A1, S2, A2 (sets of states and actions) and the optimized policy (pi_1, pi_2). Also, additional information related to the optimized design is saved as "optimized_design<k>.rdata", where <k> is the user-defined iteration number (LP.iteration).
 #' @section Output
@@ -60,6 +61,7 @@ optimize_design <- function(subpopulation.1.proportion,
 	LP.iteration=1,
 	prior.covariance.matrix=diag(2)*0,
   LP.solver.path=c(),
+  loss.function=c(),
   cleanup.temporary.files=TRUE){
 
 max_error_prob <- 0 # track approximation errors in problem construction; initialize to 0 here
@@ -95,7 +97,12 @@ number_decisions <- ifelse(length(n_stage2_subpopulation1_decision)==length(n_st
 decisions <- (1:number_decisions)
 
 ## Set loss function to be sample size; can modify if desired--general format is matrix with number_decision rows and number_actions columns, and entry is loss function value at corresponding (decision,action pair). Can also generalize to make it depend on the ncp value as well but if so need to modify generalized_generate... objective function construction
-loss_function_value <- array(n_stage1_subpopulation1+n_stage1_subpopulation2+n_stage2_subpopulation1_decision+n_stage2_subpopulation2_decision,c(number_decisions,number_actions))
+if(is.null(loss.function)){
+loss_function_value <- array(n_stage1_subpopulation1+n_stage1_subpopulation2+n_stage2_subpopulation1_decision+n_stage2_subpopulation2_decision,c(number_decisions,number_actions))} else if(length(loss.function)==number_decisions){
+  loss_function_value <- array(loss.function,c(number_decisions,number_actions))
+} else {
+  print("Error in inputs: loss.function needs to be a vector with number of entries equal to the number of possible enrollment decisions for stage 2."); return(NULL);
+}
 
 # Convert data.generating.distributions to list of non-centrality parameter vectors
 prior_mean_support <- c()
@@ -197,7 +204,6 @@ if((!is.null(dim(prior.covariance.matrix))) && (sum(dim(prior.covariance.matrix)
    print("Error in problem inputs: prior.covariance.matrix needs to be either a 2 by 2 matrix or a list of such matrices of same length as the number of rows in data.generating.distributions."); return(NULL);
 } else {prior.covariance.matrix.list <- prior.covariance.matrix}
 
-browser();
 ## Handles case of prior distribution used in objective function
 modified_joint_distribution <- function(prior_component_index,decision){
 	modified_mean_vector <- mean_vector(ncp=prior_mean_support[[prior_component_index]],d=decision)
