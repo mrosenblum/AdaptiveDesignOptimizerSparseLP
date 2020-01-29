@@ -12,7 +12,7 @@ optimize_design(subpopulation.1.proportion, total.alpha,
   discretization.parameter = c(1, 1, 10), number.cores = 30,
   ncp.list = c(), list.of.rectangles.dec = c(), LP.iteration = 1,
   prior.covariance.matrix = diag(2) * 0, LP.solver.path = c(),
-  cleanup.temporary.files = TRUE)
+  loss.function = c(), cleanup.temporary.files = TRUE)
 }
 \arguments{
 \item{subpopulation.1.proportion}{Proportion of overall population in subpopulation 1. Must be between 0 and 1.}
@@ -41,9 +41,11 @@ optimize_design(subpopulation.1.proportion, total.alpha,
 
 \item{LP.iteration}{positive integer used in file name to store output; can be used to avoid overwriting previous computations}
 
-\item{prior.covariance.matrix}{2x2 positive semidefinite matrix representing the covariance corresponding to each component of the mixture of multivariate normals prior distribution (used only in defining the objective function); the default is the matrix of all 0's, corresponding to the prior being a mixture of point masses}
+\item{prior.covariance.matrix}{2x2 positive semidefinite matrix representing the covariance corresponding to each component of the mixture of multivariate normals prior distribution (used only in defining the objective function); the default is the matrix of all 0's, corresponding to the prior being a mixture of point masses. If separate covariance matrices are desired for each component of the mixture prior distribution, a list of  such 2x2 matrices of same length as the number of rows in data.generating.distributions can be provided instead of a single matrix; this option allows the user to specify anyfinite mixture of point masses (by setting the corresponding covariance matrices to have all 0's) and bivariate normal distributions.}
 
 \item{LP.solver.path}{path (i.e., directory) where LP.solver is installed; e.g., if type.of.LP.solver=="cplex" then LP.solver.path is directory where cplex is installed}
+
+\item{loss.function}{a matrix of same length as the number of enrollment choices for stage 2, i.e., same length as the number of rows in stage.2.sample.sizes.per.enrollment.choice. Each component d of this vector represents the loss corresponding to enrollment choice d; if nothing is specified, the default is to use the total sample size under each enrollment choice, so that the objective function represents expected sample size. An alternative choice would be, for example, the trial duration under each enrollment choice, or some combination of sample size and trial duration.}
 
 \item{cleanup.temporary.files}{TRUE/FALSE indicates whether temporary files generated during problem solving process should be deleted or not after termination; set to FALSE for debugging purposes only.}
 }

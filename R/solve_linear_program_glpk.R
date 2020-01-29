@@ -81,9 +81,14 @@ A         = rbind(AAn,At,-At,A2)
 a         = c(aan,rep(1,d),rep(0,d),a2)
 const.dir = c(rep("<=",dim(AAn)[1]+2*d),rep("==",dim(A2)[1]))
 
-tmp      = Rglpk::Rglpk_solve_LP(obj,A,const.dir,a,max=FALSE)
-solution = tmp$solution
+tmp      = Rglpk::Rglpk_solve_LP(obj,A,const.dir,a,max=FALSE,control = list("tm_limit" = 120000))
 
-return(solution)
+sln        = list()
+sln$z      = tmp$solution
+sln$status = tmp$status
+sln$dual   = tmp$solution_dual
+sln$val    = tmp$optimum
+
+return(sln)
 }
 

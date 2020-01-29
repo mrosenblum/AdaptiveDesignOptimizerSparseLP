@@ -1162,7 +1162,7 @@ for(r in list.of.rectangles.dec[1:(length(list.of.rectangles.dec)-number_referen
         max_d_type_value[d] <- max(max_d_type_value[d],r$upper_boundaries[1])}
   }
 }
-print(max_d_type_value);
+#print(max_d_type_value);
 
 for(d_plot in decisions){
   postscript(paste("rejection_regions_",d_plot,".eps",sep=""),height=8,horizontal=FALSE,onefile=FALSE,width=8)
@@ -1241,10 +1241,16 @@ print("Maximum familywise Type I error rate among Type I error constraints")
 print(max_FWER)
 
 load("A3.rdata")
-print("User defined power constraints (desired power); each row corresponds to a scenario and columns correspond to H01, H02, H0C desired power")
-print("power.constraints")
-print("Power achieved for each null hypothesis under each power constraint scenario (row)")
-print(cbind(power_constraint_matrix_H01 %*% z_rounded,power_constraint_matrix_H02 %*% z_rounded,power_constraint_matrix_H0C %*% z_rounded))
+print("User defined power constraints (desired power); each row corresponds to a data generating distribution; each column corresponds to H01, H02, H0C desired power, respectively.")
+power.requirement.matrix <- cbind(data.generating.distributions,power.constraints.matrix)
+rownames(power.requirement.matrix) <- paste("Scenario",1:dim(data.generating.distributions)[1])
+print(power.requirement.matrix)
+print("Probability of rejecting each null hypothesis (last 3 columns) under each data generating distribution (row)")
+rejection.probabilities <- cbind(power_constraint_matrix_H01 %*% z_rounded,power_constraint_matrix_H02 %*% z_rounded,power_constraint_matrix_H0C %*% z_rounded)
+colnames(rejection.probabilities) <- c("H01","H02","H0C")
+rejection_probability_matrix <- cbind(data.generating.distributions,rejection.probabilities);
+rownames(rejection_probability_matrix) <- paste("Scenario",1:dim(data.generating.distributions)[1])
+print(rejection_probability_matrix)
 }
 
 # Clean up files used to specify LP
