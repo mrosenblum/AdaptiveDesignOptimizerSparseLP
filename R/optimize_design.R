@@ -9,7 +9,7 @@
 #' @param objective.function.weights Vector with length equal to number of rows of population.parameters, representing weights used to define the objective function
 #' @param power.constraints Matrix with same number of rows as population.parameters (each representing a data generating distribution) and three columns corresponding to the required power to reject (at least) H_01, H_02, H_0C, respectively.
 #' @param type.of.LP.solver "matlab", "cplex", "GLPK", or "gurobi" The linear program solve that you want to use; assumes that you have installed this already and that path is set
-#' @param discretization.parameter vector with 3 elements representing initial discretization of decision region, rejection regions, and grid representing Type I error constraints
+#' @param discretization.parameter vector with 3 positive-valued components representing initial discretization of decision region, rejection regions, and grid representing Type I error constraints; first component is edge length of each square in the decision region, second component is edge length of each square in the rejection regions, and third component determines the number of Type I error constraints equally spaced on the boundary of the null space for each null hypothesis. The third component is only used if ncp.list below is left unspecified.
 #' @param number.cores the number of cores available for parallelization using the parallel R package
 #' @param ncp.list list of pairs of real numbers representing the non-centrality parameters to be used in the Type I error constraints; if list is empty, then default list is used.
 #' @param list.of.rectangles.dec list of rectangles representing decision region partition, encoded as a list with each element of the list having fields $lower_boundaries (pair of real numbers representing coordinates of lower left corner of rectangle), $upper_boundaries (pair of real numbers representing upper right corner of rectangle), $allowed_decisions (subset of stage.2.sample.sizes.per.enrollment.choice representing which decisions allowed if first stage z-statistics are in corresponding rectangle; default is entire list stage.2.sample.sizes.per.enrollment.choice), $preset_decision (indicator of whether the decision probabilities are hard-coded by the user; default is 0), $d_probs (empty unless $preset_decision==1, in which case it is a vector representing the probabilities of each decision); if list.or.rectangles.dec is empty, then a default partition is used based on discretization.parameter.
@@ -219,8 +219,9 @@ number_reference_rectangles <- number_decisions
 w1 <- 6
 w2 <- 6
 # dimension of small squares used in discretization
-tau <- discretization.parameter[1]
-tau_mtp <- discretization.parameter[2]
+if(discretization.parameter[1]<=0 || discretization.parameter[2]<=0){print("Error in inputs: discretization.parameter needs to be a vector of three positive values"); return(NULL)}
+tau <- 3/(ceiling(3/abs(discretization.parameter[1])));
+tau_mtp <- 3/(ceiling(3/abs(discretization.parameter[2])));
 # Settings for integration region and precision in computing lower bound to original problem using dual solution to discretized problem
 max_eval_iters <- 100000
 w1_unconst <- 5
@@ -1031,44 +1032,61 @@ save(sln,file=paste("sln2M",LP.iteration,".rdata",sep=""));
 ncp.active.FWER.constraints <- ncp.list[which(sln$dual[1:length(ncp.list)]>0.01)];
 input.parameters <- list(subpopulation.1.proportion,total.alpha,data.generating.distributions,stage.1.sample.sizes,stage.2.sample.sizes.per.enrollment.choice,objective.function.weights,power.constraints,type.of.LP.solver,discretization.parameter,number.cores,ncp.list,list.of.rectangles.dec,LP.iteration,prior.covariance.matrix,LP.solver.path);
 names(input.parameters) <- list("subpopulation.1.proportion","total.alpha","data.generating.distributions","stage.1.sample.sizes","stage.2.sample.sizes.per.enrollment.choice","objective.function.weights","power.constraints","type.of.LP.solver","discretization.parameter","number.cores","ncp.list","list.of.rectangles.dec","LP.iteration","prior.covariance.matrix","LP.solver.path");
-optimized.policy <- extract_solution(list.of.rectangles.dec,decisions,list.of.rectangles.mtp,actions);
+optimized.policy <- extract_solution(list.of.rectangles.dec,decisions,list.of.rectangles.mtp,actions,sln);
 save(input.parameters,ncp.active.FWER.constraints,list.of.rectangles.dec,list.of.rectangles.mtp,ncp.list,sln,optimized.policy,file=paste("optimized.design",LP.iteration,".rdata",sep=""))
 print(paste("Adaptive Design Optimization Completed. Optimal design is stored in the file: optimized_design",LP.iteration,".rdata",sep=""))
 
 if(((type.of.LP.solver=="matlab" || type.of.LP.solver=="cplex") && (sln$status==1 || sln$status==5 )) || (type.of.LP.solver=="gurobi" && sln$status == "OPTIMAL") || (type.of.LP.solver=="glpk" && sln$status == 0)){
-  print(paste("Feasible Solution was Found and Optimal Expected Sample Size is",sln$val))
+  print(paste("Feasible Solution was Found and Optimal Expected Sample Size is",round(sln$val,2)))
   print("Fraction of solution components with integral value solutions")
-  print(sum(sln$z>1-1e-10 | sln$z<10e-10)/length(sln$z))
-  print("Active Type I error constraints")
-  print(ncp.active.FWER.constraints)
+  print(round(sum(sln$z>1-1e-10 | sln$z<10e-10)/length(sln$z),3))
+  if(length(ncp.active.FWER.constraints)>0){
+    print("Active Type I error constraints")
+  print(ncp.active.FWER.constraints)}
   print("User defined power constraints (desired power); each row corresponds to a data generating distribution; each column corresponds to H01, H02, H0C desired power, respectively.")
   load("A3.rdata")
   power.requirement.matrix <- cbind(data.generating.distributions,power.constraints.matrix)
   rownames(power.requirement.matrix) <- paste("Scenario",1:dim(data.generating.distributions)[1])
-  print(power.requirement.matrix)
+  print(round(power.requirement.matrix,3))
   print("Probability of rejecting each null hypothesis (last 3 columns) under each data generating distribution (row)")
   rejection.probabilities <- cbind(power_constraint_matrix_H01 %*% sln$z,power_constraint_matrix_H02 %*% sln$z,power_constraint_matrix_H0C %*% sln$z)
   colnames(rejection.probabilities) <- c("H01","H02","H0C")
   rejection_probability_matrix <- cbind(data.generating.distributions,rejection.probabilities);
   rownames(rejection_probability_matrix) <- paste("Scenario",1:dim(data.generating.distributions)[1])
-  print(rejection_probability_matrix)
+  print(round(rejection_probability_matrix,3))
+  # Clean up files used to specify LP
+  if(cleanup.temporary.files){
+    system('rm A*.rdata')
+    system('rm c.rdata')
+    system('rm number_variables.txt')
+    system('rm ncp.list*.rdata')
+    system('rm Inequality_Constraints_to_Restrict_MTP_to_Sufficient_Statistics.rdata')
+    system('rm Inequality_Constraints_to_set_monotonicity_in_hypotheses_rejected.rdata')
+    system('rm number_equality_constraints_of_first_type.txt')
+    system('rm number_equality_constraints_of_second_type.txt')
+    system('rm number_A1_constraints.txt')
+    system('rm number_A1_files.txt')
+    system('rm power_constraints.rdata')
+    if(type.of.LP.solver=="matlab" || type.of.LP.solver=="cplex"){
+      system('rm A*.mat')
+      system('rm a*.mat')
+      system('rm cc.mat')
+      system('rm list.of.rectangles.mtp*.rdata')
+      system('rm iteration.mat')
+      system('rm output_LP_solver')
+      system('rm sln2M*.mat')
+      system('rm max_error_prob*')
+    }
+  }
   return(optimized.policy)
 } else {print("Problem was Infeasible"); print(paste("Linear program exit status from solver",type.of.LP.solver,"is")); print(sln$status);
-  print("Please consider modifying the problem inputs, e.g., by relaxing the power constraints or by increasing the sample size, and submitting a new problem. Thank you for using this trial design optimizer."); return(NULL)}
-
+  print("Please consider modifying the problem inputs, e.g., by relaxing the power constraints or by increasing the sample size, and submitting a new problem. Thank you for using this trial design optimizer.");
 # Clean up files used to specify LP
-if(cleanup.temporary.files){
+  if(cleanup.temporary.files){
   system('rm A*.rdata')
-  system('rm A*.mat')
-  system('rm a*.mat')
-  system('rm cc.mat')
   system('rm c.rdata')
   system('rm number_variables.txt')
   system('rm ncp.list*.rdata')
-  system('rm list.of.rectangles.mtp*.rdata')
-  system('rm iteration.mat')
-  system('rm output_LP_solver')
-  system('rm sln2M*.mat')
   system('rm Inequality_Constraints_to_Restrict_MTP_to_Sufficient_Statistics.rdata')
   system('rm Inequality_Constraints_to_set_monotonicity_in_hypotheses_rejected.rdata')
   system('rm number_equality_constraints_of_first_type.txt')
@@ -1076,7 +1094,17 @@ if(cleanup.temporary.files){
   system('rm number_A1_constraints.txt')
   system('rm number_A1_files.txt')
   system('rm power_constraints.rdata')
-  system('rm max_error_prob*')
-}
-
+  if(type.of.LP.solver=="matlab" || type.of.LP.solver=="cplex"){
+    system('rm A*.mat')
+    system('rm a*.mat')
+    system('rm cc.mat')
+    system('rm list.of.rectangles.mtp*.rdata')
+    system('rm iteration.mat')
+    system('rm output_LP_solver')
+    system('rm sln2M*.mat')
+    system('rm max_error_prob*')
+      }
+    }
+  return(NULL);
+  }
 }

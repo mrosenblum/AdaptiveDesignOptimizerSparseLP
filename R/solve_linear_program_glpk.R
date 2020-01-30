@@ -5,7 +5,7 @@ for(i in 1:number_A1_files){
   tmp = load(paste("A1",i,".rdata",sep=""))
   tmp = constraint_list
   A1 = rbind(A1,tmp)
-  print(i)
+  #print(i)
 }
 
 tmp = load("A2.rdata")

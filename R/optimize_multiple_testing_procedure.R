@@ -1035,14 +1035,14 @@ else if(type.of.LP.solver=="test_version"){
 save(sln,file=paste("sln2M",LP.iteration,".rdata",sep=""))
 input.parameters <- list(subpopulation.1.proportion,total.alpha,data.generating.distributions,stage.1.sample.sizes,stage.2.sample.sizes.per.enrollment.choice,objective.function.weights,power.constraints,type.of.LP.solver,discretization.parameter,number.cores,ncp.list,list.of.rectangles.dec,LP.iteration,prior.covariance.matrix,round.each.multiple.testing.procedure.rectangle.to.integer,plots.to.round.simply,rounding.threshold.H01,rounding.threshold.H02,rounding.threshold.H0C,power.constraint.tolerance,LP.solver.path);
 names(input.parameters) <- list("subpopulation.1.proportion","total.alpha","data.generating.distributions","stage.1.sample.sizes","stage.2.sample.sizes.per.enrollment.choice","objective.function.weights","power.constraints","type.of.LP.solver","discretization.parameter","number.cores","ncp.list","list.of.rectangles.dec","LP.iteration","prior.covariance.matrix","round.each.multiple.testing.procedure.rectangle.to.integer","plots.to.round.simply","rounding.threshold.H01","rounding.threshold.H02","rounding.threshold.H0C","power.constraint.tolerance","LP.solver.path");
-optimized.policy <- extract_solution(list.of.rectangles.dec,decisions,list.of.rectangles.mtp,actions);
+optimized.policy <- extract_solution(list.of.rectangles.dec,decisions,list.of.rectangles.mtp,actions,sln);
 save(optimized.policy,input.parameters,list.of.rectangles.dec,list.of.rectangles.mtp,ncp.list,sln,file=paste("optimized.design",LP.iteration,".rdata",sep=""))
 print(paste("Adaptive Design Optimization Completed. Optimal design is stored in the file: optimized_design",LP.iteration,".rdata",sep=""))
 
 if(((type.of.LP.solver=="matlab" || type.of.LP.solver=="cplex" || type.of.LP.solver=="test_version") && (sln$status==1 || sln$status==5 )) || (type.of.LP.solver=="gurobi" && sln$status == "OPTIMAL")){
   print(paste("Feasible Solution was Found"))
   print("Fraction of solution components with integral value solutions")
-  print(sum(sln$z>1-1e-10 | sln$z<10e-10)/length(sln$z))
+  print(round(sum(sln$z>1-1e-10 | sln$z<10e-10)/length(sln$z),3))
 } else {print("Problem was Infeasible"); print("Linear program exit status"); print(sln$status);
   print("Please consider modifying the problem inputs, e.g., by relaxing the power constraints or by increasing the sample size, and submitting a new problem. Thank you for using this trial design optimizer.")
   stop();}
@@ -1238,19 +1238,19 @@ for(task_id in 1:(ceiling(length(ncp.list)/constraints_per_A1_file))){
    }
 }
 print("Maximum familywise Type I error rate among Type I error constraints")
-print(max_FWER)
+print(round(max_FWER,3));
 
 load("A3.rdata")
 print("User defined power constraints (desired power); each row corresponds to a data generating distribution; each column corresponds to H01, H02, H0C desired power, respectively.")
 power.requirement.matrix <- cbind(data.generating.distributions,power.constraints.matrix)
 rownames(power.requirement.matrix) <- paste("Scenario",1:dim(data.generating.distributions)[1])
-print(power.requirement.matrix)
+print(round(power.requirement.matrix,3))
 print("Probability of rejecting each null hypothesis (last 3 columns) under each data generating distribution (row)")
 rejection.probabilities <- cbind(power_constraint_matrix_H01 %*% z_rounded,power_constraint_matrix_H02 %*% z_rounded,power_constraint_matrix_H0C %*% z_rounded)
 colnames(rejection.probabilities) <- c("H01","H02","H0C")
 rejection_probability_matrix <- cbind(data.generating.distributions,rejection.probabilities);
 rownames(rejection_probability_matrix) <- paste("Scenario",1:dim(data.generating.distributions)[1])
-print(rejection_probability_matrix)
+print(round(rejection_probability_matrix,3))
 }
 
 # Clean up files used to specify LP

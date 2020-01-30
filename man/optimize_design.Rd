@@ -31,7 +31,7 @@ optimize_design(subpopulation.1.proportion, total.alpha,
 
 \item{type.of.LP.solver}{"matlab", "cplex", "GLPK", or "gurobi" The linear program solve that you want to use; assumes that you have installed this already and that path is set}
 
-\item{discretization.parameter}{vector with 3 elements representing initial discretization of decision region, rejection regions, and grid representing Type I error constraints}
+\item{discretization.parameter}{vector with 3 positive-valued components representing initial discretization of decision region, rejection regions, and grid representing Type I error constraints; first component is edge length of each square in the decision region, second component is edge length of each square in the rejection regions, and third component determines the number of Type I error constraints equally spaced on the boundary of the null space for each null hypothesis. The third component is only used if ncp.list below is left unspecified.}
 
 \item{number.cores}{the number of cores available for parallelization using the parallel R package}
 
