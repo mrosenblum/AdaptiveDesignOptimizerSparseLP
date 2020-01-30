@@ -1255,23 +1255,27 @@ print(round(rejection_probability_matrix,3))
 
 # Clean up files used to specify LP
 if(cleanup.temporary.files){
-system('rm A*.rdata')
-system('rm A*.mat')
-system('rm a*.mat')
-system('rm cc.mat')
-system('rm c.rdata')
-system('rm number_variables.txt')
-system('rm ncp.list*.rdata')
-system('rm list.of.rectangles.mtp*.rdata')
-system('rm iteration.mat')
-system('rm output_LP_solver')
-system('rm sln2M*.mat')
-system('rm Inequality_Constraints_to_Restrict_MTP_to_Sufficient_Statistics.rdata')
-system('rm Inequality_Constraints_to_set_monotonicity_in_hypotheses_rejected.rdata')
-system('rm number_equality_constraints_of_first_type.txt')
-system('rm number_equality_constraints_of_second_type.txt')
-system('rm number_A1_constraints.txt')
-system('rm number_A1_files.txt')
-system('rm power_constraints.rdata')
-system('rm max_error_prob*')}
+  system('rm A*.rdata')
+  system('rm c.rdata')
+  system('rm number_variables.txt')
+  system('rm ncp.list*.rdata')
+  system('rm Inequality_Constraints_to_Restrict_MTP_to_Sufficient_Statistics.rdata')
+  system('rm Inequality_Constraints_to_set_monotonicity_in_hypotheses_rejected.rdata')
+  system('rm number_equality_constraints_of_first_type.txt')
+  system('rm number_equality_constraints_of_second_type.txt')
+  system('rm number_A1_constraints.txt')
+  system('rm number_A1_files.txt')
+  system('rm power_constraints.rdata')
+  if(type.of.LP.solver=="matlab" || type.of.LP.solver=="cplex"){
+    system('rm A*.mat')
+    system('rm a*.mat')
+    system('rm cc.mat')
+    system('rm list.of.rectangles.mtp*.rdata')
+    system('rm iteration.mat')
+    system('rm output_LP_solver')
+    system('rm sln2M*.mat')
+    system('rm max_error_prob*')
+  }
+}
+
 }
