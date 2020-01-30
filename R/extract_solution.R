@@ -6,7 +6,7 @@ S2 <- list.of.rectangles.mtp;
 A2 <- actions;
 names(A2) <- c("Reject none","Reject H01","Reject H02","Reject H0C","Reject H01 and H0C","Reject H02 and H0C","Reject all");
 variable_location <- function(r,d,rprime,action){return(r$stage_1_rectangle_and_decision_offset[d]+rprime$stage_2_rectangle_offset+which(rprime$allowed_actions==action))}
-pi_1 <- function(s1_index){# Returns vector of probabilities representing the policy pi^*_1 applied at state s1; the vector represents the probability that each possible enrollment decision is chosen given that the first stage z-statistics are in rectangle s1.
+pi_1 <- function(s1_index,print.explanation=TRUE){# Returns vector of probabilities representing the policy pi^*_1 applied at state s1; the vector represents the probability that each possible enrollment decision is chosen given that the first stage z-statistics are in rectangle s1.
   if(s1_index < 1 || s1_index > length(S1)){print("s1_index is out of the range of the possible S1 states."); return(NULL)};
   s1 <- S1[[s1_index]];
   probability_vector <- rep(0,length(decisions));
@@ -19,7 +19,8 @@ pi_1 <- function(s1_index){# Returns vector of probabilities representing the po
   } else {
     probability_vector <- s1$preset_decision_value;
   }
-  print(paste("Probabilities of enrollment decisions 1 through ",length(decisions), " respectively:"))
+  if(print.explanation==TRUE){
+  print(paste("Probabilities of enrollment decisions 1 through ",length(decisions), " respectively:"))}
   return(probability_vector)
 }
 pi_2 <- function(s1_index,a1_index,s2_index){# Returns vector of probabilities representing the policy pi^*_2 applied after state s1, action a1, and state s2; the vector represents the probability that each possible subset of null hypotheses is rejected at the end of the trial
@@ -31,7 +32,7 @@ pi_2 <- function(s1_index,a1_index,s2_index){# Returns vector of probabilities r
     print(paste("s1 is rectangle defined as the Cartesian product [",s1$lower_boundaries[1],",",s1$upper_boundaries[1],"] x [",s1$lower_boundaries[2],",",s1$upper_boundaries[2],"]"));
     print(paste("a1 is enrollment decision ",a1))
     print(paste("s2 is rectangle defined as the Cartesian product [",s2$lower_boundaries[1],",",s2$upper_boundaries[1],"] x [",s2$lower_boundaries[2],",",s2$upper_boundaries[2],"]"));
-    probability_of_a1_given_s1 <- pi_1(s1_index)[a1];
+    probability_of_a1_given_s1 <- pi_1(s1_index,print.explanation=FALSE)[a1];
     if(probability_of_a1_given_s1<=0){print("That sequence of states and actions is not possible under this policy since a1 has probability 0 given s1.");return(NULL)}
     if(s1$preset_decision==0){
       variable_start_position <- variable_location(s1,a1,s2,1);
