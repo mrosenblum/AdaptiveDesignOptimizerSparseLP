@@ -38,9 +38,7 @@ number.cores=1;
 # Run first iteration solving sparse linear program
 optimized.policy <- optimize_design(subpopulation.1.proportion,total.alpha,data.generating.distributions,stage.1.sample.sizes,stage.2.sample.sizes.per.enrollment.choice,objective.function.weights,power.constraints,type.of.LP.solver,discretization.parameter,number.cores,prior.covariance.matrix=prior.covariance.matrix)
 
-print("The optimized.policy returned by our software consists of the pair of functions pi_1 and pi_2 as defined in Section 2.1 of the manuscript, along with state spaces and actions spaces for the sequential decision problem denoted by S1, A1, S2, A2. Each state in S1 is a rectangle with lower-left coordinates (x1,y1) encoded as optimized.policy$lower_boundaries and upper right coordinates (x2,y2) encoded as optimized.policy$upper_boundaries. Each action in A1 is an integer among 1,2,...,d corresponding to each of the d stage 2 enrollment choices that were input by the user.
-Since we allow the stage 2 state space to depend on end of stage 1 action in A1, we have that S2 is a function from an action in A1. E.g., the stage 2 state space after stage 1 action a1=3 is encoded as
-optimized.policy$S2[[3]]. Each action in A2 is an integer among 1,2,...,7 encoding the following outcome of the multiple testing procedure: Reject none,Reject H01,Reject H02,Reject H0C,Reject H01 and H0C,Reject H02 and H0C,Reject all, respectively.")
+print("The optimized.policy returned by our software consists of the pair of functions pi_1 and pi_2 as defined in Section 2.1 of the manuscript, along with state spaces and actions spaces for the sequential decision problem denoted by S1, A1, S2, A2. Each state in S1 is a rectangle with lower-left coordinates (x1,y1) encoded as optimized.policy$lower_boundaries and upper right coordinates (x2,y2) encoded as optimized.policy$upper_boundaries. Each action in A1 is an integer among 1,2,...,d corresponding to each of the d stage 2 enrollment choices that were input by the user. Since we allow the stage 2 state space to depend on end of stage 1 action in A1, we have that S2 is a function from an action in A1. E.g., the stage 2 state space after stage 1 action a1=3 is encoded as optimized.policy$S2[[3]]. Each action in A2 is an integer among 1,2,...,7 encoding the following outcome of the multiple testing procedure: Reject none,Reject H01,Reject H02,Reject H0C,Reject H01 and H0C,Reject H02 and H0C,Reject all, respectively.")
 
 print("Lower-left and upper right coordinates of third rectangle in list of stage 1 states S1:")
 optimized.policy$S1[[3]]$lower_boundaries
@@ -53,5 +51,5 @@ print("Lower-left and upper right coordinates of ninth rectangle in list of stag
 optimized.policy$S2[[3]][[4]]$lower_boundaries
 optimized.policy$S2[[3]][[4]]$upper_boundaries
 
-print("Stochastic policy pi_2 evaluated at third rectangle in S1, action a1=2, and ninth rectangle in S2:")
+print("Stochastic policy pi_2 evaluated at third rectangle in S1, action a1=4, and ninth rectangle in S2:")
 optimized.policy$pi_2(3,4,9)
