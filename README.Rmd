@@ -31,9 +31,12 @@ and then by entering the following in your R session:
 remotes::install_github("mrosenblum/AdaptiveDesignOptimizerSparseLP")
 ```
 
-## Example
+## Examples and Replication of Key Results from Manuscript
 
-This is an example, which involves solving the problem from Example 3.2 as described in Section 5.2 of the manuscript. 
+The computations for the key results from the paper (Examples 3.1 and 3.2 as described in Section 5.2) can be reproduced by the code in the following 2 files in the R project's inst/examples directory: replicate.results.example.3.1.R and 
+ replicate.results.example.3.2.R. We used Cplex to solve these problems, as noted in the paper.
+ 
+Below is a simplified example that can be run in 10 minutes using the GLPK solver, which involves solving a modified version of the problem from Example 3.2 as described in Section 5.2 of the manuscript; the main modifications are that we  use a coarsened partition of the decision region and rejection regions in order to speed up the computation. 
 
 ```{r example}
 #Install R package if not already done so using the following command:
