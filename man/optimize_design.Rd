@@ -57,21 +57,5 @@ Adaptive Enrichment Design Optimization Using Sparse Linear Programming
 Authors: Michael Rosenblum, Ethan Fang, Han Liu
 }
 \examples{
-#For demonstration purposes, the example below uses a coarse discretization and a single processor.
-optimize_design(subpopulation.1.proportion=0.5,
-total.alpha=0.05,
-data.generating.distributions=matrix(data=c(0,0,1,1,1,1,
-                                           0,sqrt(1/2)*(qnorm(0.95+1e-4)+qnorm(0.95))/5,1,1,1,1,
-                                           sqrt(1/2)*(qnorm(0.95+1e-4)+qnorm(0.95))/5,0,1,1,1,1,
-                                           sqrt(1/2)*(qnorm(0.95+1e-4)+qnorm(0.95))/5,sqrt(1/2)*(qnorm(0.95+1e-4)+qnorm(0.95))/5,1,1,1,1),nrow=4,ncol=6,byrow=TRUE,dimnames=list(c(),c("Delta1","Delta2","Variance10","Variance11","Variance20","Variance21"))),
-stage.1.sample.sizes=c(50,50),
-stage.2.sample.sizes.per.enrollment.choice=matrix(c(50,50,
-                                                   0,0,
-                                                   150,0,
-                                                   0,150),nrow=4,ncol=2,byrow=TRUE,dimnames=list(c(),c("Subpopulation1Stage2SampleSize","Subpopulation2Stage2SampleSize"))),
-objective.function.weights=0.25*c(1,1,1,1),
-power.constraints=matrix(c(0,0,0,
-                          0,0.83,0,
-                          0.83,0,0,
-                          0,0,0.83),nrow=4,ncol=3,byrow=TRUE,dimnames=list(c(),c("PowerH01","PowerH02","PowerH0C"))),discretization.parameter=c(3,3,1),number.cores=1)
+See inst/examples/example3.2reduced which is a simplified example that can be run in 10 minutes using the GLPK solver, which involves solving a modified version of the problem from Example 3.2 as described in Section 5.2 of the manuscript; the main modifications are that we  use a coarsened partition of the decision region and rejection regions in order to speed up the computation.
 }
