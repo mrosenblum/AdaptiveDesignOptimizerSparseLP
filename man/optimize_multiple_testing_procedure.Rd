@@ -92,8 +92,13 @@ sln (the solution to the linear program; sln$val is the expected sample size; sl
 }
 
 \examples{
-#For demonstration purposes, the code below implements the final iteration, as described in Section 5.2 of the paper, for Example 3.2 of the paper.
-#First set all problem parameters based on Example 3.2, and using explicit choices of sample sizes (where n=200, sigma=1, Delta^min=sqrt(1/2)*(qnorm(0.95+1e-4)+qnorm(0.95))/5=0.465), as follows:
+#For demonstration purposes, the code below implements the final
+# iteration, as described in Section 5.2 of the paper, for Example
+# 3.2 of the paper.
+#First set all problem parameters based on Example 3.2, and using
+#  explicit choices of sample sizes (where n=200, sigma=1,
+# Delta^min=sqrt(1/2)*(qnorm(0.95+1e-4)+qnorm(0.95))/5=0.465),
+# as follows:
 subpopulation.1.proportion=0.5;
 total.alpha=0.05-(1e-4);
 data.generating.distributions=matrix(

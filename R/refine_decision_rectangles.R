@@ -58,7 +58,8 @@ n_stage1_subpopulation1 <- stage.1.sample.sizes[1];
 n_stage1_subpopulation2 <- stage.1.sample.sizes[2];
 n_stage2_subpopulation1_decision <- as.vector(stage.2.sample.sizes.per.enrollment.choice[,1]) #Sample size in stage 2 under each decision rule for subpopulation 1
 n_stage2_subpopulation2_decision <- as.vector(stage.2.sample.sizes.per.enrollment.choice[,2]) #Sample size in stage 2 under each decision rule for subpopulation 1
-number_decisions <- ifelse(length(n_stage2_subpopulation1_decision)==length(n_stage2_subpopulation2_decision),length(n_stage2_subpopulation1_decision),exit())
+stopifnot(length(n_stage2_subpopulation1_decision)==length(n_stage2_subpopulation2_decision))
+number_decisions <- length(n_stage2_subpopulation1_decision)
 decisions <- (1:number_decisions)
 
 ## Set loss function to be sample size; can modify if desired--general format is matrix with number_decision rows and number_actions columns, and entry is loss function value at corresponding (decision,action pair). Can also generalize to make it depend on the ncp value as well but if so need to modify generalized_generate... objective function construction
