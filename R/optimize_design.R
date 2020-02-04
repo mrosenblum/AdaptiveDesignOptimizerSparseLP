@@ -1,5 +1,6 @@
 #' Adaptive Enrichment Design Optimization Using Sparse Linear Programming
-#' Authors: Michael Rosenblum, Ethan Fang, Han Liu
+#'
+#' @author Michael Rosenblum, Ethan Fang, Han Liu
 #'
 #' @param subpopulation.1.proportion Proportion of overall population in subpopulation 1. Must be between 0 and 1.
 #' @param total.alpha Familywise Type I error rate (1-sided)
@@ -27,8 +28,14 @@
 #' ncp.active.FWER.constraints (the active familywise Type I error constraints in the optimized design, obtained using the dual solution to the linear program)
 #' ncp.list (the complete list of familywise Type I error constraints input to the linear program solver)
 #' sln (the solution to the linear program; sln$val is the expected sample size; sln$status, if either 1 or 5, indicates that a feasible solution was found and other wise the problem was infeasible or no solution was found; sln$z is the actual solution as a vector)
-#' @examples
-#' See inst/examples/example3.2reduced which is a simplified example that can be run in 10 minutes using the GLPK solver, which involves solving a modified version of the problem from Example 3.2 as described in Section 5.2 of the manuscript; the main modifications are that we  use a coarsened partition of the decision region and rejection regions in order to speed up the computation.
+#' @note
+#' See inst/examples/example3.2reduced which is a simplified example
+#' that can be run in 10 minutes using the GLPK solver, which
+#' involves solving a modified version of the problem from Example
+#' 3.2 as described in Section 5.2 of the manuscript; the main
+#' modifications are that we  use a coarsened partition of the
+#' decision region and rejection regions in order to speed up the
+#' computation.
 #' @export
 optimize_design <- function(subpopulation.1.proportion,
   total.alpha,

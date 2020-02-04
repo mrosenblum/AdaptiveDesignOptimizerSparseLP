@@ -5,15 +5,19 @@
 \title{Adaptive Enrichment Design Optimization Using Sparse Linear Programming
 Authors: Michael Rosenblum, Ethan Fang, Han Liu}
 \usage{
-refine_decision_rectangles(subpopulation.1.proportion = 0.5,
+refine_decision_rectangles(
+  subpopulation.1.proportion = 0.5,
   stage.1.sample.sizes = c(50, 50),
-  stage.2.sample.sizes.per.enrollment.choice = matrix(c(50, 50, 0, 0,
-  150, 0, 0, 150), nrow = 4, ncol = 2, byrow = TRUE, dimnames = list(c(),
-  c("Subpopulation1Stage2SampleSize", "Subpopulation2Stage2SampleSize"))),
-  discretization.parameter = c(1, 1, 10), list.of.rectangles.dec = c(),
-  LP.iteration = 1, round.each.decision.rectangle.to.integer = FALSE,
+  stage.2.sample.sizes.per.enrollment.choice = matrix(c(50, 50, 0, 0, 150, 0, 0, 150),
+    nrow = 4, ncol = 2, byrow = TRUE, dimnames = list(c(),
+    c("Subpopulation1Stage2SampleSize", "Subpopulation2Stage2SampleSize"))),
+  discretization.parameter = c(1, 1, 10),
+  list.of.rectangles.dec = c(),
+  LP.iteration = 1,
+  round.each.decision.rectangle.to.integer = FALSE,
   set.rectangles.with.identically.valued.neighbors.and.split.others = TRUE,
-  sln)
+  sln
+)
 }
 \arguments{
 \item{subpopulation.1.proportion}{Proportion of overall population in subpopulation 1. Must be between 0 and 1.}

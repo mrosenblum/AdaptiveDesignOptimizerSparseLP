@@ -5,18 +5,30 @@
 \title{Adaptive Enrichment Design Optimization Using Sparse Linear Programming
 Authors: Michael Rosenblum, Ethan Fang, Han Liu}
 \usage{
-optimize_multiple_testing_procedure(subpopulation.1.proportion = 0.5,
-  total.alpha = 0.05 - (1e-04), data.generating.distributions,
-  stage.1.sample.sizes, stage.2.sample.sizes.per.enrollment.choice,
-  objective.function.weights, power.constraints,
-  type.of.LP.solver = "cplex", discretization.parameter = c(1, 1, 10),
-  number.cores = 30, ncp.list = c(), list.of.rectangles.dec = c(),
-  LP.iteration = 1, prior.covariance.matrix = diag(2) * 0,
+optimize_multiple_testing_procedure(
+  subpopulation.1.proportion = 0.5,
+  total.alpha = 0.05 - (1e-04),
+  data.generating.distributions,
+  stage.1.sample.sizes,
+  stage.2.sample.sizes.per.enrollment.choice,
+  objective.function.weights,
+  power.constraints,
+  type.of.LP.solver = "cplex",
+  discretization.parameter = c(1, 1, 10),
+  number.cores = 30,
+  ncp.list = c(),
+  list.of.rectangles.dec = c(),
+  LP.iteration = 1,
+  prior.covariance.matrix = diag(2) * 0,
   round.each.multiple.testing.procedure.rectangle.to.integer = FALSE,
-  plots.to.round.simply = c(), rounding.threshold.H01 = 1 - 1e-10,
-  rounding.threshold.H02 = 1 - 1e-10, rounding.threshold.H0C = 1 -
-  1e-10, power.constraint.tolerance = 0, LP.solver.path = c(),
-  cleanup.temporary.files = TRUE)
+  plots.to.round.simply = c(),
+  rounding.threshold.H01 = 1 - 1e-10,
+  rounding.threshold.H02 = 1 - 1e-10,
+  rounding.threshold.H0C = 1 - 1e-10,
+  power.constraint.tolerance = 0,
+  LP.solver.path = c(),
+  cleanup.temporary.files = TRUE
+)
 }
 \arguments{
 \item{subpopulation.1.proportion}{Proportion of overall population in subpopulation 1. Must be between 0 and 1.}

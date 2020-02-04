@@ -4,8 +4,13 @@
 \alias{extract_solution}
 \title{This function takes the output of the linear program solver and constructs the corresponding policy.}
 \usage{
-extract_solution(list.of.rectangles.dec, decisions, list.of.rectangles.mtp,
-  actions, sln)
+extract_solution(
+  list.of.rectangles.dec,
+  decisions,
+  list.of.rectangles.mtp,
+  actions,
+  sln
+)
 }
 \description{
 This function takes the output of the linear program solver and constructs the corresponding policy.
