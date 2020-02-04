@@ -2,8 +2,7 @@
 % Please edit documentation in R/refine_decision_rectangles.R
 \name{refine_decision_rectangles}
 \alias{refine_decision_rectangles}
-\title{Adaptive Enrichment Design Optimization Using Sparse Linear Programming
-Authors: Michael Rosenblum, Ethan Fang, Han Liu}
+\title{Adaptive Enrichment Design Optimization Using Sparse Linear Programming}
 \usage{
 refine_decision_rectangles(
   subpopulation.1.proportion = 0.5,
@@ -40,8 +39,13 @@ refine_decision_rectangles(
 }
 \value{
 4 element list containing optimized designs from four classes (with increasing complexity):
+
+A refined partition of the decision
+rectangles is constructed and returned.
 }
 \description{
 Adaptive Enrichment Design Optimization Using Sparse Linear Programming
-Authors: Michael Rosenblum, Ethan Fang, Han Liu
+}
+\author{
+Michael Rosenblum, Ethan Fang, Han Liu
 }

@@ -2,8 +2,7 @@
 % Please edit documentation in R/optimize_multiple_testing_procedure.R
 \name{optimize_multiple_testing_procedure}
 \alias{optimize_multiple_testing_procedure}
-\title{Adaptive Enrichment Design Optimization Using Sparse Linear Programming
-Authors: Michael Rosenblum, Ethan Fang, Han Liu}
+\title{Adaptive Enrichment Design Optimization Using Sparse Linear Programming}
 \usage{
 optimize_multiple_testing_procedure(
   subpopulation.1.proportion = 0.5,
@@ -80,33 +79,83 @@ Nothing is returned; instead the optimized design is saved as "optimized_design<
 }
 \description{
 Adaptive Enrichment Design Optimization Using Sparse Linear Programming
-Authors: Michael Rosenblum, Ethan Fang, Han Liu
 }
+\section{Output}{
+
+The software computes an optimized design and saves it as "optimized_design<k>.rdata", where <k> is the user-defined iteration number (LP.iteration). E.g., if one sets LP.iteration=1, then the optimized design is saved as "optimized_design1.rdata". That file can be opened in R and contains the following 6 items:
+input.parameters (the inputs passed to the optimized_design function)
+list.of.rectangles.dec (the decision rectangle partition of R^2)
+list.of.rectangles.mtp (the multiple testing procedure partition of R^2)
+ncp.active.FWER.constraints (the active familywise Type I error constraints in the optimized design, obtained using the dual solution to the linear program)
+ncp.list (the complete list of familywise Type I error constraints input to the linear program solver)
+sln (the solution to the linear program; sln$val is the expected sample size; sln$status, if either 1 or 5, indicates that a feasible solution was found and other wise the problem was infeasible or no solution was found; sln$z is the actual solution as a vector)
+}
+
 \examples{
 #For demonstration purposes, the code below implements the final iteration, as described in Section 5.2 of the paper, for Example 3.2 of the paper.
 #First set all problem parameters based on Example 3.2, and using explicit choices of sample sizes (where n=200, sigma=1, Delta^min=sqrt(1/2)*(qnorm(0.95+1e-4)+qnorm(0.95))/5=0.465), as follows:
 subpopulation.1.proportion=0.5;
 total.alpha=0.05-(1e-4);
-data.generating.distributions=matrix(data=c(0,0,1,1,1,1,
-                                           0,sqrt(1/2)*(qnorm(0.95+1e-4)+qnorm(0.95))/5,1,1,1,1,
-                                           sqrt(1/2)*(qnorm(0.95+1e-4)+qnorm(0.95))/5,0,1,1,1,1,
-                                           sqrt(1/2)*(qnorm(0.95+1e-4)+qnorm(0.95))/5,sqrt(1/2)*(qnorm(0.95+1e-4)+qnorm(0.95))/5,1,1,1,1),nrow=4,ncol=6,byrow=TRUE,dimnames=list(c(),c("Delta1","Delta2","Variance10","Variance11","Variance20","Variance21")));
+data.generating.distributions=matrix(
+  data=c(0,0,1,1,1,1,
+         0,sqrt(1/2)*(qnorm(0.95+1e-4)+qnorm(0.95))/5,1,1,1,1,
+         sqrt(1/2)*(qnorm(0.95+1e-4)+qnorm(0.95))/5,0,1,1,1,1,
+         sqrt(1/2)*(qnorm(0.95+1e-4)+qnorm(0.95))/5,
+         sqrt(1/2)*(qnorm(0.95+1e-4)+qnorm(0.95))/5,1,1,1,1),
+  nrow=4,
+  ncol=6,
+  byrow=TRUE,
+  dimnames=list(c(),c("Delta1","Delta2","Variance10",
+                      "Variance11","Variance20","Variance21")));
 stage.1.sample.sizes=c(50,50);
-stage.2.sample.sizes.per.enrollment.choice=matrix(c(50,50,
-                                                   0,0,
-                                                   150,0,
-                                                   0,150),nrow=4,ncol=2,byrow=TRUE,dimnames=list(c(),c("Subpopulation1Stage2SampleSize","Subpopulation2Stage2SampleSize")));
+stage.2.sample.sizes.per.enrollment.choice= matrix(
+  c(50,50,
+    0,0,
+    150,0,
+    0,150),
+  nrow=4,ncol=2,
+  byrow=TRUE,
+  dimnames=list(c(), c("Subpopulation1Stage2SampleSize",
+                       "Subpopulation2Stage2SampleSize")));
 objective.function.weights=0.25*c(1,1,1,1);
 prior.covariance.matrix=diag(2);
 power.constraints=matrix(c(0,0,0,
 			   0,0.83,0,
 			   0.83,0,0,
-			   0,0,0.83),nrow=4,ncol=3,byrow=TRUE,dimnames=list(c(),c("PowerH01","PowerH02","PowerH0C")));
+			   0,0,0.83),nrow=4,ncol=3,byrow=TRUE,dimnames=list(c(),
+			   c("PowerH01","PowerH02","PowerH0C")));
 type.of.LP.solver="matlab";
 discretization.parameter=c(1,0.25,10);
 number.cores=30;
-# Load list of Type I Error Constraints (encoded as ncp.list in our software and denoted as G in the paper) and the partition of decision rectangles (encoded as list.of.rectangles.dec in our software and denoted as A_1 in the paper).
-load(system.file("examples", "example3.2final.iteration.inputs.rdata", package = "AdaptiveDesignOptimizerSparseLP"));
+# Load list of Type I Error Constraints (encoded as ncp.list in our
+# software and denoted as G in the paper) and the partition of decision
+# rectangles (encoded as list.of.rectangles.dec in our software and
+# denoted as A_1 in the paper).
+load(system.file("examples", "example3.2final.iteration.inputs.rdata",
+package = "AdaptiveDesignOptimizerSparseLP"));
 # Run final iteration solving sparse linear program with above inputs
-optimize_multiple_testing_procedure(subpopulation.1.proportion,total.alpha=0.049,data.generating.distributions,stage.1.sample.sizes,stage.2.sample.sizes.per.enrollment.choice,objective.function.weights,power.constraints,type.of.LP.solver,discretization.parameter,number.cores,ncp.list,list.of.rectangles.dec,LP.iteration=5,prior.covariance.matrix,round.each.multiple.testing.procedure.rectangle.to.integer=TRUE,plots.to.round.simply = c(1,2),rounding.threshold.H0C = 0.4,power.constraint.tolerance = 0.01,LP.solver.path=c())
+optimize_multiple_testing_procedure(
+  subpopulation.1.proportion,
+  total.alpha = 0.049,
+  data.generating.distributions,
+  stage.1.sample.sizes,
+  stage.2.sample.sizes.per.enrollment.choice,
+  objective.function.weights,
+  power.constraints,
+  type.of.LP.solver,
+  discretization.parameter,
+  number.cores,
+  ncp.list,
+  list.of.rectangles.dec,
+  LP.iteration = 5,
+  prior.covariance.matrix,
+  round.each.multiple.testing.procedure.rectangle.to.integer = TRUE,
+  plots.to.round.simply = c(1, 2),
+  rounding.threshold.H0C = 0.4,
+  power.constraint.tolerance = 0.01,
+  LP.solver.path = c()
+)
+}
+\author{
+Michael Rosenblum, Ethan Fang, Han Liu
 }

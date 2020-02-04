@@ -74,6 +74,17 @@ modifications are that we  use a coarsened partition of the
 decision region and rejection regions in order to speed up the
 computation.
 }
+\section{Output}{
+
+The software computes an optimized design and saves it as "optimized_design<k>.rdata", where <k> is the user-defined iteration number (LP.iteration). E.g., if one sets LP.iteration=1, then the optimized design is saved as "optimized_design1.rdata". That file can be opened in R and contains the following 6 items:
+input.parameters (the inputs passed to the optimized_design function)
+list.of.rectangles.dec (the decision rectangle partition of R^2)
+list.of.rectangles.mtp (the multiple testing procedure partition of R^2)
+ncp.active.FWER.constraints (the active familywise Type I error constraints in the optimized design, obtained using the dual solution to the linear program)
+ncp.list (the complete list of familywise Type I error constraints input to the linear program solver)
+sln (the solution to the linear program; sln$val is the expected sample size; sln$status, if either 1 or 5, indicates that a feasible solution was found and other wise the problem was infeasible or no solution was found; sln$z is the actual solution as a vector)
+}
+
 \author{
 Michael Rosenblum, Ethan Fang, Han Liu
 }

@@ -1,5 +1,6 @@
 #' Adaptive Enrichment Design Optimization Using Sparse Linear Programming
-#' Authors: Michael Rosenblum, Ethan Fang, Han Liu
+#'
+#' @author Michael Rosenblum, Ethan Fang, Han Liu
 #'
 #' @param subpopulation.1.proportion Proportion of overall population in subpopulation 1. Must be between 0 and 1.
 #' @param stage.1.sample.sizes Vector with 2 entries representing stage 1 sample sizes for subpopulations 1 and 2, respectively
@@ -11,8 +12,8 @@
 #' @param set.rectangles.with.identically.valued.neighbors.and.split.others  TRUE/FALSE indicator of whether decision probabilities encoded in list.of.rectangles.dec should be modified for use in next iteration
 #' @param sln solution to linear program computed previously
 #' @return 4 element list containing optimized designs from four classes (with increasing complexity):
-#' @section Output
-#' A refined partition of the decision rectangles is constructed and returned.
+#' @return A refined partition of the decision
+#' rectangles is constructed and returned.
 #' @export
 refine_decision_rectangles <- function(subpopulation.1.proportion=0.5,
 		stage.1.sample.sizes=c(50,50),
