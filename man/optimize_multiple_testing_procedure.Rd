@@ -12,7 +12,7 @@ optimize_multiple_testing_procedure(
   stage.2.sample.sizes.per.enrollment.choice,
   objective.function.weights,
   power.constraints,
-  type.of.LP.solver = "cplex",
+  type.of.LP.solver = c("cplex", "matlab", "GLPK", "gurobi"),
   discretization.parameter = c(1, 1, 10),
   number.cores = 30,
   ncp.list = c(),
@@ -131,7 +131,7 @@ power.constraints=matrix(c(0,0,0,
 			   c("PowerH01","PowerH02","PowerH0C")));
 type.of.LP.solver="matlab";
 discretization.parameter=c(1,0.25,10);
-number.cores=30;
+number.cores=min(parallel::detectCores(), 30);
 # Load list of Type I Error Constraints (encoded as ncp.list in our
 # software and denoted as G in the paper) and the partition of decision
 # rectangles (encoded as list.of.rectangles.dec in our software and
@@ -139,6 +139,7 @@ number.cores=30;
 load(system.file("examples", "example3.2final.iteration.inputs.rdata",
 package = "AdaptiveDesignOptimizerSparseLP"));
 # Run final iteration solving sparse linear program with above inputs
+\donttest{
 optimize_multiple_testing_procedure(
   subpopulation.1.proportion,
   total.alpha = 0.049,
@@ -160,6 +161,7 @@ optimize_multiple_testing_procedure(
   power.constraint.tolerance = 0.01,
   LP.solver.path = c()
 )
+}
 }
 \author{
 Michael Rosenblum, Ethan Fang, Han Liu

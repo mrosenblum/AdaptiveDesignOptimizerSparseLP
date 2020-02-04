@@ -73,7 +73,7 @@
 #' 			   c("PowerH01","PowerH02","PowerH0C")));
 #' type.of.LP.solver="matlab";
 #' discretization.parameter=c(1,0.25,10);
-#' number.cores=30;
+#' number.cores=min(parallel::detectCores(), 30);
 #' # Load list of Type I Error Constraints (encoded as ncp.list in our
 #' # software and denoted as G in the paper) and the partition of decision
 #' # rectangles (encoded as list.of.rectangles.dec in our software and
@@ -81,6 +81,7 @@
 #' load(system.file("examples", "example3.2final.iteration.inputs.rdata",
 #' package = "AdaptiveDesignOptimizerSparseLP"));
 #' # Run final iteration solving sparse linear program with above inputs
+#' \donttest{
 #' optimize_multiple_testing_procedure(
 #'   subpopulation.1.proportion,
 #'   total.alpha = 0.049,
@@ -102,32 +103,37 @@
 #'   power.constraint.tolerance = 0.01,
 #'   LP.solver.path = c()
 #' )
+#' }
 #' @export
 #' @importFrom grDevices postscript dev.off
 #' @importFrom graphics par plot axis rect legend
-optimize_multiple_testing_procedure <- function(subpopulation.1.proportion=0.5,
-                                                total.alpha=0.05-(1e-4),
-                                                data.generating.distributions,
-                                                stage.1.sample.sizes,
-                                                stage.2.sample.sizes.per.enrollment.choice,
-                                                objective.function.weights,
-                                                power.constraints,
-                                                type.of.LP.solver="cplex",
-                                                discretization.parameter=c(1,1,10),
-                                                number.cores=30,
-                                                ncp.list=c(),
-                                                list.of.rectangles.dec=c(),
-                                                LP.iteration=1,
-                                                prior.covariance.matrix=diag(2)*0,
-                                                round.each.multiple.testing.procedure.rectangle.to.integer=FALSE,
-                                                plots.to.round.simply = c(),
-                                                rounding.threshold.H01 = 1-1e-10,
-                                                rounding.threshold.H02 = 1-1e-10,
-                                                rounding.threshold.H0C = 1-1e-10,
-                                                power.constraint.tolerance=0,
-                                                LP.solver.path=c(),
-                                                cleanup.temporary.files=TRUE
+optimize_multiple_testing_procedure <- function(
+  subpopulation.1.proportion=0.5,
+  total.alpha=0.05-(1e-4),
+  data.generating.distributions,
+  stage.1.sample.sizes,
+  stage.2.sample.sizes.per.enrollment.choice,
+  objective.function.weights,
+  power.constraints,
+  type.of.LP.solver=c("cplex", "matlab", "GLPK", "gurobi"),
+  discretization.parameter=c(1,1,10),
+  number.cores=30,
+  ncp.list=c(),
+  list.of.rectangles.dec=c(),
+  LP.iteration=1,
+  prior.covariance.matrix=diag(2)*0,
+  round.each.multiple.testing.procedure.rectangle.to.integer=FALSE,
+  plots.to.round.simply = c(),
+  rounding.threshold.H01 = 1-1e-10,
+  rounding.threshold.H02 = 1-1e-10,
+  rounding.threshold.H0C = 1-1e-10,
+  power.constraint.tolerance=0,
+  LP.solver.path=c(),
+  cleanup.temporary.files=TRUE
 ){
+  if (type.of.LP.solver != "test_version") {
+    type.of.LP.solver = match.arg(type.of.LP.solver)
+  }
   max_error_prob <- 0 # track approximation errors in problem construction; initialize to 0 here
   covariance_Z_1_Z_2 <-  0 # covariance_due_to overlap of subpopulations (generally we assume no overlap)
   p1 <- subpopulation.1.proportion;
@@ -424,14 +430,14 @@ optimize_multiple_testing_procedure <- function(subpopulation.1.proportion=0.5,
   #print("number of familywise Type I error constraints")
   #print(length(ncp.list))
   number_equality_constraints_part1 <- length(list.of.rectangles.dec)-number_preset_decision_rectangles
-  write(number_equality_constraints_part1,f=paste("number_equality_constraints_of_first_type.txt"))
+  write(number_equality_constraints_part1,file=paste("number_equality_constraints_of_first_type.txt"))
   #print("number of equality constraints of first type")
   #print(number_equality_constraints_part1)
   #print("number of equality constraints of second type")
   #print(number_equality_constraints_part2)
-  write(number_equality_constraints_part2,f=paste("number_equality_constraints_of_second_type.txt"))
-  write(length(ncp.list),f=paste("number_A1_constraints.txt"))
-  write(ceiling(length(ncp.list)/constraints_per_A1_file),f=paste("number_A1_files.txt"))
+  write(number_equality_constraints_part2,file =paste("number_equality_constraints_of_second_type.txt"))
+  write(length(ncp.list),file =paste("number_A1_constraints.txt"))
+  write(ceiling(length(ncp.list)/constraints_per_A1_file),file =paste("number_A1_files.txt"))
   power.constraints.matrix <- power.constraints
   power.constraints <- as.vector(power.constraints)
   save(power.constraints,file="power_constraints.rdata")
@@ -557,7 +563,7 @@ optimize_multiple_testing_procedure <- function(subpopulation.1.proportion=0.5,
       # record components of discretized linear program
       save(constraint_list,file=paste("A1",task_id,".rdata",sep=""))
 
-      if(task_id==1 && dim(constraint_list)[2]!=number_of_variables){print("error in construction of constraints");write(1,file="error_flag")} else{write(dim(constraint_list)[2],f=paste("number_variables.txt"))}
+      if(task_id==1 && dim(constraint_list)[2]!=number_of_variables){print("error in construction of constraints");write(1,file="error_flag")} else{write(dim(constraint_list)[2],file =paste("number_variables.txt"))}
 
     } else if(task_id==max_task_id_for_computing_FWER_constraints+1){# construct objective function vector
 
