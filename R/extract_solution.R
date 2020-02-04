@@ -1,4 +1,4 @@
-#' This function takes the output of the linear program solver and constructs the corresponding policy.
+# This function takes the output of the linear program solver and constructs the corresponding policy.
 extract_solution <- function(list.of.rectangles.dec,decisions,list.of.rectangles.mtp,actions,sln){
   S1 <- list.of.rectangles.dec[1:(length(list.of.rectangles.dec)-length(decisions))];
   A1 <- decisions;
