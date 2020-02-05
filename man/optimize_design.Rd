@@ -14,7 +14,7 @@ optimize_design(
   power.constraints,
   type.of.LP.solver = get_default_solver(),
   discretization.parameter = c(1, 1, 10),
-  number.cores = 30,
+  number.cores = min(parallel::detectCores(), 30),
   ncp.list = c(),
   list.of.rectangles.dec = c(),
   LP.iteration = 1,
