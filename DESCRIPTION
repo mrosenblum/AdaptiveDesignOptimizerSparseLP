@@ -17,7 +17,9 @@ Depends: R (>= 3.5.0)
 Suggests: 
     Rglpk,
     gurobi,
-    matlabr
+    matlabr,
+    Rcplex,
+    cplexAPI
 Imports: 
     R.matlab,
     mvtnorm,

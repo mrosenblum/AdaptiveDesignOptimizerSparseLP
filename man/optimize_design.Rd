@@ -12,9 +12,9 @@ optimize_design(
   stage.2.sample.sizes.per.enrollment.choice,
   objective.function.weights,
   power.constraints,
-  type.of.LP.solver = "cplex",
+  type.of.LP.solver = get_default_solver(),
   discretization.parameter = c(1, 1, 10),
-  number.cores = 30,
+  number.cores = min(parallel::detectCores(), 30),
   ncp.list = c(),
   list.of.rectangles.dec = c(),
   LP.iteration = 1,
@@ -85,6 +85,171 @@ ncp.list (the complete list of familywise Type I error constraints input to the 
 sln (the solution to the linear program; sln$val is the expected sample size; sln$status, if either 1 or 5, indicates that a feasible solution was found and other wise the problem was infeasible or no solution was found; sln$z is the actual solution as a vector)
 }
 
+\examples{
+library(AdaptiveDesignOptimizerSparseLP)
+#Install R package if not already done so using the following command:
+#remotes::install_github("mrosenblum/AdaptiveDesignOptimizerSparseLP")
+# Load R package if not already done so by the following command:
+# library(AdaptiveDesignOptimizerSparseLP)
+# For reproducibility, set the random number generator seed:
+set.seed(32515)
+
+# Set all problem parameters based on Example 3.2, and using explicit
+# choices of the following input parameters:
+# The proportion of the population in subpopulation 1:
+subpopulation.1.proportion = 0.5
+
+# Sample sizes
+# Sample size in stage 1 for each subpopulation: 50;
+stage.1.sample.sizes = c(50, 50)
+
+# We set n=200 in our adaptive design template n^(1b), which corresponds
+# to the following four
+# choices for stage 2 enrollment:
+stage.2.sample.sizes.per.enrollment.choice = matrix(
+  c(50, 50,  # Stage 2: enroll 50 from each subpopulation
+    0, 0,   # Stop trial after stage 1
+    150, 0, # Stage 2: enroll 150 from subpopulation 1 and none from
+    # subpopulation 2
+    0, 150),
+  # Stage 2: enroll none from subpopulation 1 and 150 from subpopulation 2
+  nrow = 4,
+  ncol = 2,
+  byrow = TRUE,
+  dimnames = list(
+    c(),
+    c(
+      "Subpopulation1Stage2SampleSize",
+      "Subpopulation2Stage2SampleSize"
+    )
+  )
+)
+
+# Set the Minimum, clinically meaningful treatment effect size, which
+# we set slightly larger than
+# in examples in Section 5.2 for illustration purposes (since our
+# coarsened decision and rejection regions in the illustration here
+# require this for the problem to be feasible):
+Delta_min = 1.2 * sqrt(1 / 2) * (qnorm(0.95 + 1e-4) + qnorm(0.95)) / 5
+
+# The data generating distributions for Example 3.2 are encoded as follows
+# (where we set the outcome variance to 1 for each subpopulation bby
+# study arm combination):
+# The first 2 entries in each row represent \Delta_1 and \Delta_2
+data.generating.distributions = matrix(
+  data = c(
+    0,
+    0,
+    1,
+    1,
+    1,
+    1,
+    # zero treatment effect in each arm
+    0,
+    Delta_min,
+    1,
+    1,
+    1,
+    1,
+    # Delta_min treatment effect subpopulation 2, no effect subpopulation 1
+    Delta_min,
+    0,
+    1,
+    1,
+    1,
+    1,
+    # Delta_min treatment effect subpopulation 1, no effect subpopulation 2
+    Delta_min,
+    Delta_min,
+    1,
+    1,
+    1,
+    1
+  ),
+  # Delta_min treatment effect each subpopulation
+  nrow = 4,
+  ncol = 6,
+  byrow = TRUE,
+  dimnames = list(
+    c(),
+    c(
+      "Delta1",
+      "Delta2",
+      "Variance10",
+      "Variance11",
+      "Variance20",
+      "Variance21"
+    )
+  )
+)
+
+# The resulting non-centrality parameter (see Section 5.1 of the paper)
+# matches that used in the paper computations.
+# Required Familywise Type I error:
+total.alpha = 0.05
+
+desired.power = 0.8
+
+power.constraints = matrix(
+  c(
+    0,
+    0,
+    0,
+    # No power requirements under first data generating distribution
+    0,
+    desired.power,
+    0,
+    # 80\% power required for rejecting H02 under 2nd data generating
+    # distribution
+    desired.power,
+    0,
+    0,
+    # 80\% power required for rejecting H01 under 3nd data generating
+    #  distribution
+    0,
+    0,
+    desired.power
+  ),
+  # 80\% power required for rejecting H0C under 4th data generating
+  # distribution
+  nrow = 4,
+  ncol = 3,
+  byrow = TRUE,
+  dimnames = list(c(), c("PowerH01", "PowerH02", "PowerH0C"))
+)
+
+objective.function.weights = 0.25 * c(1, 1, 1, 1)
+# Equal weights on each data generating distribution
+prior.covariance.matrix = diag(2)
+# Prior distribution \Lambda is mixture of 4 point bivariate normal
+# distributions with identity covariance matrix and means given by
+# first 2 columns in data.generating.distributions
+if (requireNamespace("Rglpk", quietly = TRUE)) {
+type.of.LP.solver = "glpk"
+} else {
+type.of.LP.solver = "cplex"
+}
+
+discretization.parameter = c(3, 3, 1)
+
+number.cores = min(parallel::detectCores(), 4)
+
+
+# Run first iteration solving sparse linear program
+optimized.policy <- optimize_design(
+  subpopulation.1.proportion,
+  total.alpha,
+  data.generating.distributions,
+  stage.1.sample.sizes,
+  stage.2.sample.sizes.per.enrollment.choice,
+  objective.function.weights,
+  power.constraints,
+  type.of.LP.solver = type.of.LP.solver,
+  discretization.parameter,
+  number.cores,
+  prior.covariance.matrix = prior.covariance.matrix
+)
+}
 \author{
 Michael Rosenblum, Ethan Fang, Han Liu
 }
