@@ -4,3 +4,6 @@
 ^LICENSE\.md$
 ^\.travis\.yml$
 ^appveyor\.yml$
+^list\.of\.rectangles\.dec1\.rdata$
+^sln2M1\.rdata$
+^optimized\.design1\.rdata$
