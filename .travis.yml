@@ -3,6 +3,18 @@
 language: R
 cache: packages
 
+addons:
+  homebrew:
+    packages:
+    - glpk
+
 env:
   global:
     _R_CHECK_FORCE_SUGGESTS_=false
+
+before_install:
+    - if [ "$TRAVIS_OS_NAME" = "linux" ];
+      then
+        sudo apt-get install -y libglpk-dev ;
+      fi
+    - Rscript -e "install.packages('Rglpk')"
