@@ -1,5 +1,6 @@
 #' Adaptive Enrichment Design Optimization Using Sparse Linear Programming
-#' Authors: Michael Rosenblum, Ethan Fang, Han Liu
+#'
+#' @author Michael Rosenblum, Ethan Fang, Han Liu
 #'
 #' @param subpopulation.1.proportion Proportion of overall population in subpopulation 1. Must be between 0 and 1.
 #' @param stage.1.sample.sizes Vector with 2 entries representing stage 1 sample sizes for subpopulations 1 and 2, respectively
@@ -11,8 +12,8 @@
 #' @param set.rectangles.with.identically.valued.neighbors.and.split.others  TRUE/FALSE indicator of whether decision probabilities encoded in list.of.rectangles.dec should be modified for use in next iteration
 #' @param sln solution to linear program computed previously
 #' @return 4 element list containing optimized designs from four classes (with increasing complexity):
-#' @section Output
-#' A refined partition of the decision rectangles is constructed and returned.
+#' @return A refined partition of the decision
+#' rectangles is constructed and returned.
 #' @export
 refine_decision_rectangles <- function(subpopulation.1.proportion=0.5,
 		stage.1.sample.sizes=c(50,50),
@@ -57,7 +58,8 @@ n_stage1_subpopulation1 <- stage.1.sample.sizes[1];
 n_stage1_subpopulation2 <- stage.1.sample.sizes[2];
 n_stage2_subpopulation1_decision <- as.vector(stage.2.sample.sizes.per.enrollment.choice[,1]) #Sample size in stage 2 under each decision rule for subpopulation 1
 n_stage2_subpopulation2_decision <- as.vector(stage.2.sample.sizes.per.enrollment.choice[,2]) #Sample size in stage 2 under each decision rule for subpopulation 1
-number_decisions <- ifelse(length(n_stage2_subpopulation1_decision)==length(n_stage2_subpopulation2_decision),length(n_stage2_subpopulation1_decision),exit())
+stopifnot(length(n_stage2_subpopulation1_decision)==length(n_stage2_subpopulation2_decision))
+number_decisions <- length(n_stage2_subpopulation1_decision)
 decisions <- (1:number_decisions)
 
 ## Set loss function to be sample size; can modify if desired--general format is matrix with number_decision rows and number_actions columns, and entry is loss function value at corresponding (decision,action pair). Can also generalize to make it depend on the ncp value as well but if so need to modify generalized_generate... objective function construction

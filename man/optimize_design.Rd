@@ -2,17 +2,27 @@
 % Please edit documentation in R/optimize_design.R
 \name{optimize_design}
 \alias{optimize_design}
-\title{Adaptive Enrichment Design Optimization Using Sparse Linear Programming
-Authors: Michael Rosenblum, Ethan Fang, Han Liu}
+\title{Adaptive Enrichment Design Optimization Using Sparse Linear Programming}
 \usage{
-optimize_design(subpopulation.1.proportion, total.alpha,
-  data.generating.distributions, stage.1.sample.sizes,
-  stage.2.sample.sizes.per.enrollment.choice, objective.function.weights,
-  power.constraints, type.of.LP.solver = "cplex",
-  discretization.parameter = c(1, 1, 10), number.cores = 30,
-  ncp.list = c(), list.of.rectangles.dec = c(), LP.iteration = 1,
-  prior.covariance.matrix = diag(2) * 0, LP.solver.path = c(),
-  loss.function = c(), cleanup.temporary.files = TRUE)
+optimize_design(
+  subpopulation.1.proportion,
+  total.alpha,
+  data.generating.distributions,
+  stage.1.sample.sizes,
+  stage.2.sample.sizes.per.enrollment.choice,
+  objective.function.weights,
+  power.constraints,
+  type.of.LP.solver = "cplex",
+  discretization.parameter = c(1, 1, 10),
+  number.cores = 30,
+  ncp.list = c(),
+  list.of.rectangles.dec = c(),
+  LP.iteration = 1,
+  prior.covariance.matrix = diag(2) * 0,
+  LP.solver.path = c(),
+  loss.function = c(),
+  cleanup.temporary.files = TRUE
+)
 }
 \arguments{
 \item{subpopulation.1.proportion}{Proportion of overall population in subpopulation 1. Must be between 0 and 1.}
@@ -54,8 +64,27 @@ An optimized policy is returned, consisting of the following elements (defined i
 }
 \description{
 Adaptive Enrichment Design Optimization Using Sparse Linear Programming
-Authors: Michael Rosenblum, Ethan Fang, Han Liu
 }
-\examples{
-See inst/examples/example3.2reduced which is a simplified example that can be run in 10 minutes using the GLPK solver, which involves solving a modified version of the problem from Example 3.2 as described in Section 5.2 of the manuscript; the main modifications are that we  use a coarsened partition of the decision region and rejection regions in order to speed up the computation.
+\note{
+See inst/examples/example3.2reduced which is a simplified example
+that can be run in 10 minutes using the GLPK solver, which
+involves solving a modified version of the problem from Example
+3.2 as described in Section 5.2 of the manuscript; the main
+modifications are that we  use a coarsened partition of the
+decision region and rejection regions in order to speed up the
+computation.
+}
+\section{Output}{
+
+The software computes an optimized design and saves it as "optimized_design<k>.rdata", where <k> is the user-defined iteration number (LP.iteration). E.g., if one sets LP.iteration=1, then the optimized design is saved as "optimized_design1.rdata". That file can be opened in R and contains the following 6 items:
+input.parameters (the inputs passed to the optimized_design function)
+list.of.rectangles.dec (the decision rectangle partition of R^2)
+list.of.rectangles.mtp (the multiple testing procedure partition of R^2)
+ncp.active.FWER.constraints (the active familywise Type I error constraints in the optimized design, obtained using the dual solution to the linear program)
+ncp.list (the complete list of familywise Type I error constraints input to the linear program solver)
+sln (the solution to the linear program; sln$val is the expected sample size; sln$status, if either 1 or 5, indicates that a feasible solution was found and other wise the problem was infeasible or no solution was found; sln$z is the actual solution as a vector)
+}
+
+\author{
+Michael Rosenblum, Ethan Fang, Han Liu
 }
