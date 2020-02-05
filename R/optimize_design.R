@@ -42,11 +42,13 @@
 #' library(AdaptiveDesignOptimizerSparseLP)
 #' #Install R package if not already done so using the following command:
 #' #remotes::install_github("mrosenblum/AdaptiveDesignOptimizerSparseLP")
-#' # Load R package if not already done so by the following command: library(AdaptiveDesignOptimizerSparseLP)
+#' # Load R package if not already done so by the following command:
+#' # library(AdaptiveDesignOptimizerSparseLP)
 #' # For reproducibility, set the random number generator seed:
 #' set.seed(32515)
 #'
-#' # Set all problem parameters based on Example 3.2, and using explicit choices of the following input parameters:
+#' # Set all problem parameters based on Example 3.2, and using explicit
+#' # choices of the following input parameters:
 #' # The proportion of the population in subpopulation 1:
 #' subpopulation.1.proportion = 0.5
 #'
@@ -54,12 +56,14 @@
 #' # Sample size in stage 1 for each subpopulation: 50;
 #' stage.1.sample.sizes = c(50, 50)
 #'
-#' # We set n=200 in our adaptive design template n^(1b), which corresponds to the following four
+#' # We set n=200 in our adaptive design template n^(1b), which corresponds
+#' # to the following four
 #' # choices for stage 2 enrollment:
 #' stage.2.sample.sizes.per.enrollment.choice = matrix(
 #'   c(50, 50,  # Stage 2: enroll 50 from each subpopulation
 #'     0, 0,   # Stop trial after stage 1
-#'     150, 0, # Stage 2: enroll 150 from subpopulation 1 and none from subpopulation 2
+#'     150, 0, # Stage 2: enroll 150 from subpopulation 1 and none from
+#'     # subpopulation 2
 #'     0, 150),
 #'   # Stage 2: enroll none from subpopulation 1 and 150 from subpopulation 2
 #'   nrow = 4,
@@ -74,12 +78,16 @@
 #'   )
 #' )
 #'
-#' # Set the Minimum, clinically meaningful treatment effect size, which we set slightly larger than
-#' # in examples in Section 5.2 for illustration purposes (since our coarsened decision and rejection regions in the illustration here require this for the problem to be feasible):
+#' # Set the Minimum, clinically meaningful treatment effect size, which
+#' # we set slightly larger than
+#' # in examples in Section 5.2 for illustration purposes (since our
+#' # coarsened decision and rejection regions in the illustration here
+#' # require this for the problem to be feasible):
 #' Delta_min = 1.2 * sqrt(1 / 2) * (qnorm(0.95 + 1e-4) + qnorm(0.95)) / 5
 #'
 #' # The data generating distributions for Example 3.2 are encoded as follows
-#' # (where we set the outcome variance to 1 for each subpopulation bby study arm combination):
+#' # (where we set the outcome variance to 1 for each subpopulation bby
+#' # study arm combination):
 #' # The first 2 entries in each row represent \Delta_1 and \Delta_2
 #' data.generating.distributions = matrix(
 #'   data = c(
@@ -215,23 +223,36 @@ optimize_design <- function(subpopulation.1.proportion,
   type.of.LP.solver = match.arg(type.of.LP.solver,
                                 choices = c("cplex", "glpk", "gurobi",
                                             "matlab"))
-  max_error_prob <- 0 # track approximation errors in problem construction; initialize to 0 here
-  covariance_Z_1_Z_2 <-  0 # covariance_due_to overlap of subpopulations (generally we assume no overlap)
+  max_error_prob <- 0
+  # track approximation errors in problem construction; initialize to 0 here
+  covariance_Z_1_Z_2 <-  0
+  # covariance_due_to overlap of subpopulations
+  # (generally we assume no overlap)
   p1 <- subpopulation.1.proportion;
-  p2 <- 1-p1 # proportion of population in subpopulation 2 (assumes non-overlapping subpopulations that partition entire population)
+  p2 <- 1-p1 # proportion of population in subpopulation
+  # 2 (assumes non-overlapping subpopulations that partition entire population)
   rho1 <- sqrt(p1)
   rho2 <- sqrt(p2)
 
   actions <- c(1,2,3,4,5,6,7)
-  number_actions <- length(actions) # correspond to rejecting nothing, H01, H02, H0C, H01 and H0C, H02 and H0C, all
+  number_actions <- length(actions)
+  # correspond to rejecting nothing, H01, H02, H0C, H01 and H0C, H02
+  # and H0C, all
 
-  ## ncp (shorthand for non-centrality parameter) is a 2 component vector equal to c(sqrt(2*p_1*sum(stage.1.sample.sizes))Delta_1/(2sigma_1) , sqrt(2*p_2*sum(stage.1.sample.sizes)Delta_2/(2sigma_2))) for sigma^2_s=(sigma^2_(s0)+sigma^2_(s1))/2.
+  ## ncp (shorthand for non-centrality parameter) is a 2 component
+  # vector equal to c(sqrt(2*p_1*sum(stage.1.sample.sizes)) Delta_1/(2sigma_1) ,
+  # sqrt(2*p_2*sum(stage.1.sample.sizes)Delta_2/(2sigma_2)))
+  # for sigma^2_s=(sigma^2_(s0)+sigma^2_(s1))/2.
 
-  ## It represents c(EZ_1,EZ_2) for the fixed design that enrolls 2*p_s*sum(stage.1.sample.sizes) from each subpopulation s.
+  ## It represents c(EZ_1,EZ_2) for the fixed design that enrolls
+  # 2*p_s*sum(stage.1.sample.sizes) from each subpopulation s.
 
   map_from_P_to_type_I_error_indicator_over_set_of_actions <- function(ncp)
   {
-    return(c(0,ncp[1]<=0,ncp[2]<=0,rho1*ncp[1]+rho2*ncp[2]<=0, ncp[1]<=0 || rho1*ncp[1]+rho2*ncp[2]<=0, ncp[2] <= 0 || rho1*ncp[1]+rho2*ncp[2]<=0, ncp[1]<=0 || ncp[2]<=0 || rho1*ncp[1]+rho2*ncp[2]<=0))
+    return(c(0,ncp[1]<=0,ncp[2]<=0,rho1*ncp[1]+rho2*ncp[2]<=0, ncp[1]<=0 ||
+               rho1*ncp[1]+rho2*ncp[2]<=0, ncp[2] <= 0 ||
+               rho1*ncp[1]+rho2*ncp[2]<=0, ncp[1]<=0 ||
+               ncp[2]<=0 || rho1*ncp[1]+rho2*ncp[2]<=0))
   }
 
   indicator_contribute_to_H01_power <- c(0,1,0,0,1,0,1)
