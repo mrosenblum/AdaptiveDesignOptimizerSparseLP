@@ -15,6 +15,10 @@ knitr::opts_chunk$set(
 
 # AdaptiveDesignOptimizerSparseLP
 
+<!-- badges: start -->
+[![Travis build status](https://travis-ci.com/mrosenblum/AdaptiveDesignOptimizerSparseLP.svg?branch=master)](https://travis-ci.com/mrosenblum/AdaptiveDesignOptimizerSparseLP)
+<!-- badges: end -->
+
 The goal of AdaptiveDesignOptimizerSparseLP is to construct an optimal two-stage, two subpopulation, adaptive enrichment designs for a given problem. The problem inputs are the desired familywise Type I error rate and power, and the set of scenarios (data generating distributions) of interest. The software minimizes the expected sample size under the power and Type I error constraints.
 
 More specifically, the user chooses the following (which are inputs to the software): the subpopulation 1 proportion, the power constraints, the familywise Type I error rate, the prior distribution used to define the objective function (which can be any finite mixture of point masses or bivariate normal distributions), and the adaptive design template (consisting of the stage 1 sample sizes and the stage 2 sample sizes under each possible stage 2 enrollment choice). The optimization goal is to minimize  expected sample size under the power and Type I error constraints.
