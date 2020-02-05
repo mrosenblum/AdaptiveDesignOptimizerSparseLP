@@ -12,7 +12,7 @@ optimize_design(
   stage.2.sample.sizes.per.enrollment.choice,
   objective.function.weights,
   power.constraints,
-  type.of.LP.solver = "cplex",
+  type.of.LP.solver = get_default_solver(),
   discretization.parameter = c(1, 1, 10),
   number.cores = 30,
   ncp.list = c(),
@@ -175,7 +175,8 @@ data.generating.distributions = matrix(
   )
 )
 
-# The resulting non-centrality parameter (see Section 5.1 of the paper) matches that used in the paper computations.
+# The resulting non-centrality parameter (see Section 5.1 of the paper)
+# matches that used in the paper computations.
 # Required Familywise Type I error:
 total.alpha = 0.05
 
@@ -190,16 +191,19 @@ power.constraints = matrix(
     0,
     desired.power,
     0,
-    # 80\% power required for rejecting H02 under 2nd data generating distribution
+    # 80\% power required for rejecting H02 under 2nd data generating
+    # distribution
     desired.power,
     0,
     0,
-    # 80\% power required for rejecting H01 under 3nd data generating distribution
+    # 80\% power required for rejecting H01 under 3nd data generating
+    #  distribution
     0,
     0,
     desired.power
   ),
-  # 80\% power required for rejecting H0C under 4th data generating distribution
+  # 80\% power required for rejecting H0C under 4th data generating
+  # distribution
   nrow = 4,
   ncol = 3,
   byrow = TRUE,
@@ -209,8 +213,14 @@ power.constraints = matrix(
 objective.function.weights = 0.25 * c(1, 1, 1, 1)
 # Equal weights on each data generating distribution
 prior.covariance.matrix = diag(2)
-# Prior distribution \Lambda is mixture of 4 point bivariate normal distributions with identity covariance matrix and means given by first 2 columns in data.generating.distributions
+# Prior distribution \Lambda is mixture of 4 point bivariate normal
+# distributions with identity covariance matrix and means given by
+# first 2 columns in data.generating.distributions
+if (requireNamespace("Rglpk", quietly = TRUE)) {
 type.of.LP.solver = "glpk"
+} else {
+type.of.LP.solver = "cplex"
+}
 
 discretization.parameter = c(3, 3, 1)
 
@@ -226,7 +236,7 @@ optimized.policy <- optimize_design(
   stage.2.sample.sizes.per.enrollment.choice,
   objective.function.weights,
   power.constraints,
-  type.of.LP.solver,
+  type.of.LP.solver = type.of.LP.solver,
   discretization.parameter,
   number.cores,
   prior.covariance.matrix = prior.covariance.matrix
