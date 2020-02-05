@@ -92,38 +92,19 @@ Delta_min = 1.2 * sqrt(1 / 2) * (qnorm(0.95 + 1e-4) + qnorm(0.95)) / 5
 
 # The data generating distributions for Example 3.2 are encoded as follows
 # (where we set the outcome variance to 1 for each subpopulation bby study arm combination):
-# The first 2 entries in each row represent \Delta_1 and \Delta_2
+# In each row, the first 2 entries represent \Delta_1 and \Delta_2 and
+# the next four entries represent variance under each subpopulation by arm combination
 data.generating.distributions = matrix(
   data = c(
-    0,
-    0,
-    1,
-    1,
-    1,
-    1,
-    # zero treatment effect in each arm
-    0,
-    Delta_min,
-    1,
-    1,
-    1,
-    1,
-    # Delta_min treatment effect subpopulation 2, no effect subpopulation 1
-    Delta_min,
-    0,
-    1,
-    1,
-    1,
-    1,
-    # Delta_min treatment effect subpopulation 1, no effect subpopulation 2
-    Delta_min,
-    Delta_min,
-    1,
-    1,
-    1,
-    1
+    # zero treatment effect in each arm:
+    0,0,1,1,1,1,
+    # Delta_min treatment effect subpopulation 2, no effect subpopulation 1:
+    0,Delta_min,1,1,1,1,
+    # Delta_min treatment effect subpopulation 1, no effect subpopulation 2:
+    Delta_min,0,1,1,1,1,
+    # Delta_min treatment effect each subpopulation:
+    Delta_min,Delta_min,1,1,1,1
   ),
-  # Delta_min treatment effect each subpopulation
   nrow = 4,
   ncol = 6,
   byrow = TRUE,
@@ -146,25 +127,19 @@ total.alpha = 0.05
 
 desired.power = 0.8
 
+# Power Requirements, one per row of data.generating.distributions
+# Column 1: Power for H01; Column 2: Power for H02; Column 3: Power for H0C
 power.constraints = matrix(
   c(
-    0,
-    0,
-    0,
     # No power requirements under first data generating distribution
-    0,
-    desired.power,
-    0,
+    0,0,0,
     # 80% power required for rejecting H02 under 2nd data generating distribution
-    desired.power,
-    0,
-    0,
+    0,desired.power,0,
     # 80% power required for rejecting H01 under 3nd data generating distribution
-    0,
-    0,
-    desired.power
+    desired.power,0,0,
+   # 80% power required for rejecting H0C under 4th data generating distribution
+    0,0,desired.power
   ),
-  # 80% power required for rejecting H0C under 4th data generating distribution
   nrow = 4,
   ncol = 3,
   byrow = TRUE,
@@ -180,7 +155,6 @@ type.of.LP.solver = "glpk"
 discretization.parameter = c(3, 3, 1)
 
 number.cores = 1
-
 
 # Run first iteration solving sparse linear program
 optimized.policy <- optimize_design(
