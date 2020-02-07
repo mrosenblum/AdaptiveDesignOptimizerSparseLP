@@ -2,7 +2,8 @@
 % Please edit documentation in R/optimize_multiple_testing_procedure.R
 \name{optimize_multiple_testing_procedure}
 \alias{optimize_multiple_testing_procedure}
-\title{Adaptive Enrichment Design Optimization Using Sparse Linear Programming}
+\title{Optimizes multiple testing procedure of two-stage, adaptive enrichment design
+  for a precomputed (e.g., using optimize_design) end-of-stage-1 decision rule.}
 \usage{
 optimize_multiple_testing_procedure(
   subpopulation.1.proportion = 0.5,
@@ -78,7 +79,8 @@ optimize_multiple_testing_procedure(
 Nothing is returned; instead the optimized design is saved as "optimized_design<k>.rdata", where <k> is the user-defined iteration number (LP.iteration).
 }
 \description{
-Adaptive Enrichment Design Optimization Using Sparse Linear Programming
+Optimizes multiple testing procedure of two-stage, adaptive enrichment design
+  for a precomputed (e.g., using optimize_design) end-of-stage-1 decision rule.
 }
 \section{Output}{
 

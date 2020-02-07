@@ -2,7 +2,7 @@
 % Please edit documentation in R/optimize_design.R
 \name{optimize_design}
 \alias{optimize_design}
-\title{Adaptive Enrichment Design Optimization Using Sparse Linear Programming}
+\title{Optimizes two-stage adaptive enrichment design using sparse linear programming}
 \usage{
 optimize_design(
   subpopulation.1.proportion,
@@ -63,7 +63,7 @@ optimize_design(
 An optimized policy is returned, consisting of the following elements (defined in the paper): S1, A1, S2, A2 (sets of states and actions) and the optimized policy (pi_1, pi_2). Also, additional information related to the optimized design is saved as "optimized_design<k>.rdata", where <k> is the user-defined iteration number (LP.iteration).
 }
 \description{
-Adaptive Enrichment Design Optimization Using Sparse Linear Programming
+Optimizes two-stage adaptive enrichment design using sparse linear programming
 }
 \note{
 See inst/examples/example3.2reduced which is a simplified example

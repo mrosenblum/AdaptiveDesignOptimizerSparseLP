@@ -322,8 +322,10 @@ optimized.policy$pi_2(20,a1,4)
 #> [1] "s1 is rectangle defined as the Cartesian product [ -1.5 , 0 ] x [ 1.5 , 3 ]"
 #> [1] "a1 is enrollment decision  4"
 #> [1] "s2 is rectangle defined as the Cartesian product [ -3 , 0 ] x [ 0 , 3 ]"
-#>        Reject none         Reject H01         Reject H02         Reject H0C 
-#>                  1                  0                  0                  0 
-#> Reject H01 and H0C Reject H02 and H0C         Reject all 
-#>                  0                  0                  0
+#>        Reject none         Reject H01         Reject H02 
+#>                  1                  0                  0 
+#>         Reject H0C Reject H01 and H0C Reject H02 and H0C 
+#>                  0                  0                  0 
+#>         Reject all 
+#>                  0
 ```

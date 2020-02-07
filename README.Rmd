@@ -19,7 +19,7 @@ knitr::opts_chunk$set(
 [![Travis build status](https://travis-ci.com/mrosenblum/AdaptiveDesignOptimizerSparseLP.svg?branch=master)](https://travis-ci.com/mrosenblum/AdaptiveDesignOptimizerSparseLP)
 <!-- badges: end -->
 
-The goal of AdaptiveDesignOptimizerSparseLP is to construct an optimal two-stage, two subpopulation, adaptive enrichment designs for a given problem. The problem inputs are the desired familywise Type I error rate and power, and the set of scenarios (data generating distributions) of interest. The software minimizes the expected sample size under the power and Type I error constraints.
+The goal of the R package AdaptiveDesignOptimizerSparseLP is to construct an optimal two-stage, two subpopulation, adaptive enrichment design for a given problem. The problem inputs are the desired familywise Type I error rate and power, and the set of scenarios (data generating distributions) of interest. The software minimizes the expected sample size under the power and Type I error constraints.
 We assume that the user has read our manuscript describing the general method (currently under review).
 
 The user chooses the following (which are inputs to the software): the subpopulation 1 proportion, the power constraints, the familywise Type I error rate, the prior distribution used to define the objective function (which can be any finite mixture of point masses or bivariate normal distributions), and the adaptive design template (consisting of the stage 1 sample sizes and the stage 2 sample sizes under each possible stage 2 enrollment choice). The optimization goal is to minimize  expected sample size under the power and Type I error constraints.
@@ -40,6 +40,20 @@ and then by entering the following in your R session:
 ``` r
 remotes::install_github("mrosenblum/AdaptiveDesignOptimizerSparseLP")
 ```
+
+Installing a Linear Program Solver:
+
+You need to have installed a linear program solver to use our software.
+Our software is compatible with Cplex, Gurobi, Matlab, and GLPK solvers.
+We recommend using Cplex or Gurobi whenever possible (due to their improved speed
+compared to the GLPK and Matlab solvers). 
+Cplex and Gurobi are commercial solvers, but are free for academic researchers. 
+See the following webpages to obtain these, respectively:
+Cplex: https://www.ibm.com/support/pages/ibm-ilog-optimization-academic-initiative
+Gurobi: https://www.gurobi.com/academia/academic-program-and-licenses/
+
+The Matlab solver comes with Matlab: https://www.mathworks.com/products/matlab.html
+GLPK can be downloaded free here: https://www.gnu.org/software/glpk/
 
 ## Examples and Replication of Key Results from Manuscript
 
@@ -278,18 +292,21 @@ The optimized.policy returned by our software consists of the pair of functions 
 Below are examples illustrating how to read the output of our solver, i.e., the optimized adaptive enrichment design encoded as optimized.policy:
 
 ```{r example_continued}
-print("Lower-left and upper right coordinates of 20th rectangle in list of stage 1 states S1:")
+#Lower-left and upper right coordinates of 20th rectangle in list of stage 1 states S1:
 optimized.policy$S1[[20]]$lower_boundaries
 optimized.policy$S1[[20]]$upper_boundaries
 
-print("Stochastic policy pi_1 evaluated at 20th rectangle in S1, i.e., the probabilities of taking each action in A1 given that the first stage z-statistics are in the rectangle corresponding to this state:")
+# Stochastic policy pi_1 evaluated at 20th rectangle in S1, i.e., the probabilities 
+# of taking each action in A1 given that the first stage z-statistics are in the 
+# rectangle corresponding to this state:
 optimized.policy$pi_1(20)
 
-print("Lower-left and upper right coordinates of 4th rectangle in list of stage 2 states S2 following action a1=4")
+# Lower-left and upper right coordinates of 4th rectangle in list of stage 2 states
+# S2 following action a1=4:
 a1 <- 4
 optimized.policy$S2[[4]][[a1]]$lower_boundaries
 optimized.policy$S2[[4]][[a1]]$upper_boundaries
 
-print("Stochastic policy pi_2 evaluated at 20th rectangle in S1, action a1=4, and 4th  rectangle in S2:")
+# Stochastic policy pi_2 evaluated at 20th rectangle in S1, action a1=4, and 4th  rectangle in S2:
 optimized.policy$pi_2(20,a1,4)
 ```

@@ -1,4 +1,5 @@
-#' Adaptive Enrichment Design Optimization Using Sparse Linear Programming
+#' Optimizes multiple testing procedure of two-stage, adaptive enrichment design
+#'   for a precomputed (e.g., using optimize_design) end-of-stage-1 decision rule.
 #'
 #' @author Michael Rosenblum, Ethan Fang, Han Liu
 #'
@@ -339,8 +340,8 @@ optimize_multiple_testing_procedure <- function(
       while(count_value <= length(list.of.rectangles.dec) && (!(abs(r$upper_boundaries[2] - list.of.rectangles.dec[[count_value]]$lower_boundaries[2])<10^(-10) && abs(r$lower_boundaries[1] - list.of.rectangles.dec[[count_value]]$lower_boundaries[1])<10^(-10) && abs(r$upper_boundaries[1] - list.of.rectangles.dec[[count_value]]$upper_boundaries[1])<10^(-10)))){count_value <- count_value +1}
       if(count_value <= length(list.of.rectangles.dec)){list.of.rectangles.dec[[counter_for_r]]$upper_neighbor <- count_value}
     }
-    save(list.of.rectangles.dec,file=paste("list.of.rectangles.dec",LP.iteration,".rdata",sep=""))
-    save(ncp.list,file=paste("ncp.list",LP.iteration,".rdata",sep=""))
+    #save(list.of.rectangles.dec,file=paste("list.of.rectangles.dec",LP.iteration,".rdata",sep=""))
+    #save(ncp.list,file=paste("ncp.list",LP.iteration,".rdata",sep=""))
   }
 
   ## Set multiple testing procedure rectangle partition
@@ -1309,7 +1310,6 @@ optimize_multiple_testing_procedure <- function(
     system('rm A*.rdata')
     system('rm c.rdata')
     system('rm number_variables.txt')
-    system('rm ncp.list*.rdata')
     system('rm Inequality_Constraints_to_Restrict_MTP_to_Sufficient_Statistics.rdata')
     system('rm Inequality_Constraints_to_set_monotonicity_in_hypotheses_rejected.rdata')
     system('rm number_equality_constraints_of_first_type.txt')
@@ -1317,6 +1317,7 @@ optimize_multiple_testing_procedure <- function(
     system('rm number_A1_constraints.txt')
     system('rm number_A1_files.txt')
     system('rm power_constraints.rdata')
+    system('rm sln*.rdata')
     if(type.of.LP.solver=="matlab" || type.of.LP.solver=="cplex"){
       system('rm A*.mat')
       system('rm a*.mat')
