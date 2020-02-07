@@ -39,7 +39,7 @@ remotes::install_github("mrosenblum/AdaptiveDesignOptimizerSparseLP")
 The computations for the key results from the paper (Examples 3.1 and 3.2 as described in Section 5.2) can be reproduced by the code in the following 2 files in the R project's inst/examples directory: replicate.results.example.3.1.R and 
  replicate.results.example.3.2.R. We used Cplex to solve these problems, as noted in the paper.
  
-Below is a simplified example that can be run in 10 minutes using the GLPK solver, which involves solving a modified version of the problem from Example 3.2 as described in Section 5.2 of the manuscript; the main modifications are that weuse a coarsened partition of the decision region and rejection regions in order to speed up the computation for illustration purposes. 
+Below is a simplified example that can be run in 4 minutes using a 4 core, 2.8 GHz processor on a Macbook laptop using the GLPK solver, which involves solving a modified version of the problem from Example 3.2 as described in Section 5.2 of the manuscript; the main modifications are that weuse a coarsened partition of the decision region and rejection regions in order to speed up the computation for illustration purposes. 
 
 To obtain definitions of each input and output argument in our main function optimize_design,
 type help(optimize_design) after installing the R package. 
@@ -47,9 +47,10 @@ type help(optimize_design) after installing the R package.
 
 ```r
 library(AdaptiveDesignOptimizerSparseLP)
-#Install R package if not already done so using the following command:
-#remotes::install_github("mrosenblum/AdaptiveDesignOptimizerSparseLP")
-# Load R package if not already done so by the following command: library(AdaptiveDesignOptimizerSparseLP)
+# Install R package if not already done so using the following command:
+# remotes::install_github("mrosenblum/AdaptiveDesignOptimizerSparseLP")
+# Load R package if not already done so by the following command: 
+# library(AdaptiveDesignOptimizerSparseLP)
 # For reproducibility, set the random number generator seed:
 set.seed(32515)
 
@@ -153,7 +154,8 @@ data.generating.distributions = matrix(
 # coarse discretization so that the computation runs relatively quickly on a single
 # processor using the open-source GLPK solver for illustration. We used multiple 
 # processors, used Cplex (which is substantially faster than GLPK for our problems), 
-# and ran our computations for longer durations to solve the problems in the paper; # this allowed finer discretizations. 
+# and ran our computations for longer durations to solve the problems in the paper; 
+# this allowed finer discretizations. 
 
 # Required Familywise Type I error:
 total.alpha = 0.05
@@ -236,11 +238,11 @@ type.of.LP.solver = "glpk"
 #   and ncp.list for explanation of available options for this.
 #  For illustration below,
 #  we set a coarse distribution since the corresponding problem can be generated
-#  and solved in about 10 minutes on 1 processor.
+#  and solved in about 4 minutes on 4 core, 2.8 GHz processor on a Macbook laptop.
 discretization.parameter = c(3, 3, 1)
 
 #  Number of available cores (the more available, the faster the algorithm will work)
-number.cores = 1
+number.cores = min(parallel::detectCores(), 4)
 
 # The following call to the main function optimize_design in our package
 #  solves the adaptive design optimization problem using the above inputs:
@@ -260,29 +262,24 @@ optimized.policy <- optimize_design(
 #> [1] "Adaptive Design Optimization Completed. Optimal design is stored in the file: optimized_design1.rdata"
 #> [1] "Feasible Solution was Found and Optimal Expected Sample Size is 181.23"
 #> [1] "Fraction of solution components with integral value solutions"
-#> [1] 0.943
+#> [1] 0.956
 #> [1] "User defined power constraints (desired power); each row corresponds to a data generating distribution; each column corresponds to H01, H02, H0C desired power, respectively."
-#>            Delta1 Delta2 Variance10 Variance11 Variance20 Variance21
-#> Scenario 1  0.000  0.000          1          1          1          1
-#> Scenario 2  0.465  0.000          1          1          1          1
-#> Scenario 3  0.000  0.465          1          1          1          1
-#> Scenario 4  0.465  0.465          1          1          1          1
-#>            PowerH01 PowerH02 PowerH0C
-#> Scenario 1      0.0      0.0      0.0
-#> Scenario 2      0.6      0.0      0.0
-#> Scenario 3      0.0      0.6      0.0
-#> Scenario 4      0.0      0.0      0.6
+#>            Delta1 Delta2 Variance10 Variance11 Variance20 Variance21 PowerH01 PowerH02
+#> Scenario 1  0.000  0.000          1          1          1          1      0.0      0.0
+#> Scenario 2  0.465  0.000          1          1          1          1      0.6      0.0
+#> Scenario 3  0.000  0.465          1          1          1          1      0.0      0.6
+#> Scenario 4  0.465  0.465          1          1          1          1      0.0      0.0
+#>            PowerH0C
+#> Scenario 1      0.0
+#> Scenario 2      0.0
+#> Scenario 3      0.0
+#> Scenario 4      0.6
 #> [1] "Probability of rejecting each null hypothesis (last 3 columns) under each data generating distribution (row)"
-#>            Delta1 Delta2 Variance10 Variance11 Variance20 Variance21   H01
-#> Scenario 1  0.000  0.000          1          1          1          1 0.028
-#> Scenario 2  0.465  0.000          1          1          1          1 0.600
-#> Scenario 3  0.000  0.465          1          1          1          1 0.050
-#> Scenario 4  0.465  0.465          1          1          1          1 0.525
-#>              H02   H0C
-#> Scenario 1 0.028 0.023
-#> Scenario 2 0.050 0.173
-#> Scenario 3 0.600 0.293
-#> Scenario 4 0.525 0.600
+#>            Delta1 Delta2 Variance10 Variance11 Variance20 Variance21   H01   H02   H0C
+#> Scenario 1  0.000  0.000          1          1          1          1 0.028 0.028 0.039
+#> Scenario 2  0.465  0.000          1          1          1          1 0.600 0.050 0.296
+#> Scenario 3  0.000  0.465          1          1          1          1 0.050 0.600 0.219
+#> Scenario 4  0.465  0.465          1          1          1          1 0.525 0.525 0.644
 ```
 
 We next explain the output of the above function. It prints (as shown above)
@@ -325,10 +322,8 @@ optimized.policy$pi_2(20,a1,4)
 #> [1] "s1 is rectangle defined as the Cartesian product [ -1.5 , 0 ] x [ 1.5 , 3 ]"
 #> [1] "a1 is enrollment decision  4"
 #> [1] "s2 is rectangle defined as the Cartesian product [ -3 , 0 ] x [ 0 , 3 ]"
-#>        Reject none         Reject H01         Reject H02 
-#>                  1                  0                  0 
-#>         Reject H0C Reject H01 and H0C Reject H02 and H0C 
-#>                  0                  0                  0 
-#>         Reject all 
-#>                  0
+#>        Reject none         Reject H01         Reject H02         Reject H0C 
+#>                  1                  0                  0                  0 
+#> Reject H01 and H0C Reject H02 and H0C         Reject all 
+#>                  0                  0                  0
 ```

@@ -67,7 +67,8 @@ Adaptive Enrichment Design Optimization Using Sparse Linear Programming
 }
 \note{
 See inst/examples/example3.2reduced which is a simplified example
-that can be run in 10 minutes using the GLPK solver, which
+that can be run in 4 minutes using the GLPK solver using a 4 core,
+2.8 GHz processor on a Macbook laptop, which
 involves solving a modified version of the problem from Example
 3.2 as described in Section 5.2 of the manuscript; the main
 modifications are that we  use a coarsened partition of the
@@ -274,16 +275,12 @@ objective.function.weights = 0.25 * c(1, 1, 1, 1)
 #   and ncp.list for explanation of available options for this.
 #  For illustration below,
 #  we set a coarse distribution since the corresponding problem can be generated
-#  and solved in about 10 minutes on 1 processor.
+#  and solved in about 4 minutes on 4 core, 2.8 GHz processor on a Macbook laptop.
 discretization.parameter = c(3, 3, 1)
 
+number.cores = min(parallel::detectCores(), 4)
 if (requireNamespace("Rglpk", quietly = TRUE)) {
 type.of.LP.solver = "glpk"
-} else {
-type.of.LP.solver = "cplex"
-}
-
-number.cores = min(parallel::detectCores(), 4)
 
 # The following call to the main function optimize_design in our package
 #  solves the adaptive design optimization problem using the above inputs:
@@ -299,7 +296,7 @@ optimized.policy <- optimize_design(
   discretization.parameter,
   number.cores,
   prior.covariance.matrix = prior.covariance.matrix
-)
+)} else {print("GLPK solver not found; please either install GLPK or set type.of.LP.solver to be 'matlab', 'gurobi', or 'cplex'.")}
 }
 \author{
 Michael Rosenblum, Ethan Fang, Han Liu

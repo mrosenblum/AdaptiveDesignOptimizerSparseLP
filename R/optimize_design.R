@@ -30,7 +30,8 @@
 #' sln (the solution to the linear program; sln$val is the expected sample size; sln$status, if either 1 or 5, indicates that a feasible solution was found and other wise the problem was infeasible or no solution was found; sln$z is the actual solution as a vector)
 #' @note
 #' See inst/examples/example3.2reduced which is a simplified example
-#' that can be run in 10 minutes using the GLPK solver, which
+#' that can be run in 4 minutes using the GLPK solver using a 4 core,
+#' 2.8 GHz processor on a Macbook laptop, which
 #' involves solving a modified version of the problem from Example
 #' 3.2 as described in Section 5.2 of the manuscript; the main
 #' modifications are that we  use a coarsened partition of the
@@ -227,16 +228,12 @@
 #' #   and ncp.list for explanation of available options for this.
 #' #  For illustration below,
 #' #  we set a coarse distribution since the corresponding problem can be generated
-#' #  and solved in about 10 minutes on 1 processor.
+#' #  and solved in about 4 minutes on 4 core, 2.8 GHz processor on a Macbook laptop.
 #' discretization.parameter = c(3, 3, 1)
 #'
+#' number.cores = min(parallel::detectCores(), 4)
 #' if (requireNamespace("Rglpk", quietly = TRUE)) {
 #' type.of.LP.solver = "glpk"
-#' } else {
-#' type.of.LP.solver = "cplex"
-#' }
-#'
-#' number.cores = min(parallel::detectCores(), 4)
 #'
 #' # The following call to the main function optimize_design in our package
 #' #  solves the adaptive design optimization problem using the above inputs:
@@ -252,7 +249,7 @@
 #'   discretization.parameter,
 #'   number.cores,
 #'   prior.covariance.matrix = prior.covariance.matrix
-#' )
+#' )} else {print("GLPK solver not found; please either install GLPK or set type.of.LP.solver to be 'matlab', 'gurobi', or 'cplex'.")}
 optimize_design <- function(subpopulation.1.proportion,
                             total.alpha,
                             data.generating.distributions,

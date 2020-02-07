@@ -97,16 +97,16 @@ sln (the solution to the linear program; sln$val is the expected sample size; sl
 # 3.2 of the paper.
 #First set all problem parameters based on Example 3.2, and using
 #  explicit choices of sample sizes (where n=200, sigma=1,
-# Delta^min=sqrt(1/2)*(qnorm(0.95+1e-4)+qnorm(0.95))/5=0.465),
+# Delta^min=4*qnorm(0.95)/sqrt(200)=0.465),
 # as follows:
 subpopulation.1.proportion=0.5;
-total.alpha=0.05-(1e-4);
+total.alpha=0.049;
+delta_min=4*qnorm(0.95)/sqrt(200);
 data.generating.distributions=matrix(
   data=c(0,0,1,1,1,1,
-         0,sqrt(1/2)*(qnorm(0.95+1e-4)+qnorm(0.95))/5,1,1,1,1,
-         sqrt(1/2)*(qnorm(0.95+1e-4)+qnorm(0.95))/5,0,1,1,1,1,
-         sqrt(1/2)*(qnorm(0.95+1e-4)+qnorm(0.95))/5,
-         sqrt(1/2)*(qnorm(0.95+1e-4)+qnorm(0.95))/5,1,1,1,1),
+         0,delta_min,1,1,1,1,
+         delta_min,0,1,1,1,1,
+         delta_min,delta_min,1,1,1,1),
   nrow=4,
   ncol=6,
   byrow=TRUE,
@@ -129,7 +129,7 @@ power.constraints=matrix(c(0,0,0,
 			   0.83,0,0,
 			   0,0,0.83),nrow=4,ncol=3,byrow=TRUE,dimnames=list(c(),
 			   c("PowerH01","PowerH02","PowerH0C")));
-type.of.LP.solver="matlab";
+type.of.LP.solver="cplex";
 discretization.parameter=c(1,0.25,10);
 number.cores=min(parallel::detectCores(), 30);
 # Load list of Type I Error Constraints (encoded as ncp.list in our
@@ -157,7 +157,6 @@ optimize_multiple_testing_procedure(
   prior.covariance.matrix,
   round.each.multiple.testing.procedure.rectangle.to.integer = TRUE,
   plots.to.round.simply = c(1, 2),
-  rounding.threshold.H0C = 0.4,
   power.constraint.tolerance = 0.01,
   LP.solver.path = c()
 )

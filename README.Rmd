@@ -46,16 +46,17 @@ remotes::install_github("mrosenblum/AdaptiveDesignOptimizerSparseLP")
 The computations for the key results from the paper (Examples 3.1 and 3.2 as described in Section 5.2) can be reproduced by the code in the following 2 files in the R project's inst/examples directory: replicate.results.example.3.1.R and 
  replicate.results.example.3.2.R. We used Cplex to solve these problems, as noted in the paper.
  
-Below is a simplified example that can be run in 10 minutes using the GLPK solver, which involves solving a modified version of the problem from Example 3.2 as described in Section 5.2 of the manuscript; the main modifications are that weuse a coarsened partition of the decision region and rejection regions in order to speed up the computation for illustration purposes. 
+Below is a simplified example that can be run in 4 minutes using a 4 core, 2.8 GHz processor on a Macbook laptop using the GLPK solver, which involves solving a modified version of the problem from Example 3.2 as described in Section 5.2 of the manuscript; the main modifications are that weuse a coarsened partition of the decision region and rejection regions in order to speed up the computation for illustration purposes. 
 
 To obtain definitions of each input and output argument in our main function optimize_design,
 type help(optimize_design) after installing the R package. 
 
 ```{r example, cache = TRUE}
 library(AdaptiveDesignOptimizerSparseLP)
-#Install R package if not already done so using the following command:
-#remotes::install_github("mrosenblum/AdaptiveDesignOptimizerSparseLP")
-# Load R package if not already done so by the following command: library(AdaptiveDesignOptimizerSparseLP)
+# Install R package if not already done so using the following command:
+# remotes::install_github("mrosenblum/AdaptiveDesignOptimizerSparseLP")
+# Load R package if not already done so by the following command: 
+# library(AdaptiveDesignOptimizerSparseLP)
 # For reproducibility, set the random number generator seed:
 set.seed(32515)
 
@@ -159,7 +160,8 @@ data.generating.distributions = matrix(
 # coarse discretization so that the computation runs relatively quickly on a single
 # processor using the open-source GLPK solver for illustration. We used multiple 
 # processors, used Cplex (which is substantially faster than GLPK for our problems), 
-# and ran our computations for longer durations to solve the problems in the paper; # this allowed finer discretizations. 
+# and ran our computations for longer durations to solve the problems in the paper; 
+# this allowed finer discretizations. 
 
 # Required Familywise Type I error:
 total.alpha = 0.05
@@ -242,11 +244,11 @@ type.of.LP.solver = "glpk"
 #   and ncp.list for explanation of available options for this.
 #  For illustration below,
 #  we set a coarse distribution since the corresponding problem can be generated
-#  and solved in about 10 minutes on 1 processor.
+#  and solved in about 4 minutes on 4 core, 2.8 GHz processor on a Macbook laptop.
 discretization.parameter = c(3, 3, 1)
 
 #  Number of available cores (the more available, the faster the algorithm will work)
-number.cores = 1
+number.cores = min(parallel::detectCores(), 4)
 
 # The following call to the main function optimize_design in our package
 #  solves the adaptive design optimization problem using the above inputs:
