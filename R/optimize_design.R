@@ -213,11 +213,15 @@
 #' #  ignores those rows in defining the objective function prior Lambda.
 #'
 #' # discretization.parameter sets how fine/coarse the rectangle partitions are
-#' #  for the decision and rejection regions, and also how fine the grid G of
-#' #  Type I error constraints should be. The first component is the side-length
-#' #  of squares in the decision region partition, the second component is the
-#' #  side-length of squares in the rejection region partitions, and the third component (after we multiply by the
-#' #  constant 54) gives the number of grid points in G.
+#' #  for the decision and rejection regions (which are exactly as in paragraph 2 in Section 5.2
+#' #  except that here we allow to multiply the side-lengths of squares by constants defined next),
+#' #  and also how fine the grid G of Type I error constraints should be.
+#' #  The first component is twice the side-length of squares in the box [-3,3]x[-3,3] and equal to
+#' #  the side-lengths of squares in the remaining region of [-6,6] x [-6,6];
+#' #  in the decision region partition;
+#' #  the second component is the side-length of squares in the rejection region partitions;
+#' #  the third component (after we multiply by theconstant 54)
+#' #  gives the number of grid points in G.
 #' #  There is also the option to set more complex partitions and grids; please
 #' #  run help(optimize_design) and look at the arguments: list.of.rectangles.dec
 #' #   and ncp.list for explanation of available options for this.
