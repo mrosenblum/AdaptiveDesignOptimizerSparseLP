@@ -93,87 +93,91 @@ library(AdaptiveDesignOptimizerSparseLP)
 # library(AdaptiveDesignOptimizerSparseLP)
 # For reproducibility, set the random number generator seed:
 set.seed(32515)
+# For reproducibility, set the random number generator seed:
+set.seed(32515)
+# Problem Inputs:
+#  For illustration below, we set all problem inputs based on Example 3.2.
+#  However, our software is general in that users can set the
+#   inputs based on their own problems, and then run our trial design
+#   optimizer.
 
-# Set all problem parameters based on Example 3.2, and using explicit
-# choices of the following input parameters:
-# The proportion of the population in subpopulation 1:
+#  The proportion of the population in subpopulation 1 is 1/2:
 subpopulation.1.proportion = 0.5
 
-# Sample sizes
-# Sample size in stage 1 for each subpopulation: 50;
+# Sample Sizes:
+#  We set n=200 in our adaptive design template n^(1b).
+#  This corresponds to total sample size 100 in stage 1,
+#  and total sample size 100 in stage 2 if both subpopulations get enrolled
+#  in stage 2.
+
+#  Stage 1 Sample Size for each subpopulation:
+#  Since p1=1/2 and total sample size in stage 1 is 100,
+#  we set the stage 1 sample size in each subpopulation to be 50 participants.
+#  This is encoded as follows (where first entry is subpopulation 1 sample size,
+# second entry is subpopulation 2 sample size):
 stage.1.sample.sizes = c(50, 50)
 
-# We set n=200 in our adaptive design template n^(1b), which corresponds
-# to the following four
-# choices for stage 2 enrollment:
+# In general, one can specify any finite number of sample size options for
+#  stage 2 enrollment. However, at some point the
+#  resulting problem size will be too large to solve, depending on the
+#  computational resources one has available.
+#  Here we consider 4 options as in adaptive design template n^(1b)
+#  (see Fig. 1b in the manuscript).
+#  Having set n=200 in adaptive design template n^(1b) as described above,
+#  this corresponds to the following four choices for stage 2 enrollment,
+#  where each row corresponds to a different stage 2 enrollment choice,
+#  encoded as (subpopulation 1 sample size, subpopulation 2 sample size)
 stage.2.sample.sizes.per.enrollment.choice = matrix(
   c(50, 50,  # Stage 2: enroll 50 from each subpopulation
-    0, 0,   # Stop trial after stage 1
-    150, 0, # Stage 2: enroll 150 from subpopulation 1 and none from
-    # subpopulation 2
-    0, 150),
-  # Stage 2: enroll none from subpopulation 1 and 150 from subpopulation 2
+    0, 0,    # Stop trial after stage 1
+    150, 0,  # Stage 2: enroll 150 from subpopulation 1 and 0 from subpopulation 2
+    0, 150), # Stage 2: enroll 0 from subpopulation 1 and 150 from subpopulation 2
   nrow = 4,
   ncol = 2,
   byrow = TRUE,
   dimnames = list(
     c(),
     c(
-      "Subpopulation1Stage2SampleSize",
-      "Subpopulation2Stage2SampleSize"
+      "Subpopulation1Stage2SampleSize", # Note: these labels are optional
+      "Subpopulation2Stage2SampleSize"  # and just for illustration
     )
   )
 )
 
-# Set the Minimum, clinically meaningful treatment effect size, which
-# we set slightly larger than
-# in examples in Section 5.2 for illustration purposes (since our
-# coarsened decision and rejection regions in the illustration here
-# require this for the problem to be feasible):
-Delta_min = 1.2 * sqrt(1 / 2) * (qnorm(0.95 + 1e-4) + qnorm(0.95)) / 5
+# We next set the minimum, clinically meaningful treatment effect size.
+#  to beDelta_min = 4*qnorm(0.95)/sqrt(n) = 0.465. We explain this choice
+#  below, which was made to match the distributions in Example 3.2 and
+#  the non-centrality parameter choice in Section 5.1.
+Delta_min = 0.465
 
-# The data generating distributions for Example 3.2 are encoded as follows
-# (where we set the outcome variance to 1 for each subpopulation bby
-# study arm combination):
-# The first 2 entries in each row represent \Delta_1 and \Delta_2
+# The data generating distributions where the trial design will be
+#  evaluated are input next, encoded as the matrix data.generating.distributions
+#  Each row of the matrix corresponds to a different data generating distribution.
+#  The user decides on how many rows to put; we use 4 rows below.
+#  Each column gives a feature of the corresponding distribution, where
+#  the first two columns represent (Delta_1,Delta_2)
+#  and the last 4 columns are the outcome variances
+#  sigma_10^2, sigma_11^2, sigma_20^2, sigma_21^2,
+#  where sigma_sa^2 is the outcome variance for subpopulation s and arm a.
+#  In our example, we set each variance equal to 1.
 data.generating.distributions = matrix(
   data = c(
-    0,
-    0,
-    1,
-    1,
-    1,
-    1,
-    # zero treatment effect in each arm
-    0,
-    Delta_min,
-    1,
-    1,
-    1,
-    1,
-    # Delta_min treatment effect subpopulation 2, no effect subpopulation 1
-    Delta_min,
-    0,
-    1,
-    1,
-    1,
-    1,
-    # Delta_min treatment effect subpopulation 1, no effect subpopulation 2
-    Delta_min,
-    Delta_min,
-    1,
-    1,
-    1,
-    1
+    # Data generating distribution with (Delta_1,Delta_2)=(0,0):
+    0,0,1,1,1,1,
+    # Data generating distribution with (Delta_1,Delta_2)=(Delta_min,0):
+    Delta_min,0,1,1,1,1,
+    # Data generating distribution with (Delta_1,Delta_2)=(0,Delta_min):
+    0,Delta_min,1,1,1,1,
+    # Data generating distribution with (Delta_1,Delta_2)=(Delta_min,Delta_min):
+    Delta_min,Delta_min,1,1,1,1
   ),
-  # Delta_min treatment effect each subpopulation
   nrow = 4,
   ncol = 6,
   byrow = TRUE,
   dimnames = list(
     c(),
     c(
-      "Delta1",
+      "Delta1",  # Note: these labels are optional
       "Delta2",
       "Variance10",
       "Variance11",
@@ -183,59 +187,102 @@ data.generating.distributions = matrix(
   )
 )
 
-# The resulting non-centrality parameter (see Section 5.1 of the paper)
-# matches that used in the paper computations.
+# The above choice of Delta_min=0.465, sigma_sa=1 for each subpopulation s and arm a,
+# and n=200 were selected in order for the non-centrality parameter (defined in #'
+# Section 5.1) to equal 2.33, so that our problem formulation here matches
+# Example 3.2 under the setup in Section 5 of the manuscript.
+# The difference here is that we use a
+# coarse discretization so that the computation runs relatively quickly on a single
+# processor using the open-source GLPK solver for illustration. We used multiple
+# processors, used Cplex (which is substantially faster than GLPK for our problems),
+# and ran our computations for longer durations to solve the problems in the paper;
+# this allowed finer discretizations.
+
 # Required Familywise Type I error:
 total.alpha = 0.05
-
-desired.power = 0.8
-
+# Power Constraints:
+#  The power constraints are represented by a matrix power.constraints
+#  with the same number ofrows as data.generating.distributions.
+#  The 3 columns correspond to the following:
+#  Column 1: Power for H01; Column 2: Power for H02; Column 3: Power for H0C.
+#  Each row of power.constraints represents the minimum required power to reject
+#  H01, H02, H0C, respectively, when the data generating distribution is
+#  the corresponding row of data.generating.distributions.
+#  There are four power constraints below (the first of which is vacuous)
+#  For illustration these are set lower than typical (only 60\%), since
+#  we use a coarse discretization that cannot achieve much higher power.
 power.constraints = matrix(
   c(
-    0,
-    0,
-    0,
-    # No power requirements under first data generating distribution
-    0,
-    desired.power,
-    0,
-    # 80\% power required for rejecting H02 under 2nd data generating
-    # distribution
-    desired.power,
-    0,
-    0,
-    # 80\% power required for rejecting H01 under 3nd data generating
-    #  distribution
-    0,
-    0,
-    desired.power
+    # No power requirements under first data generating distribution:
+    0,0,0,
+    # 60\% power required for rejecting H01 under 2nd data generating distributi#' on:
+    0.6,0,0,
+    # 60\% power required for rejecting H02 under 3rd data generating distributi#' on:
+    0,0.6,0,
+    # 60\% power required for rejecting H0C under 4th data generating distributi#' on:
+    0,0,0.6
   ),
-  # 80\% power required for rejecting H0C under 4th data generating
-  # distribution
   nrow = 4,
   ncol = 3,
   byrow = TRUE,
   dimnames = list(c(), c("PowerH01", "PowerH02", "PowerH0C"))
 )
 
+# Objective Function:
+#  The prior distribution Lambda used to define the objective function
+#  is a mixture of k distributions, where k is the number of rows of
+#  data.generating.distributions, and with weights
+#  defined by objective.function.weights (which must sum to 1).
+#  We next describe how each component distribution of the mixture is encoded.
+#  Each component distribution is a bivariate normal distribution
+#  (where we allow degenerate distributions, e.g., a point mass).
+#  Each component distribution is centered at (Delta_1,Delta_2) from
+#  the corresponding row of data.generating.distributions.
+# The covariance matrix of the each component distribution is defined by
+#  prior.covariance.matrix, e.g., we set
+prior.covariance.matrix = diag(2) # the 2x2 identity matrix
+#  When prior.covariance.matrix is input as a single 2x2 matrix, it is assumed #' that
+#  this is the same covariance matrix for each component distribution. In this #' way,
+#  if we also set
 objective.function.weights = 0.25 * c(1, 1, 1, 1)
-# Equal weights on each data generating distribution
-prior.covariance.matrix = diag(2)
-# Prior distribution \Lambda is mixture of 4 point bivariate normal
-# distributions with identity covariance matrix and means given by
-# first 2 columns in data.generating.distributions
+#  then we obtain the Lambda corresponding to the objective function in Example 3.2.
+#  The user can instead decide to set each component distribution
+#  to have a different covariance matrix,
+#  which can be input by setting prior.covariance.matrix to a list of k
+#  2x2 matrices, where k is the number of rows of data.generating.distributions.
+#  The special case of point masses can be encoded by setting the covariance matrix
+#  (or matrices) to contain all 0's, e.g., if we set
+#  prior.covariance.matrix to the 2x2 matrix of all 0's, then Lambda
+#  in our example here would correspond to an equally weighted mixture of
+#  4 point masses as in Example 3.1. One does not have to use all
+#  of the rows of data.generating.distructions, e.g., one could set some
+#  components of objective.function.weights to 0, which effectively
+#  ignores those rows in defining the objective function prior Lambda.
+
+# discretization.parameter sets how fine/coarse the rectangle partitions are
+#  for the decision and rejection regions, and also how fine the grid G of
+#  Type I error constraints should be. The first component is the side-length
+#  of squares in the decision region partition, the second component is the
+#  side-length of squares in the rejection region partitions, and the third component (after we multiply by the
+#  constant 54) gives the number of grid points in G.
+#  There is also the option to set more complex partitions and grids; please
+#  run help(optimize_design) and look at the arguments: list.of.rectangles.dec
+#   and ncp.list for explanation of available options for this.
+#  For illustration below,
+#  we set a coarse distribution since the corresponding problem can be generated
+#  and solved in about 10 minutes on 1 processor.
+discretization.parameter = c(3, 3, 1)
+
 if (requireNamespace("Rglpk", quietly = TRUE)) {
 type.of.LP.solver = "glpk"
 } else {
 type.of.LP.solver = "cplex"
 }
 
-discretization.parameter = c(3, 3, 1)
-
 number.cores = min(parallel::detectCores(), 4)
 
-
-# Run first iteration solving sparse linear program
+# The following call to the main function optimize_design in our package
+#  solves the adaptive design optimization problem using the above inputs:
 optimized.policy <- optimize_design(
   subpopulation.1.proportion,
   total.alpha,
@@ -244,7 +291,7 @@ optimized.policy <- optimize_design(
   stage.2.sample.sizes.per.enrollment.choice,
   objective.function.weights,
   power.constraints,
-  type.of.LP.solver = type.of.LP.solver,
+  type.of.LP.solver,
   discretization.parameter,
   number.cores,
   prior.covariance.matrix = prior.covariance.matrix
