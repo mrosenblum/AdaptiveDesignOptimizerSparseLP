@@ -27,7 +27,7 @@ The user chooses the following (which are inputs to the software): the subpopula
      The R package calls a linear program solver and is compatible with the solvers in Matlab, Cplex, and  Gurobi (three commercial solvers, with the latter two free for academic use) and also with the open-source GLPK solver. We wrote scripts that  make it seamless to use our package with any of these solvers, though we recommend Cplex or Gurobi due to their high performance.
      Our software reproduces our examples as well. 
 
-## Installation
+## R Package Installation
 
 You can install AdaptiveDesignOptimizerSparseLP using the remotes R package, which can be obtained by typing the following in your R session:
 
@@ -41,10 +41,11 @@ and then by entering the following in your R session:
 remotes::install_github("mrosenblum/AdaptiveDesignOptimizerSparseLP")
 ```
 
-Installing a Linear Program Solver:
+## Linear Program Solver Installation:
 
 You need to have installed a linear program solver to use our software.
 Our software is compatible with Cplex, Gurobi, Matlab, and GLPK solvers.
+
 We recommend using Cplex or Gurobi whenever possible (due to their improved speed
 compared to the GLPK and Matlab solvers). 
 Cplex and Gurobi are commercial solvers, but are free for academic researchers. 

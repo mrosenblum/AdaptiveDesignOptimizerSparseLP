@@ -1,26 +1,17 @@
----
-output: github_document
----
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
-
-
-
-# AdaptiveDesignOptimizerSparseLP
+AdaptiveDesignOptimizerSparseLP
+===============================
 
 <!-- badges: start -->
-[![Travis build status](https://travis-ci.com/mrosenblum/AdaptiveDesignOptimizerSparseLP.svg?branch=master)](https://travis-ci.com/mrosenblum/AdaptiveDesignOptimizerSparseLP)
-<!-- badges: end -->
+[![Travis build status](https://travis-ci.com/mrosenblum/AdaptiveDesignOptimizerSparseLP.svg?branch=master)](https://travis-ci.com/mrosenblum/AdaptiveDesignOptimizerSparseLP) <!-- badges: end -->
 
-The goal of AdaptiveDesignOptimizerSparseLP is to construct an optimal two-stage, two subpopulation, adaptive enrichment designs for a given problem. The problem inputs are the desired familywise Type I error rate and power, and the set of scenarios (data generating distributions) of interest. The software minimizes the expected sample size under the power and Type I error constraints.
-We assume that the user has read our manuscript describing the general method (currently under review).
+The goal of the R package AdaptiveDesignOptimizerSparseLP is to construct an optimal two-stage, two subpopulation, adaptive enrichment design for a given problem. The problem inputs are the desired familywise Type I error rate and power, and the set of scenarios (data generating distributions) of interest. The software minimizes the expected sample size under the power and Type I error constraints. We assume that the user has read our manuscript describing the general method (currently under review).
 
-The user chooses the following (which are inputs to the software): the subpopulation 1 proportion, the power constraints, the familywise Type I error rate, the prior distribution used to define the objective function (which can be any finite mixture of point masses or bivariate normal distributions), and the adaptive design template (consisting of the stage 1 sample sizes and the stage 2 sample sizes under each possible stage 2 enrollment choice). The optimization goal is to minimize  expected sample size under the power and Type I error constraints.
-     The software optimizes over the discretized policies defined in Section 4.2 to produce an optimized, two-stage adaptive trial design tailored to the user's inputs. 
-     The R package calls a linear program solver and is compatible with the solvers in Matlab, Cplex, and  Gurobi (three commercial solvers, with the latter two free for academic use) and also with the open-source GLPK solver. We wrote scripts that  make it seamless to use our package with any of these solvers, though we recommend Cplex or Gurobi due to their high performance.
-     Our software reproduces our examples as well. 
+The user chooses the following (which are inputs to the software): the subpopulation 1 proportion, the power constraints, the familywise Type I error rate, the prior distribution used to define the objective function (which can be any finite mixture of point masses or bivariate normal distributions), and the adaptive design template (consisting of the stage 1 sample sizes and the stage 2 sample sizes under each possible stage 2 enrollment choice). The optimization goal is to minimize expected sample size under the power and Type I error constraints. The software optimizes over the discretized policies defined in Section 4.2 to produce an optimized, two-stage adaptive trial design tailored to the user's inputs. The R package calls a linear program solver and is compatible with the solvers in Matlab, Cplex, and Gurobi (three commercial solvers, with the latter two free for academic use) and also with the open-source GLPK solver. We wrote scripts that make it seamless to use our package with any of these solvers, though we recommend Cplex or Gurobi due to their high performance. Our software reproduces our examples as well.
 
-## Installation
+R Package Installation
+----------------------
 
 You can install AdaptiveDesignOptimizerSparseLP using the remotes R package, which can be obtained by typing the following in your R session:
 
@@ -28,24 +19,31 @@ You can install AdaptiveDesignOptimizerSparseLP using the remotes R package, whi
 source("https://install-github.me/r-lib/remotes")
 ```
 
-and then by entering the following in your R session: 
+and then by entering the following in your R session:
 
 ``` r
 remotes::install_github("mrosenblum/AdaptiveDesignOptimizerSparseLP")
 ```
 
-## Examples and Replication of Key Results from Manuscript
+Linear Program Solver Installation:
+-----------------------------------
 
-The computations for the key results from the paper (Examples 3.1 and 3.2 as described in Section 5.2) can be reproduced by the code in the following 2 files in the R project's inst/examples directory: replicate.results.example.3.1.R and 
- replicate.results.example.3.2.R. We used Cplex to solve these problems, as noted in the paper.
- 
-Below is a simplified example that can be run in 4 minutes using a 4 core, 2.8 GHz processor on a Macbook laptop using the GLPK solver, which involves solving a modified version of the problem from Example 3.2 as described in Section 5.2 of the manuscript; the main modifications are that weuse a coarsened partition of the decision region and rejection regions in order to speed up the computation for illustration purposes. 
+You need to have installed a linear program solver to use our software. Our software is compatible with Cplex, Gurobi, Matlab, and GLPK solvers.
 
-To obtain definitions of each input and output argument in our main function optimize_design,
-type help(optimize_design) after installing the R package. 
+We recommend using Cplex or Gurobi whenever possible (due to their improved speed compared to the GLPK and Matlab solvers). Cplex and Gurobi are commercial solvers, but are free for academic researchers. See the following webpages to obtain these, respectively: Cplex: <https://www.ibm.com/support/pages/ibm-ilog-optimization-academic-initiative> Gurobi: <https://www.gurobi.com/academia/academic-program-and-licenses/>
 
+The Matlab solver comes with Matlab: <https://www.mathworks.com/products/matlab.html> GLPK can be downloaded free here: <https://www.gnu.org/software/glpk/>
 
-```r
+Examples and Replication of Key Results from Manuscript
+-------------------------------------------------------
+
+The computations for the key results from the paper (Examples 3.1 and 3.2 as described in Section 5.2) can be reproduced by the code in the following 2 files in the R project's inst/examples directory: replicate.results.example.3.1.R and replicate.results.example.3.2.R. We used Cplex to solve these problems, as noted in the paper.
+
+Below is a simplified example that can be run in 4 minutes using a 4 core, 2.8 GHz processor on a Macbook laptop using the GLPK solver, which involves solving a modified version of the problem from Example 3.2 as described in Section 5.2 of the manuscript; the main modifications are that weuse a coarsened partition of the decision region and rejection regions in order to speed up the computation for illustration purposes.
+
+To obtain definitions of each input and output argument in our main function optimize\_design, type help(optimize\_design) after installing the R package.
+
+``` r
 library(AdaptiveDesignOptimizerSparseLP)
 # Install R package if not already done so using the following command:
 # remotes::install_github("mrosenblum/AdaptiveDesignOptimizerSparseLP")
@@ -262,61 +260,60 @@ optimized.policy <- optimize_design(
 #> [1] "Adaptive Design Optimization Completed. Optimal design is stored in the file: optimized_design1.rdata"
 #> [1] "Feasible Solution was Found and Optimal Expected Sample Size is 181.23"
 #> [1] "Fraction of solution components with integral value solutions"
-#> [1] 0.956
+#> [1] 0.958
 #> [1] "User defined power constraints (desired power); each row corresponds to a data generating distribution; each column corresponds to H01, H02, H0C desired power, respectively."
-#>            Delta1 Delta2 Variance10 Variance11 Variance20 Variance21 PowerH01 PowerH02
-#> Scenario 1  0.000  0.000          1          1          1          1      0.0      0.0
-#> Scenario 2  0.465  0.000          1          1          1          1      0.6      0.0
-#> Scenario 3  0.000  0.465          1          1          1          1      0.0      0.6
-#> Scenario 4  0.465  0.465          1          1          1          1      0.0      0.0
-#>            PowerH0C
-#> Scenario 1      0.0
-#> Scenario 2      0.0
-#> Scenario 3      0.0
-#> Scenario 4      0.6
+#>            Delta1 Delta2 Variance10 Variance11 Variance20 Variance21
+#> Scenario 1  0.000  0.000          1          1          1          1
+#> Scenario 2  0.465  0.000          1          1          1          1
+#> Scenario 3  0.000  0.465          1          1          1          1
+#> Scenario 4  0.465  0.465          1          1          1          1
+#>            PowerH01 PowerH02 PowerH0C
+#> Scenario 1      0.0      0.0      0.0
+#> Scenario 2      0.6      0.0      0.0
+#> Scenario 3      0.0      0.6      0.0
+#> Scenario 4      0.0      0.0      0.6
 #> [1] "Probability of rejecting each null hypothesis (last 3 columns) under each data generating distribution (row)"
-#>            Delta1 Delta2 Variance10 Variance11 Variance20 Variance21   H01   H02   H0C
-#> Scenario 1  0.000  0.000          1          1          1          1 0.028 0.028 0.039
-#> Scenario 2  0.465  0.000          1          1          1          1 0.600 0.050 0.296
-#> Scenario 3  0.000  0.465          1          1          1          1 0.050 0.600 0.219
-#> Scenario 4  0.465  0.465          1          1          1          1 0.525 0.525 0.644
+#>            Delta1 Delta2 Variance10 Variance11 Variance20 Variance21   H01
+#> Scenario 1  0.000  0.000          1          1          1          1 0.028
+#> Scenario 2  0.465  0.000          1          1          1          1 0.600
+#> Scenario 3  0.000  0.465          1          1          1          1 0.050
+#> Scenario 4  0.465  0.465          1          1          1          1 0.525
+#>              H02   H0C
+#> Scenario 1 0.028 0.026
+#> Scenario 2 0.050 0.163
+#> Scenario 3 0.600 0.289
+#> Scenario 4 0.525 0.600
 ```
 
-We next explain the output of the above function. It prints (as shown above)
-a message indicating whether the problem was feasible, and if so, what the 
-expected sample size is. When the problem is feasible, the power achieved under
-each data generating distribution for each null hypothesis is given.
-Also, the optimzed policy is returned by the software. 
+We next explain the output of the above function. It prints (as shown above) a message indicating whether the problem was feasible, and if so, what the expected sample size is. When the problem is feasible, the power achieved under each data generating distribution for each null hypothesis is given. Also, the optimzed policy is returned by the software.
 
-The optimized.policy returned by our software consists of the pair of functions pi_1 and pi_2 as defined in Section 2.1 of the manuscript, along with state spaces and actions spaces for the sequential decision problem denoted by S1, A1, S2, A2. Each state in S1 is a rectangle with lower-left coordinates (x1,y1) encoded as optimized.policy\$lower_boundaries and upper right coordinates (x2,y2) encoded as optimized.policy\$upper_boundaries. Each action in A1 is an integer among 1,2,...,d corresponding to each of the d stage 2 enrollment choices that were input by the user. Since we allow the stage 2 state space to depend on end of stage 1 action in A1, we have that S2 is a function from an action in A1. E.g., the stage 2 state space after stage 1 action a1=3 is encoded as optimized.policy\$S2[[3]]. Each action in A2 is an integer among 1,2,...,7 encoding the following outcome of the multiple testing procedure: Reject none,Reject H01,Reject H02,Reject H0C,Reject H01 and H0C,Reject H02 and H0C,Reject all, respectively.
+The optimized.policy returned by our software consists of the pair of functions pi\_1 and pi\_2 as defined in Section 2.1 of the manuscript, along with state spaces and actions spaces for the sequential decision problem denoted by S1, A1, S2, A2. Each state in S1 is a rectangle with lower-left coordinates (x1,y1) encoded as optimized.policy$lower\_boundaries and upper right coordinates (x2,y2) encoded as optimized.policy$upper\_boundaries. Each action in A1 is an integer among 1,2,...,d corresponding to each of the d stage 2 enrollment choices that were input by the user. Since we allow the stage 2 state space to depend on end of stage 1 action in A1, we have that S2 is a function from an action in A1. E.g., the stage 2 state space after stage 1 action a1=3 is encoded as optimized.policy$S2\[\[3\]\]. Each action in A2 is an integer among 1,2,...,7 encoding the following outcome of the multiple testing procedure: Reject none,Reject H01,Reject H02,Reject H0C,Reject H01 and H0C,Reject H02 and H0C,Reject all, respectively.
 
 Below are examples illustrating how to read the output of our solver, i.e., the optimized adaptive enrichment design encoded as optimized.policy:
 
-
-```r
-print("Lower-left and upper right coordinates of 20th rectangle in list of stage 1 states S1:")
-#> [1] "Lower-left and upper right coordinates of 20th rectangle in list of stage 1 states S1:"
+``` r
+#Lower-left and upper right coordinates of 20th rectangle in list of stage 1 states S1:
 optimized.policy$S1[[20]]$lower_boundaries
 #> [1] -1.5  1.5
 optimized.policy$S1[[20]]$upper_boundaries
 #> [1] 0 3
 
-print("Stochastic policy pi_1 evaluated at 20th rectangle in S1, i.e., the probabilities of taking each action in A1 given that the first stage z-statistics are in the rectangle corresponding to this state:")
-#> [1] "Stochastic policy pi_1 evaluated at 20th rectangle in S1, i.e., the probabilities of taking each action in A1 given that the first stage z-statistics are in the rectangle corresponding to this state:"
+# Stochastic policy pi_1 evaluated at 20th rectangle in S1, i.e., the probabilities 
+# of taking each action in A1 given that the first stage z-statistics are in the 
+# rectangle corresponding to this state:
 optimized.policy$pi_1(20)
 #> [1] "Probabilities of enrollment decisions 1 through  4  respectively:"
 #> [1] 0 0 0 1
 
-print("Lower-left and upper right coordinates of 4th rectangle in list of stage 2 states S2 following action a1=4")
-#> [1] "Lower-left and upper right coordinates of 4th rectangle in list of stage 2 states S2 following action a1=4"
+# Lower-left and upper right coordinates of 4th rectangle in list of stage 2 states
+# S2 following action a1=4:
 a1 <- 4
 optimized.policy$S2[[4]][[a1]]$lower_boundaries
 #> [1] -3  0
 optimized.policy$S2[[4]][[a1]]$upper_boundaries
 #> [1] 0 3
 
-print("Stochastic policy pi_2 evaluated at 20th rectangle in S1, action a1=4, and 4th  rectangle in S2:")
-#> [1] "Stochastic policy pi_2 evaluated at 20th rectangle in S1, action a1=4, and 4th  rectangle in S2:"
+# Stochastic policy pi_2 evaluated at 20th rectangle in S1, action a1=4, and 4th  rectangle in S2:
 optimized.policy$pi_2(20,a1,4)
 #> [1] "Inputs correspond to the following:"
 #> [1] "s1 is rectangle defined as the Cartesian product [ -1.5 , 0 ] x [ 1.5 , 3 ]"
