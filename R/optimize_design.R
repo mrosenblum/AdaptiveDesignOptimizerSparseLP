@@ -229,9 +229,10 @@
 #' #  For illustration below,
 #' #  we set a coarse distribution since the corresponding problem can be generated
 #' #  and solved in about 4 minutes on 4 core, 2.8 GHz processor on a Macbook laptop.
+#' #  Below we use only 2 cores, so the run time should be about 8 minutes.
 #' discretization.parameter = c(3, 3, 1)
 #'
-#' number.cores = min(parallel::detectCores(), 4)
+#' number.cores = min(parallel::detectCores(), 2)
 #' if (requireNamespace("Rglpk", quietly = TRUE)) {
 #' type.of.LP.solver = "glpk"
 #'

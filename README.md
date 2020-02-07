@@ -30,9 +30,15 @@ Linear Program Solver Installation:
 
 You need to have installed a linear program solver to use our software. Our software is compatible with Cplex, Gurobi, Matlab, and GLPK solvers.
 
-We recommend using Cplex or Gurobi whenever possible (due to their improved speed compared to the GLPK and Matlab solvers). Cplex and Gurobi are commercial solvers, but are free for academic researchers. See the following webpages to obtain these, respectively: Cplex: <https://www.ibm.com/support/pages/ibm-ilog-optimization-academic-initiative> Gurobi: <https://www.gurobi.com/academia/academic-program-and-licenses/>
+We recommend using Cplex or Gurobi whenever possible (due to their improved speed compared to the GLPK and Matlab solvers). Cplex and Gurobi are commercial solvers, but are free for academic researchers. See the following webpages to obtain these, respectively:
 
-The Matlab solver comes with Matlab: <https://www.mathworks.com/products/matlab.html> GLPK can be downloaded free here: <https://www.gnu.org/software/glpk/>
+Cplex: <https://www.ibm.com/support/pages/ibm-ilog-optimization-academic-initiative>
+
+Gurobi: <https://www.gurobi.com/academia/academic-program-and-licenses/>
+
+The Matlab solver comes with Matlab: <https://www.mathworks.com/products/matlab.html>
+
+GLPK can be downloaded free here: <https://www.gnu.org/software/glpk/>
 
 Examples and Replication of Key Results from Manuscript
 -------------------------------------------------------
