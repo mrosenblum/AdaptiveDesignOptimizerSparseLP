@@ -272,6 +272,11 @@ optimize_design <- function(subpopulation.1.proportion,
   type.of.LP.solver = match.arg(type.of.LP.solver,
                                 choices = c("cplex", "glpk", "gurobi",
                                             "matlab"))
+
+  # If glpk selected as solver, check that it is installed:
+  if(type.of.LP.solver=="glpk" && !requireNamespace("Rglpk", quietly = TRUE)){
+    stop("Linear program solver glpk was selected, but it is not installed or its path is missing. Make sure that glpk is installed, and input its path using the LP.solver.path argument (e.g., LP.solver.path='/bin/GLPK' ")}
+
   max_error_prob <- 0
   # track approximation errors in problem construction; initialize to 0 here
   covariance_Z_1_Z_2 <-  0
