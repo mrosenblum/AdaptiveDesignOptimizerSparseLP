@@ -24,9 +24,12 @@ We assume that the user has read our manuscript describing the general method (c
 
 The user chooses the following (which are inputs to the software): the subpopulation 1 proportion, the power constraints, the familywise Type I error rate, the prior distribution used to define the objective function (which can be any finite mixture of point masses or bivariate normal distributions), and the adaptive design template (consisting of the stage 1 sample sizes and the stage 2 sample sizes under each possible stage 2 enrollment choice). The optimization goal is to minimize  expected sample size under the power and Type I error constraints.
      The software optimizes over the discretized policies defined in Section 4.2 to produce an optimized, two-stage adaptive trial design tailored to the user's inputs. 
+     
      The R package calls a linear program solver and is compatible with the solvers in Matlab, Cplex, and  Gurobi (three commercial solvers, with the latter two free for academic use) and also with the open-source GLPK solver. We wrote scripts that  make it seamless to use our package with any of these solvers, though we recommend Cplex or Gurobi due to their high performance.
      Our software reproduces our examples as well. 
 
+    If you have any questions or want help using the software, please email Michael Rosenblum at mrosen at jhu dot edu.
+    
 ## R Package Installation
 
 You can install AdaptiveDesignOptimizerSparseLP using the remotes R package, which can be obtained by typing the following in your R session:
