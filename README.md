@@ -327,9 +327,9 @@ optimized.policy$S1[[20]]$upper_boundaries
 # Stochastic policy pi_1 evaluated at 20th rectangle in S1, i.e., the probabilities 
 # of taking each action in A1 given that the first stage z-statistics are in the 
 # rectangle corresponding to this state:
-optimized.policy$pi_1(20)
+round(optimized.policy$pi_1(20),4)
 #> [1] "Probabilities of enrollment decisions 1 through  4  respectively:"
-#> [1] 0.000000e+00 2.220446e-17 0.000000e+00 1.000000e+00
+#> [1] 0 0 0 1
 
 # Lower-left and upper right coordinates of 4th rectangle in list of stage 2 states
 # S2 following action a1=4:
