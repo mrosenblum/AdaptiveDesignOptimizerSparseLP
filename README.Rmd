@@ -57,7 +57,9 @@ Gurobi: https://www.gurobi.com/academia/academic-program-and-licenses/
 
 The Matlab solver comes with Matlab: https://www.mathworks.com/products/matlab.html
 
-GLPK can be downloaded free here: https://www.gnu.org/software/glpk/
+GLPK can be downloaded free here: https://www.gnu.org/software/glpk/ 
+
+Note: GLPK needs to be installed after it is downloaded, using instructions at the link above.
 
 ## Examples and Replication of Key Results from Manuscript
 
@@ -70,11 +72,10 @@ To obtain definitions of each input and output argument in our main function opt
 type help(optimize_design) after installing the R package. 
 
 ```{r example, cache = TRUE}
-library(AdaptiveDesignOptimizerSparseLP)
 # Install R package if not already done so using the following command:
 # remotes::install_github("mrosenblum/AdaptiveDesignOptimizerSparseLP")
-# Load R package if not already done so by the following command: 
-# library(AdaptiveDesignOptimizerSparseLP)
+# Load R package:
+library(AdaptiveDesignOptimizerSparseLP)
 # For reproducibility, set the random number generator seed:
 set.seed(32515)
 
