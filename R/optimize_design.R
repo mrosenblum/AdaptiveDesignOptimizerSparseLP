@@ -275,7 +275,7 @@ optimize_design <- function(subpopulation.1.proportion,
 
   # If glpk selected as solver, check that it is installed:
   if(type.of.LP.solver=="glpk" && !requireNamespace("Rglpk", quietly = TRUE)){
-    stop("Linear program solver glpk was selected, but it is not installed or its path is missing. Make sure that glpk is installed, and input its path using the LP.solver.path argument (e.g., LP.solver.path='/bin/GLPK' ")}
+    stop("The linear program solver glpk was selected, but it is not installed or its path is missing. Please make sure that glpk is installed, and input its path using the LP.solver.path argument (e.g., LP.solver.path='/bin/GLPK'). Thank you for trying our adaptive design optimization software. If you have any questions, please email Michael Rosenblum: mrosen@jhu.edu")}
 
   max_error_prob <- 0
   # track approximation errors in problem construction; initialize to 0 here
