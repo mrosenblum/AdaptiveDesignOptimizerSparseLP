@@ -55,7 +55,7 @@ The Matlab solver comes with Matlab: https://www.mathworks.com/products/matlab.h
 
 GLPK can be downloaded free here: https://www.gnu.org/software/glpk/ 
 
-Notes: GLPK needs to be installed after it is downloaded, using instructions at the link above. Also, our software calls Cplex through a matlab interface, so having Matlab is also required if one plans to use the Cplex linear program solver; the other linear program solvers (in GLPK, Gurobi, Matlab) do not have this constraint, i.e., each solver can be used without requiring any of the other software.
+Notes: GLPK needs to be installed after it is downloaded, using instructions at the link above. Also, our software calls Cplex through a Matlab interface, so having Matlab is also required if one plans to use the Cplex linear program solver; the other linear program solvers (in GLPK, Gurobi, Matlab) do not have this constraint, i.e., each solver can be used without requiring any of the other software.
 
 ## Examples and Replication of Key Results from Manuscript
 
