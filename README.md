@@ -19,7 +19,7 @@ The user chooses the following (which are inputs to the software): the subpopula
      The software optimizes over the discretized policies defined in Section 4.2 to produce an optimized, two-stage adaptive trial design tailored to the user's inputs. 
      
   The R package calls a linear program solver and is compatible with the solvers in Matlab, Cplex, and  Gurobi (three commercial solvers, with the latter two free for academic use) and also with the open-source GLPK solver. We wrote scripts that  make it seamless to use our package with any of these solvers, though we recommend Cplex or Gurobi due to their high performance.
-   Our software reproduces our examples as well. 
+  Our software reproduces our examples as well. 
 
   If you have any questions or want help using the software, please email Michael Rosenblum at mrosen at jhu dot edu.
     
@@ -55,14 +55,14 @@ The Matlab solver comes with Matlab: https://www.mathworks.com/products/matlab.h
 
 GLPK can be downloaded free here: https://www.gnu.org/software/glpk/ 
 
-Note: GLPK needs to be installed after it is downloaded, using instructions at the link above.
+Notes: GLPK needs to be installed after it is downloaded, using instructions at the link above. Also, our software calls Cplex through a matlab interface, so having Matlab is also required if one plans to use the Cplex linear program solver; the other linear program solvers (in GLPK, Gurobi, Matlab) do not have this constraint, i.e., each solver can be used without requiring any of the other software.
 
 ## Examples and Replication of Key Results from Manuscript
 
 The computations for the key results from the paper (Examples 3.1 and 3.2 as described in Section 5.2) can be reproduced by the code in the following 2 files in the R project's inst/examples directory: replicate.results.example.3.1.R and 
  replicate.results.example.3.2.R. We used Cplex to solve these problems, as noted in the paper.
  
-Below is a simplified example that can be run in 4 minutes using a 4 core, 2.8 GHz processor on a Macbook laptop using the GLPK solver, which involves solving a modified version of the problem from Example 3.2 as described in Section 5.2 of the manuscript; the main modifications are that weuse a coarsened partition of the decision region and rejection regions in order to speed up the computation for illustration purposes. 
+Below is a simplified example that can be run in 4 minutes using a 4 core, 2.8 GHz processor on a Macbook laptop using the GLPK solver, which involves solving a modified version of the problem from Example 3.2 as described in Section 5.2 of the manuscript; the main modifications are that we use a coarsened partition of the decision region and rejection regions in order to speed up the computation for illustration purposes. 
 
 To obtain definitions of each input and output argument in our main function optimize_design,
 type help(optimize_design) after installing the R package. 
