@@ -283,23 +283,6 @@ optimize_design <- function(subpopulation.1.proportion,
 
    if(type.of.LP.solver=="cplex" && !(requireNamespace("matlabr", quietly = TRUE) && matlabr::have_matlab())){stop("The linear program solver cplex was selected, and this requires that matlab also be installed (since this R package calls cplex through a matlab interface). Either matlab is not installed or its path is missing. Please either try to fix this issue or try using a different linear program solver such as GLPK or Gurobi. Thank you for trying our adaptive design optimization software. If you have any questions, please email Michael Rosenblum: mrosen@jhu.edu")}
 
-  if(0==1){  # for testing only
-  if(type.of.LP.solver=="cplex"){ # Run test code to make sure cplex works.
-    package_name = "AdaptiveDesignOptimizerSparseLP";
-    path_to_file = system.file("cplex", "cplex_test_code.m", package = package_name);
-    function_to_call = "cplex_test_code()";
-    matlab_add_path = dirname(path_to_file);
-    if(!is.null(LP.solver.path)){
-      matlabcode = c(
-        paste0("addpath(genpath('", LP.solver.path, "'))"),
-        paste0("addpath(genpath('", matlab_add_path, "'))"),
-        function_to_call)} else {
-          matlabcode = c(
-            paste0("addpath(genpath('", matlab_add_path, "'))"),
-            function_to_call)}
-    output_matlab = capture.output(matlabr::run_matlab_code(matlabcode));
-  }}
-
   max_error_prob <- 0
   # track approximation errors in problem construction; initialize to 0 here
   covariance_Z_1_Z_2 <-  0
