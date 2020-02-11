@@ -283,6 +283,8 @@ optimize_design <- function(subpopulation.1.proportion,
 
    if(type.of.LP.solver=="cplex" && !(requireNamespace("matlabr", quietly = TRUE) && matlabr::have_matlab())){stop("The linear program solver cplex was selected, and this requires that matlab also be installed (since this R package calls cplex through a matlab interface). Either matlab is not installed or its path is missing. Please either try to fix this issue or try using a different linear program solver such as GLPK or Gurobi. Thank you for trying our adaptive design optimization software. If you have any questions, please email Michael Rosenblum: mrosen@jhu.edu")}
 
+  if(type.of.LP.solver=="gurobi" && !(requireNamespace("gurobi", quietly = TRUE))){stop("The linear program solver gurobi was selected. Either Gurobi is not installed, or the gurobi R package is not installed, or its path is missing. Please either try to fix this issue or try using a different linear program solver such as GLPK, Matlab, or Cplex. Thank you for trying our adaptive design optimization software. If you have any questions, please email Michael Rosenblum: mrosen@jhu.edu")}
+
   max_error_prob <- 0
   # track approximation errors in problem construction; initialize to 0 here
   covariance_Z_1_Z_2 <-  0
