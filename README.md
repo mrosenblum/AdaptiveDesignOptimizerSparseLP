@@ -57,7 +57,8 @@ GLPK can be downloaded free here: https://www.gnu.org/software/glpk/
 
 Important Notes: 
 
-GLPK needs to be installed after it is downloaded, using instructions at the link above. 
+GLPK needs to be installed after it is downloaded, using instructions at the link above.
+
 Our software calls Cplex through a Matlab interface, so having Matlab is also required if one plans to use the Cplex linear program solver; the other linear program solvers (in GLPK, Gurobi, Matlab) do not have this constraint, i.e., each solver can be used without requiring any of the other software. 
 
 If using Gurobi, the gurobi R package is required; this can be obtained and installed by following the instructions from Gurobi here: https://www.gurobi.com/documentation/8.1/quickstart_mac/r_installing_the_r_package.html
